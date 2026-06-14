@@ -747,15 +747,19 @@ document.addEventListener('keydown', (e) => {
 
 let touchStart = null;
 const playView = $('#view-play');
-playView.addEventListener('touchstart', (e) => {
+// スワイプは画面全体で受ける(盤の外・下の余白でも効く)。プレイ中のみ・オーバーレイ表示中は無視。
+document.addEventListener('touchstart', (e) => {
   touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
 }, { passive: true });
-playView.addEventListener('touchend', (e) => {
+document.addEventListener('touchend', (e) => {
   if (!touchStart) return;
   const dx = e.changedTouches[0].clientX - touchStart.x;
   const dy = e.changedTouches[0].clientY - touchStart.y;
   touchStart = null;
   if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return; // タップは無視
+  if (playView.hidden) return; // プレイ画面以外(章/問題一覧)はスクロールを妨げない
+  // クリア/反則/切れ目オーバーレイ表示中はスワイプ操作しない
+  if (!$('#overlay-gap').hidden || !$('#overlay-miss').hidden || !$('#overlay-tsumi').hidden) return;
   if (AV) {
     // 答えビューア中: 左右スワイプで一手ずつ進む/戻る
     if (Math.abs(dx) > Math.abs(dy)) {
