@@ -323,8 +323,19 @@ button:active { transform: translateY(1px); }
   letter-spacing: 0.18em;
   font-size: 15px;
 }
-.miss-buttons { display: flex; gap: 10px; }
-#btn-miss-back { border-color: rgba(232, 217, 176, 0.3); color: var(--gold); }
+/* 初形へ戻すリロードボタン: 言葉を出さず、円形のアイコンだけで促す */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  border-radius: 50%;
+  border-color: rgba(232, 217, 176, 0.3);
+  color: var(--gold);
+}
+.icon-btn:hover { background: rgba(232, 217, 176, 0.08); }
 /* クリアは盤上のボール発光が主役。オーバーレイは透過して盤を見せ、手数だけ下部に静かに置く */
 #overlay-tsumi {
   cursor: pointer;

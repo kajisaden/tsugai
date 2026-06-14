@@ -85,15 +85,10 @@ function markBest(puzId) {
   localStorage.setItem(BEST_KEY, JSON.stringify([...bestCleared]));
 }
 
-// ヒント設定(全問持続)。light=ぶつかる壁を常時光らせる / next=次の一手ボタンを出す
-const HINT_KEY = 'nikenzume.hints.v1';
-const hintSettings = Object.assign(
-  { light: false, next: false },
-  JSON.parse(localStorage.getItem(HINT_KEY) ?? '{}')
-);
-function saveHintSettings() {
-  localStorage.setItem(HINT_KEY, JSON.stringify(hintSettings));
-}
+// ヒント設定(問題ごと)。違う問題に移ると必ずオフから始める(同じ問題の初形/答え再生では保持)。
+// light=ぶつかる壁を常時光らせる / next=次の一手ボタンを出す
+const hintSettings = { light: false, next: false };
+let hintPuzzleId = null; // hintSettings が今ひもづく問題ID。別問題になったらオフへ戻す
 
 // ---- DOM ユーティリティ ----
 const $ = (sel) => document.querySelector(sel);
@@ -202,6 +197,11 @@ function startPuzzle(ch, index) {
   $('#hint-keys').hidden = false;
   $('#move-count').hidden = false;
   const puz = chapterLevels.get(ch.id)[index];
+  if (puz.id !== hintPuzzleId) { // 違う問題に移ったらヒントはオフから(同じ問題の再開では保持)
+    hintSettings.light = false;
+    hintSettings.next = false;
+    hintPuzzleId = puz.id;
+  }
   const { w, h } = puz.size;
   const boardsEl = $('#boards');
   boardsEl.replaceChildren();
@@ -331,7 +331,7 @@ async function doMove(d) {
   await sleep(Math.max(MOVE_MS, anyBumped ? BUMP_MS : 0));
   updateGoals();
 
-  // 同時でないのにゴールへ入った=反則。行って → 一手戻す/初形へ を選ばせる
+  // 同時でないのにゴールへ入った=反則。行って見せてから → 初形へ戻す
   if (anyGoal && !allGoal) {
     await sleep(REDUCED ? 0 : 260);
     $('#overlay-miss').hidden = false;
@@ -343,20 +343,7 @@ async function doMove(d) {
   checkClear();
 }
 
-// 反則からの復帰
-function undoMistake() {
-  if ($('#overlay-miss').hidden) return;
-  $('#overlay-miss').hidden = true;
-  G.pos = G.history.pop(); // 直前の局面へ(行って戻る)
-  G.moves--;
-  G.rooms.forEach((rm, i) =>
-    setCellXY(rm.piece, G.pos[i] % G.w, (G.pos[i] - (G.pos[i] % G.w)) / G.w)
-  );
-  updateInfo();
-  updateGoals();
-  G.busy = false;
-  refreshWallHints();
-}
+// 反則からの復帰: 初形へ戻してやり直す
 function restartFromMistake() {
   $('#overlay-miss').hidden = true;
   startPuzzle(curChapter, curIndex); // 初形へ
@@ -691,19 +678,16 @@ $('#btn-list').addEventListener('click', () => {
 
 $('#btn-undo').addEventListener('click', undo);
 $('#btn-reset').addEventListener('click', resetPuzzle);
-$('#btn-miss-back').addEventListener('click', undoMistake);
 $('#btn-miss-restart').addEventListener('click', restartFromMistake);
 $('#btn-answer-open').addEventListener('click', enterAnswer);
 $('#btn-next-move').addEventListener('click', showNextMove);
 $('#tg-light').addEventListener('click', () => {
   hintSettings.light = !hintSettings.light;
-  saveHintSettings();
   updateHintUI();
   refreshWallHints();
 });
 $('#tg-next').addEventListener('click', () => {
   hintSettings.next = !hintSettings.next;
-  saveHintSettings();
   updateHintUI();
 });
 $('#btn-ans-prev').addEventListener('click', answerBack);
@@ -725,7 +709,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   if (!$('#overlay-miss').hidden) {
-    if (e.key === 'Enter' || e.key === ' ') undoMistake(); // 既定は一手戻す
+    if (e.key === 'Enter' || e.key === ' ') restartFromMistake(); // 初形へ戻す
     return;
   }
   if (!$('#overlay-gap').hidden) return;
