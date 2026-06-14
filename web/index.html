@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tsugai</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header id="app-header">
+  <button id="btn-back" class="ghost" hidden><span class="chev">‹</span> <span data-i18n="back">戻る</span></button>
+  <h1 id="app-title" data-i18n="title">Tsugai</h1>
+</header>
+
+<main>
+  <!-- 章一覧 -->
+  <section id="view-chapters">
+    <p class="tagline" data-i18n="tagline">ふたつの部屋、ひとつの操作。</p>
+    <div id="chapter-list"></div>
+  </section>
+
+  <!-- 問題一覧 -->
+  <section id="view-levels" hidden>
+    <h2 id="levels-title"></h2>
+    <div id="level-grid"></div>
+  </section>
+
+  <!-- プレイ画面 -->
+  <section id="view-play" hidden>
+    <div id="play-info">
+      <span id="puzzle-label"></span>
+      <span id="move-count"></span>
+    </div>
+    <div id="boards"></div>
+    <div id="controls">
+      <button id="btn-undo" class="ghost" data-i18n="undo">待った</button>
+      <button id="btn-reset" class="ghost" data-i18n="reset">初形</button>
+      <button id="btn-answer-open" class="ghost" data-i18n="answer">答え</button>
+    </div>
+    <!-- ヒントはオン/オフ設定(全問持続)。開く手間なくプレイ画面に常駐 -->
+    <div id="hint-toggles">
+      <button id="tg-light" class="toggle" aria-pressed="false" data-i18n="light">光で示す</button>
+      <button id="tg-next" class="toggle" aria-pressed="false" data-i18n="nextMove">次の一手</button>
+    </div>
+    <button id="btn-next-move" class="ghost" hidden data-i18n="showNextMove">次の一手を見る</button>
+    <!-- 答えビューア: 再生(自動)ボタン + ◀▶ で一手ずつ -->
+    <div id="answer-bar" hidden>
+      <button id="btn-ans-play" data-i18n="play">再生</button>
+      <button id="btn-ans-prev" class="ghost" data-i18n-aria="prev" aria-label="前へ">◀</button>
+      <span id="ans-progress">0 / 0</span>
+      <button id="btn-ans-next" class="ghost" data-i18n-aria="next" aria-label="次へ">▶</button>
+      <button id="btn-ans-close" class="ghost" data-i18n="close">とじる</button>
+    </div>
+    <p id="hint-keys" data-i18n="controlsHint">矢印キー / スワイプで両方の部屋が動く</p>
+  </section>
+</main>
+
+<!-- 次の一手: 盤の上に方向を静かに一瞬示す -->
+<div id="hint-arrow" hidden><span class="arrow-mark"></span><span class="arrow-sub"></span></div>
+
+<!-- クリア演出: 盤上のボールが金(最短)/白(クリア)に光る。言葉は出さず、手数だけ静かに添える -->
+<div id="overlay-tsumi" hidden>
+  <div id="tsumi-moves" class="tsumi-moves">
+    <span id="tsumi-moves-1"></span>
+    <span id="tsumi-moves-2"></span>
+  </div>
+  <span class="tsumi-sub" data-i18n="tapNext">タップで次へ</span>
+</div>
+
+<!-- 反則(同時でないのにゴールへ入った): 一手戻すか初形へ -->
+<div id="overlay-miss" hidden>
+  <p class="miss-note" data-i18n="missNote">ゴールは、ふたつ同時でなければ開かない</p>
+  <div class="miss-buttons">
+    <button id="btn-miss-back" data-i18n="stepBack">一手戻す</button>
+    <button id="btn-miss-restart" class="ghost" data-i18n="restart">初形へ</button>
+  </div>
+</div>
+
+<!-- 問題間の切れ目 = 広告差し込み口 (SPEC.md 6章。盤面は聖域、広告はここにだけ置く) -->
+<div id="overlay-gap" hidden>
+  <div id="ad-slot"><!-- AD SLOT: リワード/インタースティシャルはこの枠に実装する --><span>·</span></div>
+  <div class="gap-buttons">
+    <button id="btn-next" data-i18n="nextPuzzle">次の問題へ</button>
+    <button id="btn-list" class="ghost" data-i18n="levels">一覧へ</button>
+  </div>
+</div>
+
+<script src="pool.js"></script>
+<script src="strings.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

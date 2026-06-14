@@ -1,0 +1,11 @@
+# OS / エディタの生成物
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 一時ファイル・ログ
+*.tmp
+*.log
+
+# 依存(本作は依存ゼロだが念のため)
+node_modules/
