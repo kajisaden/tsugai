@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tsugai</title>
-<link rel="stylesheet" href="style.css?v=a8b870aaeb">
+<link rel="stylesheet" href="style.css?v=dcf0838b3a">
 </head>
 <body>
 
@@ -68,16 +68,10 @@
   <span class="tsumi-sub" data-i18n="tapNext">タップで次へ</span>
 </div>
 
-<!-- 反則(同時でないのにゴールへ入った): 初形へ戻してやり直す(リロードのアイコンのみ) -->
+<!-- 反則(同時でないのにゴールへ入った): 初手から戻してやり直す -->
 <div id="overlay-miss" hidden>
   <p class="miss-note" data-i18n="missNote">ゴールは、ふたつ同時でなければ開かない</p>
-  <button id="btn-miss-restart" class="icon-btn" data-i18n-aria="restart" aria-label="初手から">
-    <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor"
-         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <polyline points="1 4 1 10 7 10"/>
-      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-    </svg>
-  </button>
+  <button id="btn-miss-restart" data-i18n="restart">初手から</button>
 </div>
 
 <!-- 問題間の切れ目 = 広告差し込み口 (SPEC.md 6章。盤面は聖域、広告はここにだけ置く) -->
