@@ -390,17 +390,6 @@ button:active { transform: translateY(1px); }
 }
 
 /* ---- 切れ目(広告枠) ---- */
-#ad-slot {
-  width: min(80vw, 320px);
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.12);
-  border: 1px dashed rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  font-size: 20px;
-}
 .gap-buttons { display: flex; flex-direction: column; gap: 10px; align-items: center; }
 #btn-next { min-width: 200px; border-color: rgba(232, 217, 176, 0.3); color: var(--gold); }
 
