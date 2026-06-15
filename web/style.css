@@ -372,8 +372,8 @@ button:active { transform: translateY(1px); }
 .level-tile.best .lv-moves { color: var(--gold); }
 
 /* ---- クリア演出: 盤上のボールが金(最短)/白(クリア)に発光する。言葉に依らない climax(SPEC.md 5章) ---- */
-#boards.clear-best .ball,
-#boards.clear-win .ball { animation: clear-pulse 1200ms ease-out 1; }
+/* 弾みはユーザがタップして次へ進むまで繰り返す。.bouncing は checkClear で付け dismissTsumi で外す */
+#boards.bouncing .ball { animation: clear-pulse 1500ms ease-out infinite; }
 #boards.clear-best .ball { box-shadow: 0 0 30px 9px rgba(240, 220, 170, 0.9); }
 #boards.clear-best .ball-glow {
   background: radial-gradient(circle, rgba(240, 220, 170, 0.42) 0%, rgba(240, 220, 170, 0.12) 48%, transparent 72%);
@@ -391,8 +391,9 @@ button:active { transform: translateY(1px); }
 }
 @keyframes clear-pulse {
   0% { transform: scale(1); }
-  35% { transform: scale(1.12); }
-  100% { transform: scale(1); }
+  16% { transform: scale(1.12); } /* ひと弾み */
+  34% { transform: scale(1); }
+  100% { transform: scale(1); }   /* 休符を挟んでから次の弾みへ */
 }
 
 /* ---- 切れ目(広告枠) ---- */
@@ -483,7 +484,7 @@ button:active { transform: translateY(1px); }
 @media (prefers-reduced-motion: reduce) {
   .piece, .board, .goal::before { transition: none; }
   .ball::after { animation: none; opacity: 0.6; }
-  #boards.clear-best .ball, #boards.clear-win .ball { animation: none; }
+  #boards.bouncing .ball { animation: none; }
   .level-tile .lv-ball, .level-tile .lv-ball.win { animation: none; }
   .tsumi-sub, .tsumi-moves { animation-duration: 1ms; animation-delay: 0ms; }
   .hint-glow { animation: none; opacity: 0.85; }

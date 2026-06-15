@@ -215,7 +215,7 @@ function startPuzzle(ch, index) {
   const { w, h } = puz.size;
   const boardsEl = $('#boards');
   boardsEl.replaceChildren();
-  boardsEl.classList.remove('clear-best', 'clear-win'); // 前問のクリア発光を消す
+  boardsEl.classList.remove('clear-best', 'clear-win', 'bouncing'); // 前問のクリア演出を消す
   const rooms = puz.rooms.map((r) => {
     const b = buildBoard(r, w, h);
     boardsEl.append(b.board);
@@ -369,7 +369,7 @@ async function checkClear() {
   markCleared(G.puz.id);
   if (best) markBest(G.puz.id);
   // 言葉でなく光で伝える: 盤上のボールが金(最短)/白(クリア)に発光する(SPEC.md 5章)
-  $('#boards').classList.add(best ? 'clear-best' : 'clear-win');
+  $('#boards').classList.add(best ? 'clear-best' : 'clear-win', 'bouncing');
   $('#tsumi-moves-1').textContent = t('clearedMoves', { n: G.moves });
   $('#tsumi-moves-2').textContent = best ? t('fewest') : t('fewestIs', { n: min });
   $('#tsumi-moves').classList.toggle('best', best);
@@ -671,6 +671,7 @@ function closeAnswer() {
 function dismissTsumi() {
   if ($('#overlay-tsumi').hidden) return;
   $('#overlay-tsumi').hidden = true;
+  $('#boards').classList.remove('bouncing'); // タップで弾みを止める
   $('#overlay-gap').hidden = false; // ここが広告の差し込み口(SPEC.md 6章)
 }
 $('#overlay-tsumi').addEventListener('click', dismissTsumi);
