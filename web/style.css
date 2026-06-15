@@ -580,3 +580,33 @@ button:active { transform: translateY(1px); }
 :root[data-theme="light"] #overlay-tsumi {
   background: linear-gradient(to top, rgba(243, 239, 230, 0.92) 0%, rgba(243, 239, 230, 0.15) 38%, transparent 62%);
 }
+
+/* クリアの弾み(ライト): スケールでなく translateY で跳ねる。接地影は別要素(.ball-glow)で床に残し、
+   球が上がると影は縮んで薄く・落ちると大きく濃く=視差で「跳ねている」ように見せる。
+   接地影は球から外して別要素に持たせるので、弾み中の .ball からはドロップシャドウを抜く。
+   (.bouncing は checkClear で付き dismissTsumi で外れる=クリア中だけ) */
+:root[data-theme="light"] #boards.bouncing .ball {
+  animation: clear-bounce 1100ms ease-in-out infinite;
+  box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.10);
+}
+:root[data-theme="light"] #boards.bouncing .ball-glow {
+  display: block;
+  inset: auto;
+  left: 22%; right: 22%; bottom: 8%; height: 11%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(40, 32, 16, 0.42), rgba(40, 32, 16, 0.12) 60%, transparent);
+  animation: ball-shadow 1100ms ease-in-out infinite;
+}
+@keyframes clear-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-22%); } /* 上に跳ねる(球の高さ基準) */
+}
+@keyframes ball-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 1; }      /* 着地: 影は大きく濃い */
+  50% { transform: scaleX(0.62); opacity: 0.38; }     /* 頂点: 影は縮んで薄い */
+}
+/* アニメ無効時はライトの弾み・接地影も止める(上の @media より後に置き specificity 同等で勝たせる) */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="light"] #boards.bouncing .ball,
+  :root[data-theme="light"] #boards.bouncing .ball-glow { animation: none; }
+}
