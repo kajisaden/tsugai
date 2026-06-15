@@ -30,6 +30,16 @@ function fillI18n() {
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
 }
 
+// ---- テーマ(ライト/ダーク): 手動トグル。localStorage 永続・既定はダーク ----
+// 実切替は <html data-theme> 属性で、配色は CSS 側(:root[data-theme="light"])がまとめて担う。
+const THEME_KEY = 'nikenzume.theme.v1';
+let theme = localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
+function applyTheme() {
+  document.documentElement.dataset.theme = theme;
+  const btn = document.querySelector('#btn-theme');
+  if (btn) btn.setAttribute('aria-pressed', String(theme === 'light'));
+}
+
 const DIRS = [[0, -1], [0, 1], [-1, 0], [1, 0]]; // 0=上 1=下 2=左 3=右
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MOVE_MS = REDUCED ? 0 : 120;
@@ -676,6 +686,11 @@ $('#btn-list').addEventListener('click', () => {
   showLevels(curChapter);
 });
 
+$('#btn-theme').addEventListener('click', () => {
+  theme = theme === 'light' ? 'dark' : 'light';
+  localStorage.setItem(THEME_KEY, theme);
+  applyTheme();
+});
 $('#btn-undo').addEventListener('click', undo);
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#btn-miss-restart').addEventListener('click', restartFromMistake);
@@ -757,5 +772,6 @@ document.addEventListener('touchend', (e) => {
 }, { passive: true });
 
 // ---- 起動 ----
+applyTheme(); // data-theme を確定し、トグルの状態を反映
 fillI18n(); // 静的文言(ボタン・タグライン等)をロケールで流し込む
 showChapters();

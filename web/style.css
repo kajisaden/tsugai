@@ -48,6 +48,12 @@ main { max-width: 560px; margin: 0 auto; padding: 0 16px 48px; }
   color: var(--gold);
 }
 #btn-back { grid-column: 1; justify-self: start; }
+#btn-theme { grid-column: 3; justify-self: end; }
+.btn-icon { padding: 8px; line-height: 0; border-radius: 50%; }
+/* テーマトグル: 切り替え先のアイコンを出す(ダーク時=太陽 / ライト時=月) */
+#btn-theme .ic-moon { display: none; }
+:root[data-theme="light"] #btn-theme .ic-sun { display: none; }
+:root[data-theme="light"] #btn-theme .ic-moon { display: inline-block; }
 
 .tagline {
   text-align: center;
@@ -481,4 +487,89 @@ button:active { transform: translateY(1px); }
   .level-tile .lv-ball, .level-tile .lv-ball.win { animation: none; }
   .tsumi-sub, .tsumi-moves { animation-duration: 1ms; animation-delay: 0ms; }
   .hint-glow { animation: none; opacity: 0.85; }
+}
+
+/* ============================================================
+   ライトモード(生成り / washi): <html data-theme="light"> で全体を切替
+   設計の肝: 黒地の「発光」は白地では効かない。
+   - ボール = 光る球 → 実体の琥珀ディスク＋やわらかい影
+   - 金 = 紙でも読める濃い琥珀(#a8801f)
+   - クリア済み(非最短) = 白だと消えるので青灰(#8b94a3)で見分ける
+   ============================================================ */
+:root[data-theme="light"] {
+  --bg: #f3efe6;        /* 温かい紙 */
+  --panel: #fbf8f1;
+  --line: rgba(43, 38, 32, 0.12);
+  --text: #2b2620;      /* 墨 */
+  --text-dim: #8a8276;
+  --gold: #a8801f;      /* 濃い琥珀(紙の上で読める) */
+  --glow: rgba(168, 128, 31, 0.40); /* 光のにじみ→淡い琥珀の影に転用 */
+}
+:root[data-theme="light"] body {
+  background: radial-gradient(120% 100% at 50% 0%, #fbf8f1 0%, var(--bg) 60%);
+}
+
+/* 盤の壁: 暗いスレート → 温かいグレー */
+:root[data-theme="light"] .cell.wall {
+  background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
+  border-color: rgba(43, 38, 32, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ボール: 実体の琥珀ディスク＋影。背後の bloom は消す */
+:root[data-theme="light"] .ball-glow { display: none; }
+:root[data-theme="light"] .ball {
+  background: radial-gradient(circle at 38% 30%, #f7e6b0 0%, #dcb44f 48%, #a8801f 100%);
+  box-shadow: 0 2px 5px rgba(70, 52, 16, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+:root[data-theme="light"] .ball::after { box-shadow: 0 0 6px 1px rgba(168, 128, 31, 0.20); }
+
+/* ゴール: 金の破線/実線を濃い琥珀へ */
+:root[data-theme="light"] .goal::before { border-color: rgba(168, 128, 31, 0.5); }
+:root[data-theme="light"] .goal.on::before { border-color: rgba(168, 128, 31, 0.85); }
+:root[data-theme="light"] .goal.filled::before {
+  background: radial-gradient(circle, rgba(168, 128, 31, 0.28) 0%, rgba(168, 128, 31, 0.06) 70%);
+}
+
+/* クリア演出: 大きな光のにじみ → 色のついた淡いハロー。非最短は青灰ディスク */
+:root[data-theme="light"] #boards.clear-best .ball {
+  box-shadow: 0 0 20px 6px rgba(184, 142, 42, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+:root[data-theme="light"] #boards.clear-best .ball-glow { display: none; }
+:root[data-theme="light"] #boards.clear-win .ball {
+  background: radial-gradient(circle at 38% 30%, #c6cdd9 0%, #8b94a3 52%, #6c7686 100%);
+  box-shadow: 0 0 18px 5px rgba(108, 118, 134, 0.40), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+:root[data-theme="light"] #boards.clear-win .ball::after { box-shadow: none; }
+:root[data-theme="light"] #boards.clear-win .goal.filled::before {
+  background: radial-gradient(circle, rgba(108, 118, 134, 0.26) 0%, rgba(108, 118, 134, 0.06) 70%);
+}
+
+/* レベル一覧の球: 最短=琥珀ディスク / クリア済み=青灰。紙地では脈動が読めないので静かに */
+:root[data-theme="light"] .level-tile .lv-ball {
+  background: radial-gradient(circle at 38% 30%, #f7e6b0 0%, #dcb44f 48%, #a8801f 100%);
+  box-shadow: 0 1px 3px rgba(70, 52, 16, 0.28);
+  animation: none;
+}
+:root[data-theme="light"] .level-tile .lv-ball.win {
+  background: radial-gradient(circle at 38% 30%, #c6cdd9 0%, #8b94a3 55%, #6c7686 100%);
+  box-shadow: 0 1px 2px rgba(60, 70, 86, 0.28);
+}
+:root[data-theme="light"] .level-tile.cleared { border-color: rgba(168, 128, 31, 0.4); }
+
+/* 金アクセントのボタン: 薄い金縁だと紙で消えるので濃い琥珀の縁にする */
+:root[data-theme="light"] #btn-next,
+:root[data-theme="light"] #btn-miss-restart,
+:root[data-theme="light"] #btn-ans-play,
+:root[data-theme="light"] #btn-next-move,
+:root[data-theme="light"] .toggle.on { border-color: rgba(168, 128, 31, 0.45); }
+
+/* オーバーレイの暗幕 → 明るい紙の幕 */
+:root[data-theme="light"] #overlay-tsumi,
+:root[data-theme="light"] #overlay-gap,
+:root[data-theme="light"] #overlay-miss {
+  background: rgba(243, 239, 230, 0.93);
+}
+:root[data-theme="light"] #overlay-tsumi {
+  background: linear-gradient(to top, rgba(243, 239, 230, 0.92) 0%, rgba(243, 239, 230, 0.15) 38%, transparent 62%);
 }
