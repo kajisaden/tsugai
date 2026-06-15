@@ -620,3 +620,24 @@ button:active { transform: translateY(1px); }
   :root[data-theme="light"] #boards.bouncing .ball,
   :root[data-theme="light"] #boards.bouncing .ball-glow { animation: none; }
 }
+
+/* ライト(washi) + PWA standalone のステータスバー可読性:
+   black-translucent では iOS がステータスバー文字を白で固定描画する。紙地だと白文字が埋もれるので、
+   上端のセーフエリア帯にだけ墨色の薄いスクリムを敷いて可読性を確保し、下端へフェードさせてハードな帯に見せない。
+   通常 Safari 表示(非 standalone)やダークモードでは出さない。 */
+@media (display-mode: standalone) {
+  :root[data-theme="light"] body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 0px);
+    background: linear-gradient(to bottom,
+      rgba(43, 38, 32, 0.72) 0%,
+      rgba(43, 38, 32, 0.58) 55%,
+      rgba(43, 38, 32, 0) 100%);
+    pointer-events: none;
+    z-index: 100;
+  }
+}
