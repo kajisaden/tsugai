@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tsugai</title>
+<!-- PWA: ホーム画面に追加すると Safari のバー無しで全画面起動する(本番=ネイティブ全画面のテスト用)。
+     App Store 本体は別途ネイティブ化(Capacitor 等)が必要。これはテスト/ホーム画面配布用 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Tsugai">
+<meta name="theme-color" content="#0a0a0e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
 <link rel="stylesheet" href="style.css?v=85a7ffada3">
