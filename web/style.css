@@ -372,8 +372,9 @@ button:active { transform: translateY(1px); }
 .level-tile.best .lv-moves { color: var(--gold); }
 
 /* ---- クリア演出: 盤上のボールが金(最短)/白(クリア)に発光する。言葉に依らない climax(SPEC.md 5章) ---- */
-/* 弾みはユーザがタップして次へ進むまで、止まらず滑らかに往復し続ける。.bouncing は checkClear で付け dismissTsumi で外す */
-#boards.bouncing .ball { animation: clear-pulse 1100ms ease-in-out infinite; }
+/* 弾みはユーザがタップして次へ進むまで、止まらず滑らかに往復し続ける(両モード共通=clear-bounce: 拡大主体＋わずかな跳ね)。
+   .bouncing は checkClear で付け dismissTsumi で外す。ライトは接地影を別要素(.ball-glow)で足す/ダークは発光が奥行きを担う */
+#boards.bouncing .ball { animation: clear-bounce 1100ms ease-in-out infinite; }
 #boards.clear-best .ball { box-shadow: 0 0 30px 9px rgba(240, 220, 170, 0.9); }
 #boards.clear-best .ball-glow {
   background: radial-gradient(circle, rgba(240, 220, 170, 0.42) 0%, rgba(240, 220, 170, 0.12) 48%, transparent 72%);
@@ -388,10 +389,6 @@ button:active { transform: translateY(1px); }
 #boards.clear-win .ball::after { box-shadow: 0 0 16px 3px rgba(228, 236, 252, 0.4); }
 #boards.clear-win .goal.filled::before {
   background: radial-gradient(circle, rgba(228, 236, 252, 0.32) 0%, rgba(228, 236, 252, 0.07) 70%);
-}
-@keyframes clear-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.12); } /* 止まらず滑らかに上下を往復 */
 }
 
 /* ---- 切れ目(広告枠) ---- */
@@ -531,7 +528,7 @@ button:active { transform: translateY(1px); }
 }
 
 /* クリア演出(案A 金メダリオン): ぼかしグローは出さず、ゴールを金/銀の円盤にして黒石を上に乗せる。
-   最短=金箔の円盤 / クリア済み=銀の円盤。球は黒のまま clear-pulse で一拍はずむ。光輪(.ball-glow)は出さない */
+   最短=金箔の円盤 / クリア済み=銀の円盤。球は黒のまま clear-bounce で弾む。光輪(.ball-glow)は接地影として使う */
 :root[data-theme="light"] #boards.clear-best .ball,
 :root[data-theme="light"] #boards.clear-win .ball {
   background: radial-gradient(circle at 38% 30%, #4a4a52 0%, #26262c 40%, #131316 100%);
