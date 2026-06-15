@@ -598,8 +598,10 @@ button:active { transform: translateY(1px); }
   animation: ball-shadow 1100ms ease-in-out infinite;
 }
 @keyframes clear-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-22%); } /* 上に跳ねる(球の高さ基準) */
+  /* 真上から見た盤なので「手前に跳ねる=拡大」を主役に、わずかな translateY で浮きの気配を足す。
+     接地影(.ball-glow)は別要素なので球と一緒に拡大せず、視差で「盤の上で跳ねている」と読める */
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8%) scale(1.1); }
 }
 @keyframes ball-shadow {
   0%, 100% { transform: scaleX(1); opacity: 1; }      /* 着地: 影は大きく濃い */
