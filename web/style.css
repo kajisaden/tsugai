@@ -487,6 +487,7 @@ button:active { transform: translateY(1px); }
   .level-tile .lv-ball, .level-tile .lv-ball.win { animation: none; }
   .tsumi-sub, .tsumi-moves { animation-duration: 1ms; animation-delay: 0ms; }
   .hint-glow { animation: none; opacity: 0.85; }
+  :root[data-theme="light"] .ball-glow { animation: none; opacity: 0.7; transform: none; }
 }
 
 /* ============================================================
@@ -516,13 +517,22 @@ button:active { transform: translateY(1px); }
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-/* ボール: 実体の琥珀ディスク＋影。背後の bloom は消す */
-:root[data-theme="light"] .ball-glow { display: none; }
+/* ボール: マット黒の碁石(実体＋立体陰影)。黒は発光できないので、まわりの金ハローを脈動させる */
 :root[data-theme="light"] .ball {
-  background: radial-gradient(circle at 38% 30%, #f7e6b0 0%, #dcb44f 48%, #a8801f 100%);
-  box-shadow: 0 2px 5px rgba(70, 52, 16, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+  background: radial-gradient(circle at 38% 30%, #4a4a52 0%, #26262c 40%, #131316 100%);
+  box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.10), 0 3px 6px rgba(40, 32, 16, 0.32);
 }
-:root[data-theme="light"] .ball::after { box-shadow: 0 0 6px 1px rgba(168, 128, 31, 0.20); }
+:root[data-theme="light"] .ball::after { box-shadow: none; } /* 球自体の縁グローは出さない */
+/* 金のハロー(脈動): ダークの「発光が息づく」を翻訳。.ball-glow を光輪に転用 */
+:root[data-theme="light"] .ball-glow {
+  inset: -22%; /* 球の約2.1倍。盤の overflow で端は切れてよい */
+  background: radial-gradient(circle, rgba(168, 128, 31, 0.5) 0%, rgba(168, 128, 31, 0.16) 42%, transparent 70%);
+  animation: ball-aura 3.6s ease-in-out infinite;
+}
+@keyframes ball-aura {
+  0%, 100% { opacity: 0.4; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
 
 /* ゴール: 金の破線/実線を濃い琥珀へ */
 :root[data-theme="light"] .goal::before { border-color: rgba(168, 128, 31, 0.5); }
@@ -531,16 +541,25 @@ button:active { transform: translateY(1px); }
   background: radial-gradient(circle, rgba(168, 128, 31, 0.28) 0%, rgba(168, 128, 31, 0.06) 70%);
 }
 
-/* クリア演出: 大きな光のにじみ → 色のついた淡いハロー。非最短は青灰ディスク */
-:root[data-theme="light"] #boards.clear-best .ball {
-  box-shadow: 0 0 20px 6px rgba(184, 142, 42, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.45);
-}
-:root[data-theme="light"] #boards.clear-best .ball-glow { display: none; }
+/* クリア演出: 球は黒のまま、ハローの色で 最短(金)/クリア済み(銀青) を分ける。
+   脈動を止めて一段明るい光輪を steady に灯し、球は clear-pulse で一拍はずむ */
+:root[data-theme="light"] #boards.clear-best .ball,
 :root[data-theme="light"] #boards.clear-win .ball {
-  background: radial-gradient(circle at 38% 30%, #c6cdd9 0%, #8b94a3 52%, #6c7686 100%);
-  box-shadow: 0 0 18px 5px rgba(108, 118, 134, 0.40), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  background: radial-gradient(circle at 38% 30%, #4a4a52 0%, #26262c 40%, #131316 100%);
+  box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.10), 0 3px 6px rgba(40, 32, 16, 0.32);
+}
+:root[data-theme="light"] #boards.clear-best .ball-glow {
+  background: radial-gradient(circle, rgba(168, 128, 31, 0.62) 0%, rgba(168, 128, 31, 0.2) 46%, transparent 72%);
+  animation: none; opacity: 1; transform: scale(1.25);
+}
+:root[data-theme="light"] #boards.clear-win .ball-glow {
+  background: radial-gradient(circle, rgba(120, 134, 156, 0.55) 0%, rgba(120, 134, 156, 0.18) 46%, transparent 72%);
+  animation: none; opacity: 1; transform: scale(1.25);
 }
 :root[data-theme="light"] #boards.clear-win .ball::after { box-shadow: none; }
+:root[data-theme="light"] #boards.clear-best .goal.filled::before {
+  background: radial-gradient(circle, rgba(168, 128, 31, 0.30) 0%, rgba(168, 128, 31, 0.07) 70%);
+}
 :root[data-theme="light"] #boards.clear-win .goal.filled::before {
   background: radial-gradient(circle, rgba(108, 118, 134, 0.26) 0%, rgba(108, 118, 134, 0.06) 70%);
 }
