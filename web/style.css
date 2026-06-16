@@ -436,8 +436,10 @@ button:active { transform: translateY(1px); }
 }
 #btn-next { color: var(--gold); }
 #btn-retry { color: var(--text); }
-/* A画面の「一覧へ」= ホームアイコン(左上・セーフエリア下)。flex フローから外して絶対配置 */
-#btn-list { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); left: 14px; }
+/* A画面の「一覧へ」= ホームアイコン(左上・セーフエリア下)。flex フローから外して絶対配置。
+   ダークは近黒背景に沈むので明るめ(#e6e3dc)、ライトは紙地で白飛びするので従来のディムのまま */
+#btn-list { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); left: 14px; color: #e6e3dc; }
+:root[data-theme="light"] #btn-list { color: var(--text-dim); }
 
 /* ---- A画面(クリア結果): 手数/最短 ・ つがいエンブレム ・ 進捗 ---- */
 /* カード = ゲーム盤の壁デザインをそのまま大きくして角だけ角丸にしたもの(テーマ追従。.cell.wall と同配色) */
