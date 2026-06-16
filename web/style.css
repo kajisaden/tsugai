@@ -588,8 +588,8 @@ button:active { transform: translateY(1px); }
    影/グラデは使わず、対称な滲みで縦横を揃え壁に密着させる */
 :root[data-theme="light"] .hint-glow,
 :root[data-theme="light"] .bump-glow {
-  background: #d9b65c;
-  box-shadow: 0 0 5px 1px rgba(176, 134, 46, 0.5), 0 0 11px 3px rgba(176, 134, 46, 0.2);
+  background: #ecd07e;
+  box-shadow: 0 0 5px 1px rgba(206, 164, 64, 0.5), 0 0 11px 3px rgba(206, 164, 64, 0.2);
 }
 /* ヒントの息づき: 実体バーなので透明まで消えず、浅い濃淡でゆっくり呼吸させる */
 :root[data-theme="light"] .hint-glow {
