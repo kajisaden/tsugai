@@ -453,7 +453,7 @@ button:active { transform: translateY(1px); }
 /* つがいエンブレム(2球が45°で寄り添う)。既定(ダーク)=発光球・皿なし。最短=金 / クリア=銀 */
 .emblem { position: relative; width: 220px; height: 176px; }
 .emblem-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 50%; display: none; }
-.emblem-balls { position: absolute; inset: 0; animation: emblem-hop 1100ms ease-in-out infinite; }
+.emblem-balls { position: absolute; inset: 0; }
 .emblem-ball {
   position: absolute; width: 86px; height: 86px; border-radius: 50%;
   background: radial-gradient(circle at 38% 32%, #fffdf6 0%, #f3e3bd 45%, #c9b585 100%);
@@ -465,7 +465,6 @@ button:active { transform: translateY(1px); }
   background: radial-gradient(circle at 38% 32%, #ffffff 0%, #eef1f7 45%, #c9cedb 100%);
   box-shadow: 0 0 26px 7px rgba(228, 236, 252, 0.8);
 }
-@keyframes emblem-hop { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9%); } }
 
 /* ---- ヒント: オン/オフのトグル(コントロール常駐) ---- */
 #hint-toggles {
@@ -552,7 +551,6 @@ button:active { transform: translateY(1px); }
   .piece, .board, .goal::before { transition: none; }
   .ball::after { animation: none; opacity: 0.6; }
   #boards.bouncing .ball { animation: none; }
-  .emblem-balls { animation: none; }
   .level-tile .lv-ball, .level-tile .lv-ball.win { animation: none; }
   .tsumi-sub, .tsumi-moves { animation-duration: 1ms; animation-delay: 0ms; }
   .hint-glow { animation: none; opacity: 0.85; }
