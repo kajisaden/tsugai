@@ -371,14 +371,14 @@ async function checkClear() {
   markCleared(G.puz.id);
   if (best) markBest(G.puz.id);
   lastClear = { moves: G.moves, min, best }; // A画面で出すため確保
-  // 盤上のボールが金(最短)/白(クリア)に発光して弾む。2秒見せて A画面(切れ目)へ。タップで早送り
+  // 盤上のボールが金(最短)/白(クリア)に発光して弾む。約1秒見せて A画面(切れ目)へ。タップで早送り
   $('#boards').classList.add(best ? 'clear-best' : 'clear-win', 'bouncing');
   if (REDUCED) { goToGap(); return; } // モーション無効: 演出を飛ばして A画面へ
   await sleep(200); // グローが出るのを一拍見せる
   if (!G.cleared || !$('#overlay-gap').hidden) return; // 既に遷移済みなら何もしない
   $('#overlay-tsumi').hidden = false; // 透明ベール(タップ早送りの受け皿)
   clearTimeout(tsumiTimer);
-  tsumiTimer = setTimeout(goToGap, 2000);
+  tsumiTimer = setTimeout(goToGap, 1000);
 }
 
 function undo() {
