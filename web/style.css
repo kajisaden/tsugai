@@ -29,9 +29,23 @@ body {
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  /* 画面いっぱいに広げ、ヘッダ下の余りを main が埋める土台にする(standalone 全画面で下が間延びしないよう中身を縦中央寄せ) */
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
-main { max-width: 560px; margin: 0 auto; padding: 0 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
+main {
+  width: 100%;            /* フレックス中で auto マージンにより縮まないよう明示 */
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 16px calc(24px + env(safe-area-inset-bottom, 0px));
+  /* ヘッダ下の残り高さを占有し、中身を縦中央へ。safe = 中身が高すぎる時は上寄せに退避し上端が切れない */
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+}
 
 /* ---- ヘッダ ---- */
 #app-header {
