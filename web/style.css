@@ -540,6 +540,20 @@ button:active { transform: translateY(1px); }
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
+/* 壁の印(ヒント/壁当て)ライト: ダークの「発光」に対する「滲み」。明るい金の芯＋金の顔料が紙にじわっと
+   広がる対称なハロー(オフセット無し)。印は縦横どちらの壁面にも出る(縦4x52 / 横52x4)ので、方向性のある
+   影/グラデは使わず、対称な滲みで縦横を揃え壁に密着させる */
+:root[data-theme="light"] .hint-glow,
+:root[data-theme="light"] .bump-glow {
+  background: #d9b65c;
+  box-shadow: 0 0 5px 1px rgba(176, 134, 46, 0.5), 0 0 11px 3px rgba(176, 134, 46, 0.2);
+}
+/* ヒントの息づき: 実体バーなので透明まで消えず、浅い濃淡でゆっくり呼吸させる */
+:root[data-theme="light"] .hint-glow {
+  animation: hint-glow-leaf 2.6s ease-in-out infinite;
+}
+@keyframes hint-glow-leaf { 0%, 100% { opacity: 0.82; } 50% { opacity: 1; } }
+
 /* ボール: マット黒の碁石(実体＋立体陰影)。静止(脈動なし)。光輪はクリア時だけ出す */
 :root[data-theme="light"] .ball {
   background: radial-gradient(circle at 38% 30%, #4a4a52 0%, #26262c 40%, #131316 100%);
@@ -636,6 +650,8 @@ button:active { transform: translateY(1px); }
 @media (prefers-reduced-motion: reduce) {
   :root[data-theme="light"] #boards.bouncing .ball,
   :root[data-theme="light"] #boards.bouncing .ball-glow { animation: none; }
+  /* ライトの金箔ヒントはライト上書きの方が詳細度が高いので、ここで明示的に止める */
+  :root[data-theme="light"] .hint-glow { animation: none; opacity: 0.9; }
 }
 
 /* ライト(washi) + PWA standalone のステータスバー可読性:
