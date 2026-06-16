@@ -198,7 +198,9 @@ button:active { transform: translateY(1px); }
      横幅(100%)を超えない。dvh 非対応ブラウザ向けに 100vh のフォールバックを先に置く */
   width: min(100%, calc((100vh  - var(--play-chrome) - var(--board-gap)) / 2));
   width: min(100%, calc((100dvh - var(--play-chrome) - var(--board-gap) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) / 2));
-  background: var(--panel);
+  /* ダークの床(盤の地)は中央を少し灯したグラデで視認性を上げる(従来#121218は地色と同化し沈んでいた)。
+     ライトは下のテーマ上書きで紙色(var(--panel))に戻す */
+  background: radial-gradient(120% 120% at 50% 42%, #24242f 0%, #16161d 72%);
   /* 案A 額装インセット: 盤を少しへこんだ盆として枠取りし「部屋としてのまとまり」を出す。
      ここは既定(ダーク)値。ライトは下のテーマ上書きで暖色の弱い影に差し替える。--line(格子線)は不変 */
   border: 1px solid rgba(255, 255, 255, 0.11);
@@ -244,7 +246,8 @@ button:active { transform: translateY(1px); }
 }
 .cell { border: 0.5px solid var(--line); }
 .cell.wall {
-  background: linear-gradient(160deg, #2e2e3a 0%, #22222c 100%);
+  /* ダーク壁: 灯り床(中央#24)の上で沈まないよう、従来#2e2e3a→#22222cから一段持ち上げ(スレートの色みは維持) */
+  background: linear-gradient(160deg, #3a3a47 0%, #2c2c37 100%);
   border-color: rgba(255, 255, 255, 0.08);
   /* 上辺ハイライトは廃止: 壁マス毎に出ると隣接壁の継ぎ目で境界線と二重になり線が浮く。
      継ぎ目は境界線(1本)だけに任せる(案2 単線) */
@@ -599,6 +602,7 @@ button:active { transform: translateY(1px); }
 
 /* 案A 額装インセット ライト: 紙では発光しないので暖色の弱い影で盆/額の凹みを表現 */
 :root[data-theme="light"] .board {
+  background: var(--panel); /* ダークの床グラデを打ち消し、ライトは紙色に戻す */
   border-color: rgba(43, 38, 32, 0.20);
   box-shadow: inset 0 2px 7px rgba(70, 55, 30, 0.12), 0 1px 2px rgba(70, 55, 30, 0.06);
 }
