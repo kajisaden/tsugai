@@ -10,7 +10,7 @@ window.NIKENZUME_STRINGS = {
     back: '戻る', undo: '待った', reset: '初形', answer: '答え', theme: '表示テーマ',
     light: '光で示す', nextMove: '次の一手', showNextMove: '次の一手を見る',
     play: '再生', pause: '一時停止', prev: '前へ', next: '次へ', close: 'とじる',
-    restart: '初手から', nextPuzzle: '次の問題へ', levels: '一覧へ',
+    restart: '初手から', nextPuzzle: '次の問題へ', levels: '一覧へ', retryAgain: 'もう一度',
     // メッセージ
     controlsHint: '矢印キー / スワイプで両方の部屋が動く',
     missNote: 'ゴールは、ふたつ同時でなければ開かない',
@@ -32,7 +32,7 @@ window.NIKENZUME_STRINGS = {
     back: 'Back', undo: 'Undo', reset: 'Reset', answer: 'Answer', theme: 'Theme',
     light: 'Light', nextMove: 'Next move', showNextMove: 'Show next move',
     play: 'Play', pause: 'Pause', prev: 'Prev', next: 'Next', close: 'Close',
-    restart: 'Retry', nextPuzzle: 'Next puzzle', levels: 'Levels',
+    restart: 'Retry', nextPuzzle: 'Next puzzle', levels: 'Levels', retryAgain: 'Try again',
     controlsHint: 'Arrow keys or swipe move both rooms',
     missNote: 'The goal opens only when both arrive together.',
     tapNext: 'Tap to continue',

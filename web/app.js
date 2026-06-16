@@ -165,6 +165,8 @@ function showLevels(ch) {
 
 // ---- プレイ ----
 let G = null; // ゲーム状態
+let lastClear = null; // 直近クリアの結果(A画面用): { moves, min, best }
+let tsumiTimer = null; // クリア演出(2秒) → A画面 への自動遷移タイマー
 
 function setCellPos(node, p, w, h) {
   node.style.width = 100 / w + '%';
@@ -368,13 +370,15 @@ async function checkClear() {
   const best = G.moves === min; // 最短達成か
   markCleared(G.puz.id);
   if (best) markBest(G.puz.id);
-  // 言葉でなく光で伝える: 盤上のボールが金(最短)/白(クリア)に発光する(SPEC.md 5章)
+  lastClear = { moves: G.moves, min, best }; // A画面で出すため確保
+  // 盤上のボールが金(最短)/白(クリア)に発光して弾む。2秒見せて A画面(切れ目)へ。タップで早送り
   $('#boards').classList.add(best ? 'clear-best' : 'clear-win', 'bouncing');
-  $('#tsumi-moves-1').textContent = t('clearedMoves', { n: G.moves });
-  $('#tsumi-moves-2').textContent = best ? t('fewest') : t('fewestIs', { n: min });
-  $('#tsumi-moves').classList.toggle('best', best);
-  await sleep(REDUCED ? 0 : 800); // 盤上のグローを一拍見せてから手数を静かに添える
-  $('#overlay-tsumi').hidden = false;
+  if (REDUCED) { goToGap(); return; } // モーション無効: 演出を飛ばして A画面へ
+  await sleep(200); // グローが出るのを一拍見せる
+  if (!G.cleared || !$('#overlay-gap').hidden) return; // 既に遷移済みなら何もしない
+  $('#overlay-tsumi').hidden = false; // 透明ベール(タップ早送りの受け皿)
+  clearTimeout(tsumiTimer);
+  tsumiTimer = setTimeout(goToGap, 2000);
 }
 
 function undo() {
@@ -667,14 +671,28 @@ function closeAnswer() {
   startPuzzle(curChapter, curIndex); // 初形へ戻して自力で挑戦(クリアにはしない)。光/次手も復帰
 }
 
-// ---- クリア後の流れ: 詰 → 切れ目(広告枠) → 次へ ----
-function dismissTsumi() {
-  if ($('#overlay-tsumi').hidden) return;
+// ---- クリア後の流れ: 盤の演出(2秒) → A画面(切れ目) → 次へ/もう一度/一覧 ----
+// A画面: 手数/最短 ・ つがいエンブレム(最短=金/クリア=銀) ・ 章の進捗 を出す。弾みは盤からエンブレムへ継ぐ。
+function goToGap() {
+  if (!$('#overlay-gap').hidden) return; // 二重防止
+  clearTimeout(tsumiTimer);
   $('#overlay-tsumi').hidden = true;
-  $('#boards').classList.remove('bouncing'); // タップで弾みを止める
-  $('#overlay-gap').hidden = false; // ここが広告の差し込み口(SPEC.md 6章)
+  $('#boards').classList.remove('bouncing'); // 盤の弾みは止める(エンブレムが弾む)
+  const { moves, min, best } = lastClear || { moves: 0, min: 0, best: false };
+  $('#gap-moves-1').textContent = t('clearedMoves', { n: moves });
+  $('#gap-moves-2').textContent = best ? t('fewest') : t('fewestIs', { n: min });
+  $('#gap-moves').classList.toggle('best', best);
+  const em = $('#gap-emblem');
+  em.classList.remove('best', 'win');
+  em.classList.add(best ? 'best' : 'win');
+  const levels = chapterLevels.get(curChapter.id);
+  const done = levels.filter((p) => cleared.has(p.id)).length;
+  $('#gap-progress').innerHTML =
+    `${t('chapter', { n: CHAPTERS.indexOf(curChapter) + 1 })}　<b>${done}</b> / ${levels.length}`;
+  // 「もう一度」は常に表示(次の問題への下)。同じ問題をいつでもやり直せる
+  $('#overlay-gap').hidden = false; // SPEC.md 6章の広告差し込み口もここ
 }
-$('#overlay-tsumi').addEventListener('click', dismissTsumi);
+$('#overlay-tsumi').addEventListener('click', goToGap);
 
 $('#btn-next').addEventListener('click', () => {
   $('#overlay-gap').hidden = true;
@@ -685,6 +703,10 @@ $('#btn-next').addEventListener('click', () => {
 $('#btn-list').addEventListener('click', () => {
   $('#overlay-gap').hidden = true;
   showLevels(curChapter);
+});
+$('#btn-retry').addEventListener('click', () => {
+  $('#overlay-gap').hidden = true;
+  startPuzzle(curChapter, curIndex); // 同じ問題を初形から(最短を狙ってやり直す)
 });
 
 $('#btn-theme').addEventListener('click', () => {
@@ -721,7 +743,7 @@ const KEYMAP = {
 };
 document.addEventListener('keydown', (e) => {
   if (!$('#overlay-tsumi').hidden) {
-    if (e.key === 'Enter' || e.key === ' ') dismissTsumi();
+    if (e.key === 'Enter' || e.key === ' ') goToGap();
     return;
   }
   if (!$('#overlay-miss').hidden) {

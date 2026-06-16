@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=03d90b764e">
+<link rel="stylesheet" href="style.css?v=9270468b5f">
 </head>
 <body>
 
@@ -83,12 +83,8 @@
 <!-- 次の一手: 盤の上に方向を静かに一瞬示す -->
 <div id="hint-arrow" hidden><span class="arrow-mark"></span><span class="arrow-sub"></span></div>
 
-<!-- クリア演出: 盤上のボールが金(最短)/白(クリア)に光る。言葉は出さず、手数だけ静かに添える -->
+<!-- クリア演出(2秒): 盤上のボールが金(最短)/白(クリア)に光って弾む。タップで早送りして A画面(切れ目)へ -->
 <div id="overlay-tsumi" hidden>
-  <div id="tsumi-moves" class="tsumi-moves">
-    <span id="tsumi-moves-1"></span>
-    <span id="tsumi-moves-2"></span>
-  </div>
   <span class="tsumi-sub" data-i18n="tapNext">タップで次へ</span>
 </div>
 
@@ -98,17 +94,39 @@
   <button id="btn-miss-restart" data-i18n="restart">初手から</button>
 </div>
 
-<!-- 問題間の切れ目 = 広告差し込み口 (SPEC.md 6章。盤面は聖域、広告はここにだけ置く) -->
+<!-- 問題間の切れ目 = A画面(クリア結果＋次へ)。SPEC.md 6章の広告差し込み口もここ(盤面は聖域) -->
 <div id="overlay-gap" hidden>
-  <!-- AD SLOT: 広告(リワード/インタースティシャル)はここに差し込む。実装までは枠を出さない -->
-  <div class="gap-buttons">
-    <button id="btn-next" data-i18n="nextPuzzle">次の問題へ</button>
-    <button id="btn-list" class="ghost" data-i18n="levels">一覧へ</button>
+  <button id="btn-list" class="ghost btn-icon" data-i18n-aria="levels" aria-label="一覧へ">
+    <svg class="ic-home" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 11 12 4l8 7"/>
+      <path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"/>
+    </svg>
+  </button>
+  <!-- A画面の中身はカードに載せる。カード=ゲーム盤の壁デザインを大きくして角丸にしたもの(テーマ追従) -->
+  <div class="gap-card">
+    <div class="gap-result">
+      <p class="gap-moves" id="gap-moves"><span id="gap-moves-1"></span><span id="gap-moves-2"></span></p>
+      <!-- つがいエンブレム: 2球が45°で寄り添う。ダーク=発光 / ライト=碁石＋金(最短)/銀(クリア)の楕円皿 -->
+      <div class="emblem" id="gap-emblem">
+        <div class="emblem-disc"></div>
+        <div class="emblem-balls">
+          <div class="emblem-ball eb1"></div>
+          <div class="emblem-ball eb2"></div>
+        </div>
+      </div>
+      <p class="gap-progress" id="gap-progress"></p>
+    </div>
+    <div class="gap-buttons">
+      <button id="btn-next" data-i18n="nextPuzzle">次の問題へ</button>
+      <button id="btn-retry" class="ghost" data-i18n="retryAgain">もう一度</button>
+    </div>
   </div>
+  <!-- AD SLOT: 広告は別インタースティシャル想定(A画面はカードに集約) -->
 </div>
 
 <script src="pool.js?v=b15ee5deb3"></script>
-<script src="strings.js?v=dda3377177"></script>
-<script src="app.js?v=659d5283fb"></script>
+<script src="strings.js?v=164d0e9dbc"></script>
+<script src="app.js?v=e200e1c6bc"></script>
 </body>
 </html>

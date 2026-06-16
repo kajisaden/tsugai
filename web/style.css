@@ -422,6 +422,50 @@ button:active { transform: translateY(1px); }
 /* ---- 切れ目(広告枠) ---- */
 .gap-buttons { display: flex; flex-direction: column; gap: 10px; align-items: center; }
 #btn-next { min-width: 200px; border-color: rgba(232, 217, 176, 0.3); color: var(--gold); }
+#btn-retry { min-width: 200px; border-color: var(--line); color: var(--text); }
+/* A画面の「一覧へ」= ホームアイコン(左上・セーフエリア下)。flex フローから外して絶対配置 */
+#btn-list { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); left: 14px; }
+
+/* ---- A画面(クリア結果): 手数/最短 ・ つがいエンブレム ・ 進捗 ---- */
+/* カード = ゲーム盤の壁デザインをそのまま大きくして角だけ角丸にしたもの(テーマ追従。.cell.wall と同配色) */
+.gap-card {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px;
+  width: min(88vw, 350px);
+  min-height: min(72vh, 640px);
+  padding: 44px 32px 36px;
+  border-radius: 26px;
+  background: linear-gradient(160deg, #2e2e3a 0%, #22222c 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.gap-buttons { width: 100%; }
+.gap-buttons button { width: 100%; }
+.gap-result { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+/* 案C入替: 手数の見出しと進捗の数字を金に / 「最短は◯手」「第1章」「/20」は平文(墨・生成り)で読みやすく */
+.gap-moves {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 17px; letter-spacing: 0.16em; color: var(--gold);
+}
+.gap-moves #gap-moves-2 { font-size: 13px; color: var(--text); margin-left: 0.6em; letter-spacing: 0.12em; }
+.gap-progress { font-size: 14px; letter-spacing: 0.16em; color: var(--text); }
+.gap-progress b { color: var(--gold); font-weight: 600; }
+
+/* つがいエンブレム(2球が45°で寄り添う)。既定(ダーク)=発光球・皿なし。最短=金 / クリア=銀 */
+.emblem { position: relative; width: 220px; height: 176px; }
+.emblem-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 50%; display: none; }
+.emblem-balls { position: absolute; inset: 0; animation: emblem-hop 1100ms ease-in-out infinite; }
+.emblem-ball {
+  position: absolute; width: 86px; height: 86px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #fffdf6 0%, #f3e3bd 45%, #c9b585 100%);
+}
+.eb1 { left: 40px; top: 62px; z-index: 2; } /* 左下・手前 */
+.eb2 { left: 94px; top: 31px; z-index: 1; } /* 右上・奥 */
+#gap-emblem.best .emblem-ball { box-shadow: 0 0 26px 7px rgba(240, 220, 170, 0.85); }
+#gap-emblem.win .emblem-ball {
+  background: radial-gradient(circle at 38% 32%, #ffffff 0%, #eef1f7 45%, #c9cedb 100%);
+  box-shadow: 0 0 26px 7px rgba(228, 236, 252, 0.8);
+}
+@keyframes emblem-hop { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9%); } }
 
 /* ---- ヒント: オン/オフのトグル(コントロール常駐) ---- */
 #hint-toggles {
@@ -508,6 +552,7 @@ button:active { transform: translateY(1px); }
   .piece, .board, .goal::before { transition: none; }
   .ball::after { animation: none; opacity: 0.6; }
   #boards.bouncing .ball { animation: none; }
+  .emblem-balls { animation: none; }
   .level-tile .lv-ball, .level-tile .lv-ball.win { animation: none; }
   .tsumi-sub, .tsumi-moves { animation-duration: 1ms; animation-delay: 0ms; }
   .hint-glow { animation: none; opacity: 0.85; }
@@ -589,6 +634,28 @@ button:active { transform: translateY(1px); }
 :root[data-theme="light"] #boards.clear-win .goal.filled::before {
   background: radial-gradient(circle at 42% 38%, #e4e8ef 0%, #b9c0cc 55%, #8b93a1 100%);
   box-shadow: 0 1px 3px rgba(50, 58, 70, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+/* A画面エンブレム ライト: 碁石2球＋金(最短)/銀(クリア)の楕円皿(横から見た盤)。発光ではなく実体＋影 */
+:root[data-theme="light"] #gap-emblem .emblem-ball {
+  background: radial-gradient(circle at 38% 30%, #4a4a52 0%, #26262c 40%, #131316 100%);
+  box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.10), 0 4px 7px rgba(40, 32, 16, 0.40);
+}
+:root[data-theme="light"] .emblem-disc { display: block; }
+:root[data-theme="light"] #gap-emblem.best .emblem-disc {
+  background: radial-gradient(circle at 42% 36%, #f4e1a8 0%, #d8b75f 52%, #b08a36 100%);
+  box-shadow: 0 5px 10px rgba(80, 58, 18, 0.25), inset 0 2px 3px rgba(255, 255, 255, 0.55), inset 0 -4px 6px rgba(120, 86, 28, 0.45);
+}
+:root[data-theme="light"] #gap-emblem.win .emblem-disc {
+  background: radial-gradient(circle at 42% 36%, #eef1f6 0%, #b9c0cc 52%, #8b93a1 100%);
+  box-shadow: 0 5px 10px rgba(50, 58, 70, 0.25), inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -4px 6px rgba(90, 98, 110, 0.4);
+}
+
+/* A画面カード ライト: 壁(washi)の配色そのまま(.cell.wall light と同じ)＋角丸 */
+:root[data-theme="light"] .gap-card {
+  background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
+  border-color: rgba(43, 38, 32, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 /* レベル一覧の球: 最短=琥珀ディスク / クリア済み=青灰。紙地では脈動が読めないので静かに */
