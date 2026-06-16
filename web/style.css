@@ -421,8 +421,21 @@ button:active { transform: translateY(1px); }
 
 /* ---- 切れ目(広告枠) ---- */
 .gap-buttons { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-#btn-next { min-width: 200px; border-color: rgba(232, 217, 176, 0.3); color: var(--gold); }
-#btn-retry { min-width: 200px; border-color: var(--line); color: var(--text); }
+/* A画面のボタン: 壁カードから彫り出した(raised)質感＋明朝体。次の問題へ=金文字 / もう一度=平文 */
+#btn-next, #btn-retry {
+  min-width: 200px;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 18px;
+  background: #383844;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 2px 5px rgba(0, 0, 0, 0.18);
+}
+#btn-next { color: var(--gold); }
+#btn-retry { color: var(--text); }
 /* A画面の「一覧へ」= ホームアイコン(左上・セーフエリア下)。flex フローから外して絶対配置 */
 #btn-list { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); left: 14px; }
 
@@ -654,6 +667,12 @@ button:active { transform: translateY(1px); }
   background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
   border-color: rgba(43, 38, 32, 0.10);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+/* A画面ボタンの彫り出し面(ライト) */
+:root[data-theme="light"] #btn-next,
+:root[data-theme="light"] #btn-retry {
+  background: #e6decd;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 5px rgba(80, 64, 36, 0.16);
 }
 
 /* レベル一覧の球: 最短=琥珀ディスク / クリア済み=青灰。紙地では脈動が読めないので静かに */
