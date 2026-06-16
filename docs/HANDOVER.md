@@ -6,6 +6,16 @@
 
 ---
 
+## 現在地 (2026-06-17 更新)
+
+- **ライト A画面エンブレムの質感改善＝案C 実装(2026-06-17)**: ライトが「鮮やかな金皿＋フラット黒球=玉子焼き/絵文字っぽい」件を解消。**案C**を `web/style.css` light セクション＋`web/index.html` に反映済み(コミット済・**push 未**):
+  - **ボール=磨いた碁石**: `:root[data-theme="light"] #gap-emblem .emblem-ball` を `radial-gradient(circle at 35% 26%, #6c6c77 0%, #37373f 30%, #1b1b21 68%, #0d0d11 100%)` ＋ `box-shadow: inset -2px -3px 7px rgba(0,0,0,.6), inset 3px 3px 6px rgba(255,255,255,.16), 0 5px 9px rgba(40,32,16,.42)`(上面に反射のある立体)。
+  - **金皿(最短)=漆金精緻化(ツヤ維持)**: `radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%)` ＋ 磨きハイライト＋細い金縁(`inset 0 0 0 1px rgba(255,242,205,.18)`)。**マット化3案は実機エミュ比較の上ツヤ維持を選択**(マットは平板/黄身寄りに振れた)。
+  - **銀皿(クリア)=金と同構造の精緻化ツヤ銀**で統一: `radial-gradient(120% 150% at 40% 24%, #f7fafd 0%, #d4dae3 40%, #aeb6c3 72%, #79808d 100%)`。
+  - **後光halo**: `#gap-emblem` 先頭に `.emblem-halo` 要素を追加し、状態別に出し分け(最短=金 `rgba(216,183,95,..)` / クリア=銀 `rgba(185,192,204,..)`、`closest-side` ＋ `filter: blur(3px)`)。既定は `display:none`、`:root[data-theme="light"] #gap-emblem.best/.win .emblem-halo` でのみ表示。
+  - **ダークは無傷**: halo/disc とも `display:none`(computed style 確認)、従来の発光球のまま。chrome-devtools 390×844 でライト best/win・ダーク回帰を目視＋計測。stamp-cache 済み(`style.css?v=2dcb6745d0`)。
+  - **残**: 実機(iPhone standalone)確認 → 確定後に push → Pages ビルド一致＋ライブ反映を curl grep 検証。検証スクショは `docs/mocks/loop/`(未追跡)、設計モックは `docs/mocks/tsugai-{light-emblem,matte-disc}.html`。
+
 ## 現在地 (2026-06-15 更新)
 
 - **クリア後の A画面(2026-06-16)**: クリア→盤で約1秒 発光＋弾み→**A画面(切れ目)へ自動遷移**(タップ/Enter で早送り)。A画面 = **盤の壁デザインを大きく角丸にしたカード**(`.gap-card`: ライト=washi壁 / ダーク=スレート壁＝`.cell.wall` と同配色＋角丸、`width: min(88vw,350px)` / `min-height: min(72vh,640px)`・中身は縦中央)の上に、上から: **手数**(`◯手でクリア`)＋最短(`最短は◯手`/`最短手数です`)→ **つがいエンブレム**(`#gap-emblem` 2球が約30°で寄り添う。ライト=碁石＋金(最短)/銀(クリア)の楕円皿、ダーク=金/銀の発光。`emblem-hop` で弾む。`.best`/`.win` で出し分け)→ **進捗**`第1章 X/20`→ ボタン**[次の問題へ/もう一度(常時表示)]**(カード幅にフィット。**壁カードから彫り出した raised 質感＋明朝体(ヒラギノ)**、次=金文字/もう一度=平文)。左上に**ホームアイコン**(=一覧へ、`#btn-list` を SVG 化)。文字色は**「案C入替」**: 見出し`◯手でクリア`と進捗の数字=**金**(`var(--gold)`)、`最短は◯手`/`第1章`/`/20`=**平文**(カードの中間トーンで沈むディムを廃止)。`overlay-tsumi` は手数表示を撤去し2秒ベール化。`もう一度`=同じ問題を初形から(`startPuzzle(cur)`)。`goToGap()` が `lastClear{moves,min,best}` で生成、`tsumiTimer` で2秒。reduced-motion は跳ね停止。strings に `retryAgain`(もう一度/Try again)。本コミットで公開。

@@ -467,6 +467,8 @@ button:active { transform: translateY(1px); }
 
 /* つがいエンブレム(2球が45°で寄り添う)。既定(ダーク)=発光球・皿なし。最短=金 / クリア=銀 */
 .emblem { position: relative; width: 220px; height: 176px; }
+/* 後光(halo): エンブレム背後の温かなオーラ。既定(ダーク)は発光球が奥行きを担うので非表示。ライトのみ表示(下) */
+.emblem-halo { display: none; position: absolute; inset: -12% -6% -20% -6%; border-radius: 50%; pointer-events: none; }
 .emblem-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 50%; display: none; }
 .emblem-balls { position: absolute; inset: 0; }
 .emblem-ball {
@@ -649,19 +651,32 @@ button:active { transform: translateY(1px); }
   box-shadow: 0 1px 3px rgba(50, 58, 70, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.6);
 }
 
-/* A画面エンブレム ライト: 碁石2球＋金(最短)/銀(クリア)の楕円皿(横から見た盤)。発光ではなく実体＋影 */
+/* A画面エンブレム ライト(案C): 磨いた碁石2球＋漆金精緻化(最短)/精緻化銀(クリア)の楕円皿＋温かな後光halo。発光ではなく実体＋素材感 */
 :root[data-theme="light"] #gap-emblem .emblem-ball {
-  background: radial-gradient(circle at 38% 30%, #4a4a52 0%, #26262c 40%, #131316 100%);
-  box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.10), 0 4px 7px rgba(40, 32, 16, 0.40);
+  background: radial-gradient(circle at 35% 26%, #6c6c77 0%, #37373f 30%, #1b1b21 68%, #0d0d11 100%);
+  box-shadow: inset -2px -3px 7px rgba(0, 0, 0, 0.6), inset 3px 3px 6px rgba(255, 255, 255, 0.16), 0 5px 9px rgba(40, 32, 16, 0.42);
 }
 :root[data-theme="light"] .emblem-disc { display: block; }
+/* 漆金精緻化(ツヤ): 上面に磨きハイライト＋細い金縁。チープな均一黄でなく金箔の照り */
 :root[data-theme="light"] #gap-emblem.best .emblem-disc {
-  background: radial-gradient(circle at 42% 36%, #f4e1a8 0%, #d8b75f 52%, #b08a36 100%);
-  box-shadow: 0 5px 10px rgba(80, 58, 18, 0.25), inset 0 2px 3px rgba(255, 255, 255, 0.55), inset 0 -4px 6px rgba(120, 86, 28, 0.45);
+  background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
+  box-shadow: 0 6px 13px rgba(70, 52, 18, 0.22), inset 0 2px 4px rgba(255, 248, 224, 0.7), inset 0 -6px 9px rgba(105, 78, 30, 0.42), inset 0 0 0 1px rgba(255, 242, 205, 0.18);
 }
+/* 銀も金と同じ精緻化ツヤで揃える */
 :root[data-theme="light"] #gap-emblem.win .emblem-disc {
-  background: radial-gradient(circle at 42% 36%, #eef1f6 0%, #b9c0cc 52%, #8b93a1 100%);
-  box-shadow: 0 5px 10px rgba(50, 58, 70, 0.25), inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -4px 6px rgba(90, 98, 110, 0.4);
+  background: radial-gradient(120% 150% at 40% 24%, #f7fafd 0%, #d4dae3 40%, #aeb6c3 72%, #79808d 100%);
+  box-shadow: 0 6px 13px rgba(40, 48, 60, 0.22), inset 0 2px 4px rgba(248, 251, 255, 0.7), inset 0 -6px 9px rgba(70, 78, 92, 0.42), inset 0 0 0 1px rgba(238, 244, 250, 0.2);
+}
+/* 後光(halo) ライト: 状態で色を出し分け(最短=金 / クリア=銀)。背後に敷いて温かさを足す */
+:root[data-theme="light"] #gap-emblem.best .emblem-halo {
+  display: block;
+  background: radial-gradient(closest-side, rgba(216, 183, 95, 0.42), rgba(216, 183, 95, 0.15) 46%, transparent 72%);
+  filter: blur(3px);
+}
+:root[data-theme="light"] #gap-emblem.win .emblem-halo {
+  display: block;
+  background: radial-gradient(closest-side, rgba(185, 192, 204, 0.4), rgba(185, 192, 204, 0.14) 46%, transparent 72%);
+  filter: blur(3px);
 }
 
 /* A画面カード ライト: 壁(washi)の配色そのまま(.cell.wall light と同じ)＋角丸 */
