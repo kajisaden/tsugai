@@ -141,7 +141,9 @@ button:active { transform: translateY(1px); }
   /* 壁カード化: 盤の壁・A画面カードと同色の「壁から彫り出したカード」に。
      既定=ダーク(持ち上げた壁色 #4a4a57→#3a3a45)。ライトは下で washi に上書き。
      クリア済みの金縁(.level-tile.cleared)は specificity で維持される */
-  background: linear-gradient(160deg, #4a4a57 0%, #3a3a45 100%);
+  /* 一覧タイルは盤の床(.board)と同色＝盤面そのものの暗さ(壁より暗い)。
+     地色に沈めつつカードの立体(縁＋上辺ハイライト)は残す。盤床と同じ radial */
+  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   border-radius: 14px;
@@ -465,8 +467,9 @@ button:active { transform: translateY(1px); }
   min-height: min(72vh, 640px);
   padding: 44px 32px 36px;
   border-radius: 26px;
-  /* 持ち上げた壁色で統一(盤の壁・一覧タイルと同色)。低輝度でも沈まない */
-  background: linear-gradient(160deg, #4a4a57 0%, #3a3a45 100%);
+  /* A画面カードも盤の床(.board)と同色の radial。一覧タイルと統一・盤面と地続きに見せる。
+     中心の灯りが中央のエンブレムを引き立てる(壁 .cell.wall より暗い) */
+  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
