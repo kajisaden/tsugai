@@ -113,6 +113,8 @@ button:active { transform: translateY(1px); }
   width: 100%;
   text-align: left;
   padding: 18px 20px;
+  /* 一覧タイル/A画面カードと同じ盤床色に統一(ダーク)。ライトは下で従来の紙色に戻す */
+  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
 }
 .chapter-card .ch-name { font-size: 15px; letter-spacing: 0.15em; }
 .chapter-card .ch-meta { font-size: 12px; color: var(--text-dim); }
@@ -718,6 +720,9 @@ button:active { transform: translateY(1px); }
   background: #e6decd;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 5px rgba(80, 64, 36, 0.16);
 }
+
+/* 章カード ライト: ダークで足した盤床色を打ち消し、従来の紙色(var(--panel))を維持 */
+:root[data-theme="light"] .chapter-card { background: var(--panel); }
 
 /* 一覧タイルの壁カード ライト: washi壁(.cell.wall light と同色)＋彫り出しハイライト */
 :root[data-theme="light"] .level-tile {
