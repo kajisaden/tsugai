@@ -138,6 +138,13 @@ button:active { transform: translateY(1px); }
   justify-content: center;
   gap: 4px;
   padding: 0;
+  /* 壁カード化: 盤の壁・A画面カードと同色の「壁から彫り出したカード」に。
+     既定=ダーク(持ち上げた壁色 #4a4a57→#3a3a45)。ライトは下で washi に上書き。
+     クリア済みの金縁(.level-tile.cleared)は specificity で維持される */
+  background: linear-gradient(160deg, #4a4a57 0%, #3a3a45 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
 }
 .level-tile .lv-no { font-size: 18px; }
 .level-tile .lv-moves { font-size: 10px; color: var(--text-dim); }
@@ -458,7 +465,8 @@ button:active { transform: translateY(1px); }
   min-height: min(72vh, 640px);
   padding: 44px 32px 36px;
   border-radius: 26px;
-  background: linear-gradient(160deg, #2e2e3a 0%, #22222c 100%);
+  /* 持ち上げた壁色で統一(盤の壁・一覧タイルと同色)。低輝度でも沈まない */
+  background: linear-gradient(160deg, #4a4a57 0%, #3a3a45 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
@@ -706,6 +714,13 @@ button:active { transform: translateY(1px); }
 :root[data-theme="light"] #btn-retry {
   background: #e6decd;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 5px rgba(80, 64, 36, 0.16);
+}
+
+/* 一覧タイルの壁カード ライト: washi壁(.cell.wall light と同色)＋彫り出しハイライト */
+:root[data-theme="light"] .level-tile {
+  background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
+  border-color: rgba(43, 38, 32, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 /* レベル一覧の球: 最短=琥珀ディスク / クリア済み=青灰。紙地では脈動が読めないので静かに */
