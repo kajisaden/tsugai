@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=f5f834e4b1">
+<link rel="stylesheet" href="style.css?v=42e7c1ed59">
 </head>
 <body>
 
@@ -62,17 +62,16 @@
       <span id="move-count"></span>
     </div>
     <div id="boards"></div>
+    <!-- 操作系: 上段=ヘルプ(リワード広告・残数バッジ) / 下段=最初から(無料・最頻・フル幅)。
+         残数(光5/次の手10/日)は角丸の金バッジ、0で▶。答えは毎回▶。待った(一手戻る)は廃止 -->
     <div id="controls">
-      <button id="btn-undo" class="ghost" data-i18n="undo">待った</button>
-      <button id="btn-reset" class="ghost" data-i18n="reset">初形</button>
-      <button id="btn-answer-open" class="ghost" data-i18n="answer">答え</button>
+      <div id="hint-row">
+        <button id="btn-hint-light" class="help"><span data-i18n="light">光ヒント</span><span class="hint-badge"></span></button>
+        <button id="btn-hint-next" class="help"><span data-i18n="nextMove">次の手ヒント</span><span class="hint-badge"></span></button>
+        <button id="btn-answer-open" class="help"><span data-i18n="answer">答え</span><span class="hint-badge ad">▶</span></button>
+      </div>
+      <button id="btn-reset" class="reset-btn" data-i18n="reset">最初から</button>
     </div>
-    <!-- ヒントはオン/オフ設定(全問持続)。開く手間なくプレイ画面に常駐 -->
-    <div id="hint-toggles">
-      <button id="tg-light" class="toggle" aria-pressed="false" data-i18n="light">光で示す</button>
-      <button id="tg-next" class="toggle" aria-pressed="false" data-i18n="nextMove">次の一手</button>
-    </div>
-    <button id="btn-next-move" class="ghost" hidden data-i18n="showNextMove">次の一手を見る</button>
     <!-- 答えビューア: 再生(自動)ボタン + ◀▶ で一手ずつ -->
     <div id="answer-bar" hidden>
       <button id="btn-ans-play" data-i18n="play">再生</button>
@@ -127,7 +126,7 @@
 </div>
 
 <script src="pool.js?v=b15ee5deb3"></script>
-<script src="strings.js?v=95469b5652"></script>
-<script src="app.js?v=834bd69199"></script>
+<script src="strings.js?v=87352f8746"></script>
+<script src="app.js?v=67a91f199a"></script>
 </body>
 </html>

@@ -359,12 +359,51 @@ button:active { transform: translateY(1px); }
   50% { opacity: 1; }
 }
 
+/* ---- 操作系: 上段=ヘルプ(リワード) / 下段=最初から(無料・フル幅) ---- */
 #controls {
+  margin: 18px auto 0;
+  width: fit-content;            /* ヘルプ行の幅に合わせ、最初からをフル幅に */
   display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 18px;
+  flex-direction: column;
 }
+#hint-row { display: flex; gap: 10px; }
+/* ヘルプ = 盤床色のカード(一覧タイル/結果カードと同家系)。背後の一枚板は置かない */
+.help {
+  position: relative;
+  font: inherit; font-size: 13px; letter-spacing: 0.04em;
+  color: var(--text);
+  border-radius: 11px;
+  padding: 11px 14px;
+  cursor: pointer;
+  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+/* 光ヒント点灯中(この問題): 金で強調 */
+.help.lit { color: var(--gold); border-color: rgba(232, 217, 176, 0.35); }
+/* 残数バッジ(角丸の金。0で▶=広告)。答えは常に▶ */
+.hint-badge {
+  position: absolute; top: -7px; right: -7px;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  border-radius: 5px;
+  font-size: 10px; font-weight: 700; line-height: 18px; text-align: center;
+  background: #e8d9b0; color: #16161d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.hint-badge.ad { font-weight: 400; font-size: 9px; }
+/* 最初から = 下段フル幅・枠強(中立。リワードの金とは別カテゴリ) */
+.reset-btn {
+  margin-top: 14px;
+  width: 100%;
+  font: inherit; font-size: 15px; letter-spacing: 0.08em;
+  color: var(--text);
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.36);
+  border-radius: 11px;
+  padding: 10px 26px;
+  cursor: pointer;
+}
+.reset-btn:active { transform: translateY(1px); }
 #hint-keys {
   text-align: center;
   font-size: 11px;
@@ -503,51 +542,6 @@ button:active { transform: translateY(1px); }
   box-shadow: 0 0 26px 7px rgba(228, 236, 252, 0.8);
 }
 
-/* ---- ヒント: オン/オフのトグル(コントロール常駐) ---- */
-#hint-toggles {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 12px;
-}
-.toggle {
-  font-size: 12px;
-  color: var(--text-dim);
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 7px 16px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  letter-spacing: 0.08em;
-}
-.toggle::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--text-dim);
-  opacity: 0.35;
-}
-.toggle.on {
-  color: var(--gold);
-  border-color: rgba(232, 217, 176, 0.3);
-}
-.toggle.on::before {
-  background: var(--gold);
-  opacity: 1;
-  box-shadow: 0 0 8px var(--glow);
-}
-#btn-next-move {
-  display: block;
-  margin: 10px auto 0;
-  font-size: 12px;
-  color: var(--gold);
-  border-color: rgba(232, 217, 176, 0.25);
-  border-radius: 20px;
-  padding: 7px 18px;
-}
 
 /* 次の一手の矢印: 盤の上に静かに一瞬だけ */
 #hint-arrow {
@@ -756,9 +750,21 @@ button:active { transform: translateY(1px); }
 /* 金アクセントのボタン: 薄い金縁だと紙で消えるので濃い琥珀の縁にする */
 :root[data-theme="light"] #btn-next,
 :root[data-theme="light"] #btn-miss-restart,
-:root[data-theme="light"] #btn-ans-play,
-:root[data-theme="light"] #btn-next-move,
-:root[data-theme="light"] .toggle.on { border-color: rgba(168, 128, 31, 0.45); }
+:root[data-theme="light"] #btn-ans-play { border-color: rgba(168, 128, 31, 0.45); }
+
+/* 操作系 ライト: ヘルプ=washiカード / 残数バッジ=案Bコイン金 / 最初から=濃い枠 */
+:root[data-theme="light"] .help {
+  background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
+  border-color: rgba(43, 38, 32, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+:root[data-theme="light"] .help.lit { color: #a8801f; border-color: rgba(168, 128, 31, 0.45); }
+:root[data-theme="light"] .hint-badge {
+  background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 45%, #bd9c52 100%);
+  color: #4a3a12;
+  box-shadow: inset 0 1px 1px rgba(255, 248, 224, 0.7), 0 1px 2px rgba(80, 58, 18, 0.25);
+}
+:root[data-theme="light"] .reset-btn { border-color: rgba(43, 38, 32, 0.46); }
 
 /* オーバーレイの暗幕 → 明るい紙の幕 */
 :root[data-theme="light"] #overlay-gap,

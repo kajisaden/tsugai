@@ -97,8 +97,37 @@ function markBest(puzId) {
 
 // ヒント設定(問題ごと)。違う問題に移ると必ずオフから始める(同じ問題の初形/答え再生では保持)。
 // light=ぶつかる壁を常時光らせる / next=次の一手ボタンを出す
-const hintSettings = { light: false, next: false };
+const hintSettings = { light: false };
 let hintPuzzleId = null; // hintSettings が今ひもづく問題ID。別問題になったらオフへ戻す
+
+// ---- ヒント残数(毎日リセット) ----
+// 無料: 光ヒント 5回/日, 次の手ヒント 10回/日。0回で広告(差し込み口)。答えは毎回広告。コイン無し。
+const HINT_KEY = 'nikenzume.hints.v1';
+const HINT_FREE = { light: 5, next: 10 };
+function hintToday() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
+function loadHintCredits() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(HINT_KEY)); } catch (e) {}
+  if (!s || s.date !== hintToday()) s = { date: hintToday(), light: HINT_FREE.light, next: HINT_FREE.next };
+  return s;
+}
+let hintCredits = loadHintCredits();
+function saveHintCredits() { localStorage.setItem(HINT_KEY, JSON.stringify(hintCredits)); }
+function rolloverHints() {
+  if (hintCredits.date !== hintToday()) {
+    hintCredits = { date: hintToday(), light: HINT_FREE.light, next: HINT_FREE.next };
+    saveHintCredits();
+  }
+}
+// リワード広告の差し込み口。配信形態(Capacitor等)が決まるまでは即時付与のプレースホルダ。
+function watchRewardAd(then) { /* TODO: リワード広告SDK。今は即時実行 */ then(); }
+// 残数を1消費して action。0なら広告(差し込み口)。
+function spendHint(kind, action) {
+  rolloverHints();
+  if (hintCredits[kind] > 0) { hintCredits[kind]--; saveHintCredits(); action(); }
+  else watchRewardAd(action);
+  updateHintUI();
+}
 
 // ---- DOM ユーティリティ ----
 const $ = (sel) => document.querySelector(sel);
@@ -209,13 +238,11 @@ function startPuzzle(ch, index) {
   AV = null;
   $('#answer-bar').hidden = true;
   $('#controls').hidden = false;
-  $('#hint-toggles').hidden = false;
   $('#hint-keys').hidden = false;
   $('#move-count').hidden = false;
   const puz = chapterLevels.get(ch.id)[index];
-  if (puz.id !== hintPuzzleId) { // 違う問題に移ったらヒントはオフから(同じ問題の再開では保持)
+  if (puz.id !== hintPuzzleId) { // 違う問題に移ったら光ヒントはオフから(同じ問題の再開では保持)
     hintSettings.light = false;
-    hintSettings.next = false;
     hintPuzzleId = puz.id;
   }
   const { w, h } = puz.size;
@@ -385,19 +412,6 @@ async function checkClear() {
   tsumiTimer = setTimeout(goToGap, 1000);
 }
 
-function undo() {
-  if (!G || G.busy || G.cleared || !G.history.length) return;
-  clearWallHints();
-  G.pos = G.history.pop();
-  G.moves--;
-  G.rooms.forEach((rm, i) =>
-    setCellXY(rm.piece, G.pos[i] % G.w, (G.pos[i] - (G.pos[i] % G.w)) / G.w)
-  );
-  updateInfo();
-  updateGoals();
-  refreshWallHints();
-}
-
 function resetPuzzle() {
   if (!G || G.busy || G.cleared) return;
   startPuzzle(curChapter, curIndex);
@@ -466,16 +480,22 @@ function hintFromState(positions) {
   return { dir: path[0], remaining: path.length, path };
 }
 
-// トグルの見た目と「次の一手」ボタンの表示をヒント設定に同期する
+// ヘルプボタンの状態(光の点灯・残数バッジ)を反映
 function updateHintUI() {
-  const tgl = $('#tg-light');
-  const tgn = $('#tg-next');
-  tgl.classList.toggle('on', hintSettings.light);
-  tgl.setAttribute('aria-pressed', String(hintSettings.light));
-  tgn.classList.toggle('on', hintSettings.next);
-  tgn.setAttribute('aria-pressed', String(hintSettings.next));
-  // 次の一手ボタンは「next ON」かつプレイ中(答えビューア/クリア中でない)のときだけ
-  $('#btn-next-move').hidden = !(hintSettings.next && G && !AV && !G.cleared);
+  rolloverHints();
+  const lightBtn = $('#btn-hint-light');
+  if (lightBtn) {
+    lightBtn.classList.toggle('lit', hintSettings.light);
+    setHintBadge(lightBtn, hintCredits.light);
+  }
+  setHintBadge($('#btn-hint-next'), hintCredits.next);
+}
+// 残数バッジ: 1以上は数字 / 0は ▶(広告)
+function setHintBadge(btn, n) {
+  const b = btn && btn.querySelector('.hint-badge');
+  if (!b) return;
+  if (n > 0) { b.textContent = String(n); b.classList.remove('ad'); }
+  else { b.textContent = '▶'; b.classList.add('ad'); }
 }
 // 光ヒントONなら現局面のぶつかり面を出し直す。OFFなら消す
 function refreshWallHints() {
@@ -656,8 +676,6 @@ function enterAnswer() {
   };
   clearWallHints(); // 答えビューア中は光ヒントを出さない
   $('#controls').hidden = true;
-  $('#hint-toggles').hidden = true;
-  $('#btn-next-move').hidden = true;
   $('#hint-keys').hidden = true;
   $('#move-count').hidden = true; // 進捗は answer-bar に出す
   $('#answer-bar').hidden = false;
@@ -669,10 +687,9 @@ function closeAnswer() {
   AV = null;
   $('#answer-bar').hidden = true;
   $('#controls').hidden = false;
-  $('#hint-toggles').hidden = false;
   $('#hint-keys').hidden = false;
   $('#move-count').hidden = false;
-  startPuzzle(curChapter, curIndex); // 初形へ戻して自力で挑戦(クリアにはしない)。光/次手も復帰
+  startPuzzle(curChapter, curIndex); // 初形へ戻して自力で挑戦(クリアにはしない)。光も復帰
 }
 
 // ---- クリア後の流れ: 盤の演出(2秒) → A画面(切れ目) → 次へ/もう一度/一覧 ----
@@ -716,19 +733,20 @@ $('#btn-theme').addEventListener('click', () => {
   localStorage.setItem(THEME_KEY, theme);
   applyTheme();
 });
-$('#btn-undo').addEventListener('click', undo);
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#btn-miss-restart').addEventListener('click', restartFromMistake);
-$('#btn-answer-open').addEventListener('click', enterAnswer);
-$('#btn-next-move').addEventListener('click', showNextMove);
-$('#tg-light').addEventListener('click', () => {
-  hintSettings.light = !hintSettings.light;
-  updateHintUI();
-  refreshWallHints();
+// 答え = 毎回リワード広告(差し込み口)→ 答えビューア
+$('#btn-answer-open').addEventListener('click', () => watchRewardAd(enterAnswer));
+// 光ヒント = 1回消費してその問題で点灯(点灯済みなら据え置き=消費しない)
+$('#btn-hint-light').addEventListener('click', () => {
+  if (!G || G.busy || G.cleared || AV) return;
+  if (hintSettings.light) return;
+  spendHint('light', () => { hintSettings.light = true; refreshWallHints(); });
 });
-$('#tg-next').addEventListener('click', () => {
-  hintSettings.next = !hintSettings.next;
-  updateHintUI();
+// 次の手ヒント = 都度1回消費して次の一手を表示
+$('#btn-hint-next').addEventListener('click', () => {
+  if (!G || G.busy || G.cleared || AV) return;
+  spendHint('next', showNextMove);
 });
 $('#btn-ans-prev').addEventListener('click', answerBack);
 $('#btn-ans-next').addEventListener('click', () => {

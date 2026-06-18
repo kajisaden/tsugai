@@ -7,8 +7,8 @@ window.NIKENZUME_STRINGS = {
     tagline: 'ふたつの部屋、ひとつの操作。',
     chapter: ({ n }) => `第${n}章`,
     // ボタン
-    back: '戻る', undo: '待った', reset: '初形', answer: '答え', theme: '表示テーマ',
-    light: '光で示す', nextMove: '次の一手', showNextMove: '次の一手を見る',
+    back: '戻る', reset: '最初から', answer: '答え', theme: '表示テーマ',
+    light: '光ヒント', nextMove: '次の手ヒント',
     play: '再生', pause: '一時停止', prev: '前へ', next: '次へ', close: 'とじる',
     restart: '初手から', nextPuzzle: '次の問題へ', levels: '一覧へ', retryAgain: 'もう一度',
     // メッセージ
@@ -28,8 +28,8 @@ window.NIKENZUME_STRINGS = {
     title: 'Tsugai',
     tagline: 'Two rooms, one move.',
     chapter: ({ n }) => `Chapter ${n}`,
-    back: 'Back', undo: 'Undo', reset: 'Reset', answer: 'Answer', theme: 'Theme',
-    light: 'Light', nextMove: 'Next move', showNextMove: 'Show next move',
+    back: 'Back', reset: 'Restart', answer: 'Answer', theme: 'Theme',
+    light: 'Light hint', nextMove: 'Next move',
     play: 'Play', pause: 'Pause', prev: 'Prev', next: 'Next', close: 'Close',
     restart: 'Retry', nextPuzzle: 'Next puzzle', levels: 'Levels', retryAgain: 'Try again',
     controlsHint: 'Arrow keys or swipe move both rooms',
