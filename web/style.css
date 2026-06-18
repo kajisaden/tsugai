@@ -112,8 +112,6 @@ main {
   /* オン側の円 = 盤の壁色(ライト=washi) */
   background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
 }
-/* ライト太陽の光学中心補正: わずかに左に寄って見えるので右へ微ナッジ(数学的には中央) */
-:root[data-theme="light"] #btn-theme .sun-wrap svg { transform: translateX(0.6px); }
 
 .tagline {
   text-align: center;
