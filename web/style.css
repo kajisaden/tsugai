@@ -227,7 +227,8 @@ button:active { transform: translateY(1px); }
   letter-spacing: 0.2em;
   color: var(--gold);
 }
-#move-count { font-size: 13px; color: var(--text-dim); letter-spacing: 0.1em; }
+/* 手数は左上「戻る」と同サイズ(16px)。色/字体/字間は元から戻ると一致 */
+#move-count { font-size: 16px; color: var(--text-dim); letter-spacing: 0.1em; }
 
 /* 盤は縦1列(スマホで各盤を大きく見せる)。横並びだと1枚が小さく潰れる */
 #boards {
