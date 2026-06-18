@@ -192,27 +192,26 @@ button:active { transform: translateY(1px); }
   border-color: rgba(232, 217, 176, 0.35);
 }
 .level-tile.cleared .lv-no { color: var(--gold); }
-/* 最短達成: 大きめ・金のボールが脈動して光る(★の置き換え。盤上の金=最短と統一) */
-.level-tile .lv-ball {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+/* クリア印 = A画面のつがいエンブレム(縮小)。最短=金 / クリア=白(銀)。
+   220x176座標の本物の意匠を transform: scale で縮小し、発光/影も比率を保つ。
+   既定=ダーク(発光2球)。ライトは下で碁石+皿+後光に上書き */
+.lv-emblem { position: relative; display: inline-block; width: 38px; height: 30px; }
+.lv-emblem .le-inner {
+  position: absolute; top: 50%; left: 50%; width: 220px; height: 176px;
+  margin: -88px 0 0 -110px; transform: scale(0.16); transform-origin: center;
+}
+.le-halo { position: absolute; inset: -12% -6% -20% -6%; border-radius: 50%; display: none; }
+.le-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 50%; display: none; }
+.le-ball { position: absolute; width: 86px; height: 86px; border-radius: 50%; }
+.le-ball.eb1 { left: 40px; top: 62px; z-index: 2; } /* 左下・手前 */
+.le-ball.eb2 { left: 94px; top: 31px; z-index: 1; } /* 右上・奥 */
+.lv-emblem.best .le-ball {
   background: radial-gradient(circle at 38% 32%, #fffdf6 0%, #f3e3bd 45%, #c9b585 100%);
-  box-shadow: 0 0 7px 2px rgba(240, 220, 170, 0.55);
-  animation: tile-ball-glow 3.2s ease-in-out infinite;
+  box-shadow: 0 0 26px 7px rgba(240, 220, 170, 0.85);
 }
-@keyframes tile-ball-glow {
-  0%, 100% { box-shadow: 0 0 5px 1px rgba(240, 220, 170, 0.4); }
-  50% { box-shadow: 0 0 10px 3px rgba(240, 220, 170, 0.7); }
-}
-/* クリア(非最短): 小さめ・寒色の白で静かに灯る。脈動なし=最短との強弱差で見分ける */
-.level-tile .lv-ball.win {
-  width: 9px;
-  height: 9px;
-  background: radial-gradient(circle at 38% 32%, #f4f7fc 0%, #c5ccdb 50%, #8a90a2 100%);
-  box-shadow: 0 0 4px 1px rgba(200, 212, 235, 0.35);
-  animation: none;
+.lv-emblem.win .le-ball {
+  background: radial-gradient(circle at 38% 32%, #ffffff 0%, #eef1f7 45%, #c9cedb 100%);
+  box-shadow: 0 0 26px 7px rgba(228, 236, 252, 0.8);
 }
 
 /* ---- プレイ画面 ---- */
@@ -589,7 +588,6 @@ button:active { transform: translateY(1px); }
   .piece, .board, .goal::before { transition: none; }
   .ball::after { animation: none; opacity: 0.6; }
   #boards.bouncing .ball { animation: none; }
-  .level-tile .lv-ball, .level-tile .lv-ball.win { animation: none; }
   .hint-glow { animation: none; opacity: 0.85; }
 }
 
@@ -729,15 +727,29 @@ button:active { transform: translateY(1px); }
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-/* レベル一覧の球: 最短=琥珀ディスク / クリア済み=青灰。紙地では脈動が読めないので静かに */
-:root[data-theme="light"] .level-tile .lv-ball {
-  background: radial-gradient(circle at 38% 30%, #f7e6b0 0%, #dcb44f 48%, #a8801f 100%);
-  box-shadow: 0 1px 3px rgba(70, 52, 16, 0.28);
-  animation: none;
+/* レベル一覧のクリア印 ライト: 碁石2球＋金(最短)/銀(クリア)の楕円皿＋後光(A画面と同意匠) */
+:root[data-theme="light"] .lv-emblem .le-ball {
+  background: radial-gradient(circle at 35% 26%, #6c6c77 0%, #37373f 30%, #1b1b21 68%, #0d0d11 100%);
+  box-shadow: inset -2px -3px 7px rgba(0, 0, 0, 0.6), inset 3px 3px 6px rgba(255, 255, 255, 0.16), 0 5px 9px rgba(40, 32, 16, 0.42);
 }
-:root[data-theme="light"] .level-tile .lv-ball.win {
-  background: radial-gradient(circle at 38% 30%, #c6cdd9 0%, #8b94a3 55%, #6c7686 100%);
-  box-shadow: 0 1px 2px rgba(60, 70, 86, 0.28);
+:root[data-theme="light"] .lv-emblem .le-disc { display: block; }
+:root[data-theme="light"] .lv-emblem.best .le-disc {
+  background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
+  box-shadow: 0 6px 13px rgba(70, 52, 18, 0.22), inset 0 2px 4px rgba(255, 248, 224, 0.7), inset 0 -6px 9px rgba(105, 78, 30, 0.42), inset 0 0 0 1px rgba(255, 242, 205, 0.18);
+}
+:root[data-theme="light"] .lv-emblem.win .le-disc {
+  background: radial-gradient(120% 150% at 40% 24%, #f7fafd 0%, #d4dae3 40%, #aeb6c3 72%, #79808d 100%);
+  box-shadow: 0 6px 13px rgba(40, 48, 60, 0.22), inset 0 2px 4px rgba(248, 251, 255, 0.7), inset 0 -6px 9px rgba(70, 78, 92, 0.42), inset 0 0 0 1px rgba(238, 244, 250, 0.2);
+}
+:root[data-theme="light"] .lv-emblem.best .le-halo {
+  display: block;
+  background: radial-gradient(closest-side, rgba(216, 183, 95, 0.42), rgba(216, 183, 95, 0.15) 46%, transparent 72%);
+  filter: blur(3px);
+}
+:root[data-theme="light"] .lv-emblem.win .le-halo {
+  display: block;
+  background: radial-gradient(closest-side, rgba(185, 192, 204, 0.4), rgba(185, 192, 204, 0.14) 46%, transparent 72%);
+  filter: blur(3px);
 }
 :root[data-theme="light"] .level-tile.cleared { border-color: rgba(168, 128, 31, 0.4); }
 

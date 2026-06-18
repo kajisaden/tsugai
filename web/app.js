@@ -150,11 +150,15 @@ function showLevels(ch) {
     const isCleared = cleared.has(p.id);
     const isBest = bestCleared.has(p.id);
     btn.className = 'level-tile' + (isCleared ? ' cleared' : '') + (isBest ? ' best' : '');
-    // 最短=金ボール / クリア(非最短)=白ボール / 未クリア=手数 (クリア画面の金/白と統一)
+    // クリア印 = A画面のつがいエンブレム。最短=金 / クリア(非最短)=白 / 未クリア=手数
+    const emblem = (state) =>
+      `<span class="lv-emblem ${state}"><span class="le-inner">` +
+      `<span class="le-halo"></span><span class="le-disc"></span>` +
+      `<span class="le-ball eb1"></span><span class="le-ball eb2"></span></span></span>`;
     const mark = isBest
-      ? '<span class="lv-ball"></span>'
+      ? emblem('best')
       : isCleared
-        ? '<span class="lv-ball win"></span>'
+        ? emblem('win')
         : t('levelMoves', { n: p.solution.minMoves });
     btn.innerHTML = `<span class="lv-no">${i + 1}</span>` +
       `<span class="lv-moves">${mark}</span>`;
