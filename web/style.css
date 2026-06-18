@@ -66,6 +66,7 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
   /* standalone(black-translucent)では時計/電池の下までコンテンツが広がるので上に safe-area 分の余白 */
   padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 8px;
   max-width: 560px;
+  width: 100%;          /* フル幅: 戻る=左マージン / トグル=右マージンに固定(縮んで中央寄りにならない) */
   margin: 0 auto;
 }
 #app-title {
@@ -77,7 +78,21 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
   text-indent: 0.5em; /* 字間の右余白を相殺して中央に */
   color: var(--gold);
 }
-#btn-back { grid-column: 1; justify-self: start; }
+/* 戻る = 案2 盤色の丸ボタン(シェブロン)。左端は「○手詰」と揃う左マージン、行はトグルと同じ高さ */
+#btn-back {
+  grid-column: 1; justify-self: start;
+  width: 38px; height: 38px; padding: 0;
+  display: grid; place-items: center; border-radius: 50%;
+  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+#btn-back svg { width: 20px; height: 20px; color: var(--text-dim); display: block; }
+:root[data-theme="light"] #btn-back {
+  background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
+  border-color: rgba(43, 38, 32, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
 /* 章一覧では戻るを隠すが、列幅(=テーマトグルの位置)を全画面で揃えるため場所は確保する
    (display:none だと左右列が縮みトグルがタイトルに寄ってしまう) */
 #btn-back[hidden] { display: block !important; visibility: hidden; }
@@ -225,7 +240,7 @@ button:active { transform: translateY(1px); }
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin: 4px 2px 14px;
+  margin: 4px 0 14px;   /* 左右マージンを0に: ○手詰の左端=戻る / ○手の右端=トグル と揃える */
 }
 #puzzle-label {
   font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;

@@ -17,12 +17,15 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=c66bff4f3b">
+<link rel="stylesheet" href="style.css?v=d458c5ec99">
 </head>
 <body>
 
 <header id="app-header">
-  <button id="btn-back" class="ghost" hidden><span class="chev">‹</span> <span data-i18n="back">戻る</span></button>
+  <!-- 戻る = 盤色の丸ボタン(シェブロン)。左上・トグルと同じ行・左端は「○手詰」と揃う -->
+  <button id="btn-back" data-i18n-aria="back" aria-label="戻る" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
   <h1 id="app-title" data-i18n="title">Tsugai</h1>
   <!-- テーマトグル(案C): 太陽(ライト)/月(ダーク)を埋め込んだスライド式。アクティブ側が金で点灯 -->
   <button id="btn-theme" data-i18n-aria="theme" aria-label="表示テーマ">
