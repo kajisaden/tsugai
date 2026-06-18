@@ -81,7 +81,7 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
 /* 戻る = 案2 盤色の丸ボタン(シェブロン)。左端は「○手詰」と揃う左マージン、行はトグルと同じ高さ */
 #btn-back {
   grid-column: 1; justify-self: start;
-  width: 38px; height: 38px; padding: 0;
+  width: 32px; height: 32px; padding: 0;   /* 直径=テーマトグルの高さ(32px)に一致 */
   display: grid; place-items: center; border-radius: 50%;
   background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
   border: 1px solid rgba(255, 255, 255, 0.08);
