@@ -51,6 +51,12 @@ main {
   flex-direction: column;
   justify-content: safe center;
 }
+/* 章一覧・問題一覧は内容を上寄せ＋上マージンにして、ロゴ/ヘッダとの余白を詰める
+   (縦中央寄せだと上が大きく空く)。:has 非対応の旧環境は従来の中央寄せにフォールバック。
+   プレイ画面(view-play)は対象外＝従来どおり */
+main:has(#view-chapters:not([hidden])),
+main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
+#view-chapters, #view-levels { margin-top: 60px; }
 
 /* ---- ヘッダ ---- */
 #app-header {
