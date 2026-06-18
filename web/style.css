@@ -72,12 +72,40 @@ main {
   color: var(--gold);
 }
 #btn-back { grid-column: 1; justify-self: start; }
-#btn-theme { grid-column: 3; justify-self: end; }
 .btn-icon { padding: 8px; line-height: 0; border-radius: 50%; }
-/* テーマトグル: 切り替え先のアイコンを出す(ダーク時=太陽 / ライト時=月) */
-#btn-theme .ic-moon { display: none; }
-:root[data-theme="light"] #btn-theme .ic-sun { display: none; }
-:root[data-theme="light"] #btn-theme .ic-moon { display: inline-block; }
+/* テーマトグル(案C): 太陽(ライト)/月(ダーク)を埋め込んだスライド式。アクティブ側を金で点灯。
+   実切替は data-theme(CSS)駆動。クリックは app.js が data-theme を反転する */
+#btn-theme {
+  grid-column: 3; justify-self: end;
+  position: relative; width: 68px; height: 32px; padding: 0 6px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(160deg, #3a3a45 0%, #2c2c37 100%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+#btn-theme .ic-wrap {
+  width: 26px; height: 26px; display: grid; place-items: center;
+  border-radius: 50%; color: var(--text-dim); /* 非アクティブ=薄字 */
+}
+#btn-theme .ic-wrap svg { width: 17px; height: 17px; display: block; }
+/* アクティブ側の背後に金のほの灯り＋金アイコン。ダーク既定=月(右)が点灯。
+   三日月は質量が左下に寄るので右上へ微ナッジして丸の中心へ(調整B) */
+#btn-theme .moon-wrap {
+  color: var(--gold);
+  background: radial-gradient(circle, rgba(232, 217, 176, 0.30), rgba(232, 217, 176, 0.08) 70%);
+}
+#btn-theme .moon-wrap svg { transform: translate(0.7px, -0.6px); }
+/* ライト: トラック=washi、アクティブ=太陽(左)が琥珀で点灯。月側は素に戻す */
+:root[data-theme="light"] #btn-theme {
+  background: #e6decd; border-color: rgba(43, 38, 32, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+:root[data-theme="light"] #btn-theme .moon-wrap { color: var(--text-dim); background: none; }
+:root[data-theme="light"] #btn-theme .moon-wrap svg { transform: none; }
+:root[data-theme="light"] #btn-theme .sun-wrap {
+  color: #a8801f;
+  background: radial-gradient(circle, rgba(168, 128, 31, 0.22), rgba(168, 128, 31, 0.05) 70%);
+}
 
 .tagline {
   text-align: center;
