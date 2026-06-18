@@ -376,7 +376,7 @@ async function checkClear() {
   if (REDUCED) { goToGap(); return; } // モーション無効: 演出を飛ばして A画面へ
   await sleep(200); // グローが出るのを一拍見せる
   if (!G.cleared || !$('#overlay-gap').hidden) return; // 既に遷移済みなら何もしない
-  $('#overlay-tsumi').hidden = false; // 透明ベール(タップ早送りの受け皿)
+  // 球の発光＋弾みを約1秒見せてから A画面へ自動遷移(画面を覆う幕は廃止)
   clearTimeout(tsumiTimer);
   tsumiTimer = setTimeout(goToGap, 1000);
 }
@@ -676,7 +676,6 @@ function closeAnswer() {
 function goToGap() {
   if (!$('#overlay-gap').hidden) return; // 二重防止
   clearTimeout(tsumiTimer);
-  $('#overlay-tsumi').hidden = true;
   $('#boards').classList.remove('bouncing'); // 盤の弾みは止める(エンブレムが弾む)
   const { moves, min, best } = lastClear || { moves: 0, min: 0, best: false };
   $('#gap-moves-1').textContent = t('clearedMoves', { n: moves });
@@ -692,7 +691,6 @@ function goToGap() {
   // 「もう一度」は常に表示(次の問題への下)。同じ問題をいつでもやり直せる
   $('#overlay-gap').hidden = false; // SPEC.md 6章の広告差し込み口もここ
 }
-$('#overlay-tsumi').addEventListener('click', goToGap);
 
 $('#btn-next').addEventListener('click', () => {
   $('#overlay-gap').hidden = true;
@@ -742,10 +740,6 @@ const KEYMAP = {
   w: 0, s: 1, a: 2, d: 3,
 };
 document.addEventListener('keydown', (e) => {
-  if (!$('#overlay-tsumi').hidden) {
-    if (e.key === 'Enter' || e.key === ' ') goToGap();
-    return;
-  }
   if (!$('#overlay-miss').hidden) {
     if (e.key === 'Enter' || e.key === ' ') restartFromMistake(); // 初形へ戻す
     return;
@@ -781,7 +775,7 @@ document.addEventListener('touchend', (e) => {
   if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return; // タップは無視
   if (playView.hidden) return; // プレイ画面以外(章/問題一覧)はスクロールを妨げない
   // クリア/反則/切れ目オーバーレイ表示中はスワイプ操作しない
-  if (!$('#overlay-gap').hidden || !$('#overlay-miss').hidden || !$('#overlay-tsumi').hidden) return;
+  if (!$('#overlay-gap').hidden || !$('#overlay-miss').hidden) return;
   if (AV) {
     // 答えビューア中: 左右スワイプで一手ずつ進む/戻る
     if (Math.abs(dx) > Math.abs(dy)) {

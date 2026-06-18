@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=c09fd4cad6">
+<link rel="stylesheet" href="style.css?v=2120ed9ac9">
 </head>
 <body>
 
@@ -83,11 +83,6 @@
 <!-- 次の一手: 盤の上に方向を静かに一瞬示す -->
 <div id="hint-arrow" hidden><span class="arrow-mark"></span><span class="arrow-sub"></span></div>
 
-<!-- クリア演出(約1秒): 盤上のボールが金(最短)/白(クリア)に光って弾む。タップで早送りして A画面(切れ目)へ -->
-<div id="overlay-tsumi" hidden>
-  <span class="tsumi-sub" data-i18n="tapNext">タップで次へ</span>
-</div>
-
 <!-- 反則(同時でないのにゴールへ入った): 初手から戻してやり直す -->
 <div id="overlay-miss" hidden>
   <p class="miss-note" data-i18n="missNote">ゴールは、ふたつ同時でなければ開かない</p>
@@ -127,7 +122,7 @@
 </div>
 
 <script src="pool.js?v=b15ee5deb3"></script>
-<script src="strings.js?v=164d0e9dbc"></script>
-<script src="app.js?v=0b191d6c79"></script>
+<script src="strings.js?v=95469b5652"></script>
+<script src="app.js?v=3dff09f160"></script>
 </body>
 </html>

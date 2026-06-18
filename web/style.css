@@ -358,7 +358,7 @@ button:active { transform: translateY(1px); }
 #answer-bar button:disabled { opacity: 0.3; }
 
 /* ---- 「詰」オーバーレイ: 静けさで演出する ---- */
-#overlay-tsumi, #overlay-gap, #overlay-miss {
+#overlay-gap, #overlay-miss {
   position: fixed;
   inset: 0;
   display: flex;
@@ -379,43 +379,6 @@ button:active { transform: translateY(1px); }
 }
 /* 初手から戻すボタン: 金で主役を示すテキストボタン */
 #btn-miss-restart { border-color: rgba(232, 217, 176, 0.3); color: var(--gold); }
-/* クリアは盤上のボール発光が主役。オーバーレイは透過して盤を見せ、手数だけ下部に静かに置く */
-#overlay-tsumi {
-  cursor: pointer;
-  background: linear-gradient(to top, rgba(8, 8, 11, 0.8) 0%, rgba(8, 8, 11, 0.12) 38%, transparent 62%);
-  justify-content: flex-end;
-  padding-bottom: 12vh;
-  gap: 14px;
-}
-.tsumi-sub {
-  font-size: 11px;
-  color: var(--text-dim);
-  letter-spacing: 0.3em;
-  opacity: 0;
-  animation: tsumi-in 800ms ease 900ms forwards;
-}
-/* 手数(最短かどうか)。盤上の発光のあと、下部に静かに現れる */
-.tsumi-moves {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  opacity: 0;
-  animation: tsumi-in 700ms ease 150ms forwards;
-}
-#tsumi-moves-1 {
-  font-size: 16px;
-  color: var(--text);
-  letter-spacing: 0.18em;
-}
-#tsumi-moves-2 {
-  font-size: 12px;
-  color: var(--text-dim);
-  letter-spacing: 0.15em;
-}
-.tsumi-moves.best #tsumi-moves-2 { color: var(--gold); } /* 最短だけ金色 */
-@keyframes tsumi-in { to { opacity: 1; } }
-
 /* レベル一覧: 最短達成は金星 */
 .level-tile.best .lv-moves { color: var(--gold); }
 
@@ -591,7 +554,6 @@ button:active { transform: translateY(1px); }
   .ball::after { animation: none; opacity: 0.6; }
   #boards.bouncing .ball { animation: none; }
   .level-tile .lv-ball, .level-tile .lv-ball.win { animation: none; }
-  .tsumi-sub, .tsumi-moves { animation-duration: 1ms; animation-delay: 0ms; }
   .hint-glow { animation: none; opacity: 0.85; }
 }
 
@@ -751,13 +713,9 @@ button:active { transform: translateY(1px); }
 :root[data-theme="light"] .toggle.on { border-color: rgba(168, 128, 31, 0.45); }
 
 /* オーバーレイの暗幕 → 明るい紙の幕 */
-:root[data-theme="light"] #overlay-tsumi,
 :root[data-theme="light"] #overlay-gap,
 :root[data-theme="light"] #overlay-miss {
   background: rgba(243, 239, 230, 0.93);
-}
-:root[data-theme="light"] #overlay-tsumi {
-  background: linear-gradient(to top, rgba(243, 239, 230, 0.92) 0%, rgba(243, 239, 230, 0.15) 38%, transparent 62%);
 }
 
 /* クリアの弾み(ライト): スケールでなく translateY で跳ねる。接地影は別要素(.ball-glow)で床に残し、
