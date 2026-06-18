@@ -79,8 +79,10 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
   color: var(--gold);
 }
 /* 戻る = 案2 盤色の丸ボタン(シェブロン)。左端は「○手詰」と揃う左マージン、行はトグルと同じ高さ */
+/* ヘッダ左グループ(戻る+トグル) / 右スロット(後で設定) */
+.hdr-left { grid-column: 1; justify-self: start; display: flex; align-items: center; gap: 8px; }
+.hdr-right { grid-column: 3; justify-self: end; }
 #btn-back {
-  grid-column: 1; justify-self: start;
   width: 32px; height: 32px; padding: 0;   /* 直径=テーマトグルの高さ(32px)に一致 */
   display: grid; place-items: center; border-radius: 50%;
   background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
@@ -93,14 +95,10 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
   border-color: rgba(43, 38, 32, 0.10);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
-/* 章一覧では戻るを隠すが、列幅(=テーマトグルの位置)を全画面で揃えるため場所は確保する
-   (display:none だと左右列が縮みトグルがタイトルに寄ってしまう) */
-#btn-back[hidden] { display: block !important; visibility: hidden; }
 .btn-icon { padding: 8px; line-height: 0; border-radius: 50%; }
 /* テーマトグル(案C): 太陽(ライト)/月(ダーク)を埋め込んだスライド式。アクティブ側を金で点灯。
    実切替は data-theme(CSS)駆動。クリックは app.js が data-theme を反転する */
 #btn-theme {
-  grid-column: 3; justify-self: end;
   position: relative; width: 68px; height: 32px; padding: 0 6px; border-radius: 16px;
   display: flex; align-items: center; justify-content: space-between;
   /* トラック = 盤の床色(ダーク) */

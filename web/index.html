@@ -17,32 +17,37 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=6427ce64dd">
+<link rel="stylesheet" href="style.css?v=b928d7dc94">
 </head>
 <body>
 
 <header id="app-header">
-  <!-- 戻る = 盤色の丸ボタン(シェブロン)。左上・トグルと同じ行・左端は「○手詰」と揃う -->
-  <button id="btn-back" data-i18n-aria="back" aria-label="戻る" hidden>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-  </button>
+  <!-- 左グループ: 戻る + テーマトグル。右(hdr-right)は後で設定ボタンを入れる -->
+  <div class="hdr-left">
+    <!-- 戻る = 盤色の丸ボタン(シェブロン)。左端は「○手詰」と揃う -->
+    <button id="btn-back" data-i18n-aria="back" aria-label="戻る" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <!-- テーマトグル(案C): 太陽(ライト)/月(ダーク)を埋め込んだスライド式。アクティブ側が金で点灯 -->
+    <button id="btn-theme" data-i18n-aria="theme" aria-label="表示テーマ">
+      <span class="ic-wrap sun-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+        </svg>
+      </span>
+      <span class="ic-wrap moon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>
+        </svg>
+      </span>
+    </button>
+  </div>
   <h1 id="app-title" data-i18n="title">Tsugai</h1>
-  <!-- テーマトグル(案C): 太陽(ライト)/月(ダーク)を埋め込んだスライド式。アクティブ側が金で点灯 -->
-  <button id="btn-theme" data-i18n-aria="theme" aria-label="表示テーマ">
-    <span class="ic-wrap sun-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="4"/>
-        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
-      </svg>
-    </span>
-    <span class="ic-wrap moon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>
-      </svg>
-    </span>
-  </button>
+  <!-- 右スロット: 後で設定ボタン。今は空(タイトル中央寄せの釣り合い用) -->
+  <div class="hdr-right"></div>
 </header>
 
 <main>
