@@ -72,6 +72,9 @@ main {
   color: var(--gold);
 }
 #btn-back { grid-column: 1; justify-self: start; }
+/* 章一覧では戻るを隠すが、列幅(=テーマトグルの位置)を全画面で揃えるため場所は確保する
+   (display:none だと左右列が縮みトグルがタイトルに寄ってしまう) */
+#btn-back[hidden] { display: block !important; visibility: hidden; }
 .btn-icon { padding: 8px; line-height: 0; border-radius: 50%; }
 /* テーマトグル(案C): 太陽(ライト)/月(ダーク)を埋め込んだスライド式。アクティブ側を金で点灯。
    実切替は data-theme(CSS)駆動。クリックは app.js が data-theme を反転する */
