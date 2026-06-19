@@ -733,6 +733,12 @@ $('#btn-theme').addEventListener('click', () => {
   localStorage.setItem(THEME_KEY, theme);
   applyTheme();
 });
+// 設定ドロワー(右サイドシート): 歯車で開く / ×・スクリム・Esc で閉じる
+function openSettings() { $('#settings-drawer').classList.add('open'); }
+function closeSettings() { $('#settings-drawer').classList.remove('open'); }
+$('#btn-settings').addEventListener('click', openSettings);
+$('#btn-settings-close').addEventListener('click', closeSettings);
+$('#settings-drawer').querySelector('.drawer-scrim').addEventListener('click', closeSettings);
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#btn-miss-restart').addEventListener('click', restartFromMistake);
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア
@@ -762,6 +768,10 @@ const KEYMAP = {
   w: 0, s: 1, a: 2, d: 3,
 };
 document.addEventListener('keydown', (e) => {
+  if ($('#settings-drawer').classList.contains('open')) {
+    if (e.key === 'Escape') closeSettings();
+    return; // 設定表示中は盤操作を受けない
+  }
   if (!$('#overlay-miss').hidden) {
     if (e.key === 'Enter' || e.key === ' ') restartFromMistake(); // 初形へ戻す
     return;
