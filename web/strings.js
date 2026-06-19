@@ -9,6 +9,14 @@ window.NIKENZUME_STRINGS = {
     // ボタン
     back: '戻る', reset: '最初から', answer: '答え', theme: '表示テーマ', settings: '設定',
     light: '光ヒント', nextMove: '次の手ヒント',
+    // 設定
+    language: '言語', se: '効果音', haptics: '触覚フィードバック',
+    resetProgress: '進捗をリセット', howto: '遊び方', about: 'このアプリについて',
+    privacy: 'プライバシーポリシー', contact: 'お問い合わせ', review: 'レビューする',
+    removeAds: '広告を消す', restore: '購入を復元',
+    secDisplay: '表示', secSound: '音・操作感', secData: 'データ', secInfo: '情報', secPurchase: '購入',
+    soon: '準備中',
+    resetConfirm: '進捗(クリア・最短の記録)をすべて消去します。よろしいですか?',
     play: '再生', pause: '一時停止', prev: '前へ', next: '次へ', close: 'とじる',
     restart: '初手から', nextPuzzle: '次の問題へ', levels: '一覧へ', retryAgain: 'もう一度',
     // メッセージ
@@ -31,6 +39,14 @@ window.NIKENZUME_STRINGS = {
     chapter: ({ n }) => `Chapter ${n}`,
     back: 'Back', reset: 'Restart', answer: 'Answer', theme: 'Theme', settings: 'Settings',
     light: 'Light hint', nextMove: 'Next move',
+    // settings
+    language: 'Language', se: 'Sound', haptics: 'Haptics',
+    resetProgress: 'Reset progress', howto: 'How to play', about: 'About',
+    privacy: 'Privacy policy', contact: 'Contact', review: 'Rate',
+    removeAds: 'Remove ads', restore: 'Restore purchases',
+    secDisplay: 'Display', secSound: 'Sound & feel', secData: 'Data', secInfo: 'Info', secPurchase: 'Purchases',
+    soon: 'Coming soon',
+    resetConfirm: 'This will erase all progress (clear & best records). Continue?',
     play: 'Play', pause: 'Pause', prev: 'Prev', next: 'Next', close: 'Close',
     restart: 'Retry', nextPuzzle: 'Next puzzle', levels: 'Levels', retryAgain: 'Try again',
     controlsHint: 'Arrow keys or swipe move both rooms',

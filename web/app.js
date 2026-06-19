@@ -739,6 +739,57 @@ function closeSettings() { $('#settings-drawer').classList.remove('open'); }
 $('#btn-settings').addEventListener('click', openSettings);
 $('#btn-settings-close').addEventListener('click', closeSettings);
 $('#settings-drawer').querySelector('.drawer-scrim').addEventListener('click', closeSettings);
+
+// ---- 設定の中身 ----
+// 音/触覚: 機能本体は後日。今は設定値だけ保存(実装時に参照)。既定ON
+const SE_KEY = 'nikenzume.se.v1', HAPTICS_KEY = 'nikenzume.haptics.v1';
+let seOn = localStorage.getItem(SE_KEY) !== '0';
+let hapticsOn = localStorage.getItem(HAPTICS_KEY) !== '0';
+function updateSettingsUI() {
+  const lv = $('#lang-value'); if (lv) lv.textContent = locale === 'ja' ? '日本語' : 'English';
+  const se = $('#sw-se'); if (se) se.setAttribute('aria-pressed', String(seOn));
+  const hp = $('#sw-haptics'); if (hp) hp.setAttribute('aria-pressed', String(hapticsOn));
+}
+// 言語切替: ロケール変更→保存→静的文言再翻訳→表示中ビューの動的文言を再描画
+function relocalize(newLocale) {
+  if (!STRINGS[newLocale] || newLocale === locale) return;
+  locale = newLocale;
+  localStorage.setItem(LANG_KEY, newLocale);
+  fillI18n();
+  if (!$('#view-chapters').hidden) showChapters();
+  else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
+  if (!$('#view-play').hidden && G) {
+    $('#puzzle-label').textContent = t('puzzlePar', { n: G.puz.solution.minMoves });
+    updateInfo();
+  }
+  updateSettingsUI();
+}
+// 進捗(クリア/最短)を消去
+function resetProgress() {
+  if (!confirm(t('resetConfirm'))) return;
+  cleared.clear(); localStorage.removeItem(STORE_KEY);
+  bestCleared.clear(); localStorage.removeItem(BEST_KEY);
+  if (!$('#view-chapters').hidden) showChapters();
+  else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
+  closeSettings();
+}
+// 簡易トースト(未実装項目の「準備中」など)
+let toastTimer = null;
+function showToast(msg) {
+  let el = $('#toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; document.body.appendChild(el); }
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 1300);
+}
+$('#set-lang').addEventListener('click', () => relocalize(locale === 'ja' ? 'en' : 'ja'));
+$('#set-reset').addEventListener('click', resetProgress);
+$('#sw-se').addEventListener('click', () => { seOn = !seOn; localStorage.setItem(SE_KEY, seOn ? '1' : '0'); updateSettingsUI(); });
+$('#sw-haptics').addEventListener('click', () => { hapticsOn = !hapticsOn; localStorage.setItem(HAPTICS_KEY, hapticsOn ? '1' : '0'); updateSettingsUI(); });
+// 未実装項目(data-soon)タップ → 「準備中」
+$('#settings-drawer').addEventListener('click', (e) => {
+  if (e.target.closest('[data-soon]')) showToast(t('soon'));
+});
+
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#btn-miss-restart').addEventListener('click', restartFromMistake);
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア
@@ -823,4 +874,5 @@ document.addEventListener('touchend', (e) => {
 // ---- 起動 ----
 applyTheme(); // data-theme を確定し、トグルの状態を反映
 fillI18n(); // 静的文言(ボタン・タグライン等)をロケールで流し込む
+updateSettingsUI(); // 設定の言語値・スイッチ状態を反映
 showChapters();
