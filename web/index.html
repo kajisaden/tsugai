@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=ee85bdeda7">
+<link rel="stylesheet" href="style.css?v=d10892b1d1">
 </head>
 <body>
 
@@ -28,7 +28,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
   </div>
-  <h1 id="app-title" data-i18n="title">Tsugai</h1>
+  <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
+       data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
+  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">1</span></h1>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -186,6 +188,6 @@
 
 <script src="pool.js?v=b15ee5deb3"></script>
 <script src="strings.js?v=ae6f7b8758"></script>
-<script src="app.js?v=aac012cd27"></script>
+<script src="app.js?v=4440325fa0"></script>
 </body>
 </html>

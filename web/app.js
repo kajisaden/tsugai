@@ -224,10 +224,11 @@ function buildBoard(room, w, h) {
   setCellPos(goal, room.goal, w, h);
   const piece = el('piece');
   setCellPos(piece, room.start, w, h);
-  piece.append(el('ball-glow'), el('ball'));
+  const ball = el('ball');
+  piece.append(el('ball-glow'), ball);
   const bumpGlow = el('bump-glow'); // 壁当ての面ハイライト用(答え再生時)
   board.append(cells, goal, piece, bumpGlow);
-  return { board, goal, piece, wallSet, goalIndex: room.goal, bumpGlow };
+  return { board, goal, piece, ball, wallSet, goalIndex: room.goal, bumpGlow };
 }
 
 function startPuzzle(ch, index) {
@@ -290,8 +291,49 @@ function step(p, d, wallSet, w, h) {
   return wallSet.has(np) ? p : np;
 }
 
-// 壁当て: 進行方向に少しめり込んで戻る。「入力は通ったが空振り」の情報(SPEC.md 5章)
-function bumpPiece(piece, d) {
+// ---- ジューシー化(操作の手応え): scale で「伸びて潰れて戻る」を出す ----
+// 真上視点なので squash&stretch は scale で表現。位置(translate)は既存ロジックのまま壊さない。
+// .piece には移動の transition が乗るので、scale は子の .ball にだけ重ねる(競合しない)。
+const AXIS_H = (d) => d === 2 || d === 3; // 横移動(左/右)なら true
+
+// 触覚: 設定ONかつモーション許可時のみ。短い tick。
+// ※iOS Safari/WKWebView は Vibration API 非対応で無反応(Androidのみ効く)。
+// ネイティブ化(Capacitor)時に @capacitor/haptics へ差し替える前提のフック。[[tsugai-distribution-strategy]]
+function haptic(ms) {
+  if (REDUCED || !hapticsOn) return;
+  try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {}
+}
+
+// 移動の手応え: 進行軸へ少し伸び → 着地で直交に潰れて戻る(settle)。「スッと行ってコトッ」
+function squashMove(ball, d) {
+  if (REDUCED || !ball || !ball.animate) return;
+  const h = AXIS_H(d);
+  const stretch = h ? 'scale(1.12, 0.90)' : 'scale(0.90, 1.12)';
+  const squash  = h ? 'scale(0.93, 1.09)' : 'scale(1.09, 0.93)';
+  ball.animate([
+    { transform: 'scale(1,1)', offset: 0 },
+    { transform: stretch,      offset: 0.45 },
+    { transform: squash,       offset: 0.70 },
+    { transform: 'scale(1,1)', offset: 1 },
+  ], { duration: 200, easing: 'ease-out' });
+}
+
+// 当たった部屋だけを進行軸へ極小シェイク(±2px)。室外には波及させない
+function shakeBoard(board, d) {
+  if (REDUCED || !board || !board.animate) return;
+  const ax = DIRS[d][0] * 2, ay = DIRS[d][1] * 2;
+  board.animate([
+    { transform: 'translate(0,0)' },
+    { transform: `translate(${ax}px, ${ay}px)`, offset: 0.35 },
+    { transform: `translate(${-ax * 0.5}px, ${-ay * 0.5}px)`, offset: 0.7 },
+    { transform: 'translate(0,0)' },
+  ], { duration: 110, easing: 'ease-out' });
+}
+
+// 壁当て: 進行方向に少しめり込んで戻る + ボールが進行軸に潰れて弾き返す + 盤の微震。
+// 「入力は通ったが空振り」の情報(SPEC.md 5章)を、手応えとして増幅する。
+function bumpPiece(rm, d) {
+  const piece = rm.piece;
   const x = +piece.dataset.x;
   const y = +piece.dataset.y;
   const base = `translate(${x * 100}%, ${y * 100}%)`;
@@ -300,6 +342,18 @@ function bumpPiece(piece, d) {
     [{ transform: base }, { transform: off, offset: 0.4 }, { transform: base }],
     { duration: BUMP_MS || 1, easing: 'ease-out' }
   );
+  if (!REDUCED && rm.ball && rm.ball.animate) {
+    const h = AXIS_H(d);
+    const crush = h ? 'scale(0.80, 1.16)' : 'scale(1.16, 0.80)';
+    const rebound = h ? 'scale(1.05, 0.97)' : 'scale(0.97, 1.05)';
+    rm.ball.animate([
+      { transform: 'scale(1,1)', offset: 0 },
+      { transform: crush,        offset: 0.4 },
+      { transform: rebound,      offset: 0.72 }, // 反発のわずかな伸び
+      { transform: 'scale(1,1)', offset: 1 },
+    ], { duration: BUMP_MS || 1, easing: 'ease-out' });
+  }
+  shakeBoard(rm.board, d);
 }
 
 // 辺グローの配置: マス p の方向 d 側の辺(=ぶつかる面)に細い光を合わせる。
@@ -349,12 +403,16 @@ async function doMove(d) {
   // 動かす/弾く(反則でも、まず「行って」見せてから判定する)
   G.rooms.forEach((rm, i) => {
     if (next[i] === G.pos[i]) {
-      bumpPiece(rm.piece, d);
+      bumpPiece(rm, d);
       showBumpGlow(rm, G.pos[i], d); // ぶつかった面を光らせる
     } else {
       setCellXY(rm.piece, next[i] % G.w, (next[i] - (next[i] % G.w)) / G.w);
+      squashMove(rm.ball, d); // 進行軸へ伸び→着地でつぶれて戻る(settle)
     }
   });
+  // 触覚: ぶつかれば firm / きれいに動けば light。一手につき一度(両部屋で二度鳴らさない)。
+  if (anyBumped) haptic(14);
+  else if (anyMoved) haptic(7);
 
   if (!anyMoved) {
     // 全員スキップ=無意味手。状態も手数も変えず、壁当てbumpだけ見せる(SPEC.md 3-1)
@@ -608,8 +666,8 @@ async function answerForward(animate) {
     });
   }
   G.rooms.forEach((rm, i) => {
-    if (next[i] === cur[i]) bumpPiece(rm.piece, d);
-    else setCellXY(rm.piece, next[i] % G.w, (next[i] - (next[i] % G.w)) / G.w);
+    if (next[i] === cur[i]) bumpPiece(rm, d);
+    else { setCellXY(rm.piece, next[i] % G.w, (next[i] - (next[i] % G.w)) / G.w); squashMove(rm.ball, d); }
   });
   G.pos = next;
   AV.k++;

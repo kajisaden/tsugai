@@ -31,5 +31,19 @@ for (const file of ASSETS) {
   });
   stamped.push(`${file} -> v=${v}${hit ? '' : '  (参照が見つからない!)'}`);
 }
+
+// ビルド印(タイトル横の番号): スタンプを走らせる(=デプロイ前)たびに +1。
+// 実機で配信が反映されたかを一目で確認するためのマーカー。番号の絶対値に意味はなく、変われば反映済み。
+const buildRe = /(<span\b[^>]*\bclass="build-mark"[^>]*>)(\d+)(<\/span>)/;
+const bm = html.match(buildRe);
+let buildMsg;
+if (bm) {
+  const next = parseInt(bm[2], 10) + 1;
+  html = html.replace(buildRe, (_m, pre, _n, post) => `${pre}${next}${post}`);
+  buildMsg = `build-mark -> ${next}`;
+} else {
+  buildMsg = 'build-mark: 参照が見つからない!';
+}
+
 writeFileSync(HTML, html);
-console.log('stamped web/index.html:\n  ' + stamped.join('\n  '));
+console.log('stamped web/index.html:\n  ' + stamped.join('\n  ') + '\n  ' + buildMsg);
