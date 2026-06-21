@@ -352,7 +352,7 @@ function audio() {
       if (!AC) return null;
       audioCtx = new AC();
       audioMaster = audioCtx.createGain();
-      audioMaster.gain.value = 0.9;
+      audioMaster.gain.value = 1.4; // 全体音量の底上げ(個々のgainはクリアに揃えた上で master で一律up)
       const lp = audioCtx.createBiquadFilter();
       lp.type = 'lowpass'; lp.frequency.value = 3200; lp.Q.value = 0.6;
       audioMaster.connect(lp).connect(audioCtx.destination);
@@ -388,13 +388,13 @@ function tone(ctx, { freq, type = 'sine', dur = 0.12, gain = 0.07, glideTo = nul
 function playMove() {
   if (!seOn) return;
   const ctx = audio(); if (!ctx) return;
-  tone(ctx, { freq: 360, glideTo: 260, type: 'sine', dur: 0.09, gain: 0.085, attack: 0.012, cutoff: 760 });
+  tone(ctx, { freq: 360, glideTo: 260, type: 'sine', dur: 0.09, gain: 0.13, attack: 0.012, cutoff: 760 });
 }
 // 壁当て: 軽くこもった当たり。低い重さを抜いて高め・短く・小さめに(軽い「トッ」寄り)。lowpassで丸さは維持
 function playBump() {
   if (!seOn) return;
   const ctx = audio(); if (!ctx) return;
-  tone(ctx, { freq: 300, glideTo: 235, type: 'sine', dur: 0.075, gain: 0.10, attack: 0.005, cutoff: 1300 });
+  tone(ctx, { freq: 300, glideTo: 235, type: 'sine', dur: 0.075, gain: 0.13, attack: 0.005, cutoff: 1300 });
 }
 // クリア「ふわ〜ん」: やわらかいサインの上昇アルペジオ(C-E-G)＋余韻。最短は C6 のきらめきを追加
 function playClear(best) {
@@ -409,8 +409,8 @@ function playClear(best) {
 function playFoul() {
   if (!seOn) return;
   const ctx = audio(); if (!ctx) return;
-  tone(ctx, { freq: 392, glideTo: 372, type: 'sine', dur: 0.13, gain: 0.085, attack: 0.006, cutoff: 1400, t0: 0.00 }); // G4
-  tone(ctx, { freq: 294, glideTo: 262, type: 'sine', dur: 0.24, gain: 0.10, attack: 0.006, cutoff: 1100, t0: 0.10 }); // D4→C4(沈む余韻)
+  tone(ctx, { freq: 392, glideTo: 372, type: 'sine', dur: 0.13, gain: 0.11, attack: 0.006, cutoff: 1400, t0: 0.00 }); // G4
+  tone(ctx, { freq: 294, glideTo: 262, type: 'sine', dur: 0.24, gain: 0.12, attack: 0.006, cutoff: 1100, t0: 0.10 }); // D4→C4(沈む余韻)
 }
 // UIタップ音: ボタン押下の極小ティック(ゲーム音と別の軽い高め・とても静か)。設定SEで制御
 function playTap() {
