@@ -147,6 +147,9 @@ function showView(name) {
   for (const v of ['chapters', 'levels', 'play']) {
     $('#view-' + v).hidden = v !== name;
   }
+  // ③ 画面切り替えをふわっと立ち上げる(瞬間カットを和らげる)。表示中の画面に enter を付け直して毎回再生
+  const cur = $('#view-' + name);
+  if (!REDUCED && cur) { cur.classList.remove('view-enter'); void cur.offsetWidth; cur.classList.add('view-enter'); }
   $('#btn-back').hidden = name === 'chapters';
 }
 $('#btn-back').addEventListener('click', () => {
