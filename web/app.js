@@ -147,9 +147,10 @@ function showView(name) {
   for (const v of ['chapters', 'levels', 'play']) {
     $('#view-' + v).hidden = v !== name;
   }
-  // ③ 画面切り替えをふわっと立ち上げる(瞬間カットを和らげる)。表示中の画面に enter を付け直して毎回再生
+  // ③ 画面切り替えをふわっと立ち上げる(瞬間カットを和らげる)。表示中の画面に enter を付け直して毎回再生。
+  // プレイ画面は②の専用登場(animatePuzzleEntrance)を使うので、ここの一律ライズは付けない。
   const cur = $('#view-' + name);
-  if (!REDUCED && cur) { cur.classList.remove('view-enter'); void cur.offsetWidth; cur.classList.add('view-enter'); }
+  if (!REDUCED && cur && name !== 'play') { cur.classList.remove('view-enter'); void cur.offsetWidth; cur.classList.add('view-enter'); }
   $('#btn-back').hidden = name === 'chapters';
 }
 $('#btn-back').addEventListener('click', () => {
@@ -239,7 +240,34 @@ function buildBoard(room, w, h) {
   return { board, goal, piece, ball, ballFlash, wallSet, goalIndex: room.goal, bumpGlow, ripple };
 }
 
-function startPuzzle(ch, index) {
+// ② 問題の登場: 盤がフェードイン(上→下の軽いスタッガー) → ゴールが現れる → 球がコトッと収まる(着地squash・2球同時=つがい)。
+// 入れ子の transform 競合を避けるため、親(view/board)は opacity だけ動かし、transform は goal/ball だけにする。
+function animatePuzzleEntrance() {
+  if (REDUCED) return;
+  const view = $('#view-play');
+  if (view.animate) view.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: 'ease-out' });
+  G.rooms.forEach((rm, i) => {
+    if (rm.board.animate) rm.board.animate(
+      [{ opacity: 0 }, { opacity: 1 }],
+      { duration: 300, delay: i * 80, easing: 'ease-out', fill: 'backwards' }); // B: 盤が上→下で置かれる
+    if (rm.goal.animate) { // C: ゴールの輪が遅れてスケールイン(位置の translate は保持)
+      const gx = +rm.goal.dataset.x, gy = +rm.goal.dataset.y;
+      const base = `translate(${gx * 100}%, ${gy * 100}%)`;
+      rm.goal.animate([
+        { opacity: 0, transform: base + ' scale(0.78)' },
+        { opacity: 1, transform: base + ' scale(1)' },
+      ], { duration: 240, delay: 180, easing: 'ease-out', fill: 'backwards' });
+    }
+    if (rm.ball.animate) rm.ball.animate([ // A: 球がコトッと収まる(スケールイン→着地squash→settle)
+      { opacity: 0, transform: 'scale(0.5)',        offset: 0 },
+      { opacity: 1, transform: 'scale(1.12, 0.9)',  offset: 0.55 },
+      {             transform: 'scale(0.97, 1.04)', offset: 0.75 },
+      {             transform: 'scale(1, 1)',       offset: 1 },
+    ], { duration: 320, delay: 360, easing: 'ease-out', fill: 'backwards' });
+  });
+}
+
+function startPuzzle(ch, index, entrance = true) {
   curChapter = ch;
   curIndex = index;
   hintGlows = []; // 盤を作り直すので壁ヒントの参照を捨てる
@@ -277,6 +305,7 @@ function startPuzzle(ch, index) {
   updateHintUI(); // トグル状態と「次の一手」ボタンを反映
   refreshWallHints(); // 光ONなら新しい盤でも光らせる
   showView('play');
+  if (entrance) animatePuzzleEntrance(); // ② 問題の登場(盤→ゴール→球がコトッと収まる)
 }
 
 function updateInfo() {
@@ -563,7 +592,7 @@ async function doMove(d) {
     if (REDUCED) { startPuzzle(curChapter, curIndex); return; } // モーション無効は即復帰
     await sleep(MISS_HOLD_MS);
     await slideToStart();
-    startPuzzle(curChapter, curIndex); // 状態を完全リセット(見た目は初形のまま)
+    startPuzzle(curChapter, curIndex, false); // 状態を完全リセット(巻き戻しで戻したので登場演出は出さない)
     return;
   }
 
