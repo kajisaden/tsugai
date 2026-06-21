@@ -263,7 +263,7 @@ function animatePuzzleEntrance() {
       { opacity: 1, transform: 'scale(1.12, 0.9)',  offset: 0.55 },
       {             transform: 'scale(0.97, 1.04)', offset: 0.75 },
       {             transform: 'scale(1, 1)',       offset: 1 },
-    ], { duration: 320, delay: 360, easing: 'ease-out', fill: 'backwards' });
+    ], { duration: 320, delay: 520, easing: 'ease-out', fill: 'backwards' }); // 盤・ゴールが据わってから一拍おいて出す
   });
 }
 
