@@ -412,6 +412,12 @@ function playFoul() {
   tone(ctx, { freq: 392, glideTo: 372, type: 'sine', dur: 0.13, gain: 0.05, attack: 0.006, cutoff: 1400, t0: 0.00 }); // G4
   tone(ctx, { freq: 294, glideTo: 262, type: 'sine', dur: 0.24, gain: 0.06, attack: 0.006, cutoff: 1100, t0: 0.10 }); // D4→C4(沈む余韻)
 }
+// UIタップ音: ボタン押下の極小ティック(ゲーム音と別の軽い高め・とても静か)。設定SEで制御
+function playTap() {
+  if (!seOn) return;
+  const ctx = audio(); if (!ctx) return;
+  tone(ctx, { freq: 680, type: 'sine', dur: 0.045, gain: 0.028, attack: 0.004, cutoff: 2400 });
+}
 
 // 移動の手応え: 進行軸へ少し伸び → 着地で直交に潰れて戻る(settle)。「スッと行ってコトッ」
 function squashMove(ball, d) {
@@ -1042,6 +1048,11 @@ $('#settings-drawer').addEventListener('click', (e) => {
 
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
+// ④ UI音: ボタンを押した瞬間に極小ティック(音設定トグル .sw は除外。押下感の見た目は既存の :active で担保)
+document.addEventListener('pointerdown', (e) => {
+  const b = e.target.closest('button');
+  if (b && !b.disabled && !b.classList.contains('sw')) playTap();
+}, { passive: true });
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア
 $('#btn-answer-open').addEventListener('click', () => watchRewardAd(enterAnswer));
 // 光ヒント = 1回消費してその問題で点灯(点灯済みなら据え置き=消費しない)
