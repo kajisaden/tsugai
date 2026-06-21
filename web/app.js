@@ -42,7 +42,7 @@ function applyTheme() {
 
 const DIRS = [[0, -1], [0, 1], [-1, 0], [1, 0]]; // 0=上 1=下 2=左 3=右
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const MOVE_MS = REDUCED ? 0 : 120;
+const MOVE_MS = REDUCED ? 0 : 240; // 移動(スライド)。120→240=体感ほぼ半分の速さ。CSS --move-ms と必ず一致させる
 const BUMP_MS = REDUCED ? 0 : 200;
 const ANSWER_AUTO_GAP = REDUCED ? 260 : 520; // 答え自動再生の手間
 
@@ -315,7 +315,7 @@ function squashMove(ball, d) {
     { transform: stretch,      offset: 0.45 },
     { transform: squash,       offset: 0.70 },
     { transform: 'scale(1,1)', offset: 1 },
-  ], { duration: 200, easing: 'ease-out' });
+  ], { duration: Math.round(MOVE_MS * 5 / 3), easing: 'ease-out' }); // 移動時間に比例(着地の潰れが滑り終わり直後に来る)
 }
 
 // 当たった部屋だけを進行軸へ極小シェイク(±2px)。室外には波及させない
