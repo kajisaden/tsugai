@@ -225,10 +225,13 @@ function buildBoard(room, w, h) {
   const piece = el('piece');
   setCellPos(piece, room.start, w, h);
   const ball = el('ball');
+  const ballFlash = el('ball-flash'); // 壁当ての一瞬の発光。ボールの子=crushに追従。主にライトの黒石用
+  ball.append(ballFlash);
   piece.append(el('ball-glow'), ball);
   const bumpGlow = el('bump-glow'); // 壁当ての面ハイライト用(答え再生時)
-  board.append(cells, goal, piece, bumpGlow);
-  return { board, goal, piece, ball, wallSet, goalIndex: room.goal, bumpGlow };
+  const ripple = el('bump-ripple'); // 壁当ての衝撃リップル(レバー6)
+  board.append(cells, goal, piece, bumpGlow, ripple);
+  return { board, goal, piece, ball, ballFlash, wallSet, goalIndex: room.goal, bumpGlow, ripple };
 }
 
 function startPuzzle(ch, index) {
@@ -352,6 +355,22 @@ function bumpPiece(rm, d) {
       { transform: rebound,      offset: 0.72 }, // 反発のわずかな伸び
       { transform: 'scale(1,1)', offset: 1 },
     ], { duration: BUMP_MS || 1, easing: 'ease-out' });
+    // レバー5: 当たった瞬間ボール自身も一瞬発光(輝度を上げて戻す)。filter なのでテーマに自然追従し、
+    // 暗背景の金球では強く、ライトのマット黒石では控えめに出る(黒石の意匠を壊さない)。
+    rm.ball.animate([
+      { filter: 'brightness(1)',    offset: 0 },
+      { filter: 'brightness(1.55)', offset: 0.32 },
+      { filter: 'brightness(1)',    offset: 1 },
+    ], { duration: (BUMP_MS || 1) * 2, easing: 'ease-out' });
+    // ライトの黒石は brightness では光らないので、白いディスクを一瞬重ねて「白く発光」させる(ダーク相当)。
+    // ダークは金球が brightness で十分光るため重ねない(承認済みの見えを変えない)。
+    if (rm.ballFlash && rm.ballFlash.animate && document.documentElement.dataset.theme === 'light') {
+      rm.ballFlash.animate([
+        { opacity: 0,   offset: 0 },
+        { opacity: 0.8, offset: 0.3 },
+        { opacity: 0,   offset: 1 },
+      ], { duration: (BUMP_MS || 1) * 2, easing: 'ease-out' });
+    }
   }
   shakeBoard(rm.board, d);
 }
@@ -384,12 +403,35 @@ function placeEdgeGlow(g, p, d) {
 // 壁当ての可視化(答え再生時): ぶつかった面だけを一瞬光らせる
 function showBumpGlow(rm, p, d) {
   const g = rm.bumpGlow;
-  placeEdgeGlow(g, p, d);
+  placeEdgeGlow(g, p, d); // バーは4pxのまま。強調はにじみ/白熱/タイミング(CSS)で出す
+  // レバー2: にじみ外層を、当たった壁の反対=開いた室内側へ寄せる方向ベクトル(キーフレームが使う)。
+  // 当たり方向 DIRS[d] は壁側を指すので、室内側はその逆 -DIRS[d]。
+  g.style.setProperty('--bloom-x', `${-DIRS[d][0] * 9}px`);
+  g.style.setProperty('--bloom-y', `${-DIRS[d][1] * 9}px`);
   g.classList.remove('show');
   void g.offsetWidth; // アニメ再始動
   g.classList.add('show');
   clearTimeout(g._bumpTimer);
-  g._bumpTimer = setTimeout(() => g.classList.remove('show'), 600);
+  g._bumpTimer = setTimeout(() => g.classList.remove('show'), 750); // 強調アニメ(750ms)を切らないよう延長
+}
+
+// レバー6: 衝撃リップル。接触辺の中点から細いリングが広がって消える(短時間・低不透明度で上品に)。
+function showRipple(rm, p, d) {
+  if (REDUCED || !rm.ripple || !rm.ripple.animate) return;
+  const r = rm.ripple;
+  const x = p % G.w, y = (p - (p % G.w)) / G.w;
+  const cw = 100 / G.w, ch = 100 / G.h;
+  const dia = Math.min(cw, ch) * 1.0; // 直径(盤%)。短辺基準で円を保つ。最大scaleで約2.2セルまで広がる
+  // 中心 = 当たった面(接触辺)の中点。セル中心から当たり方向 DIRS[d] へ半セル寄せる
+  r.style.width = `${dia}%`;
+  r.style.height = `${dia}%`;
+  r.style.left = `${(x + 0.5 + DIRS[d][0] * 0.5) * cw}%`;
+  r.style.top = `${(y + 0.5 + DIRS[d][1] * 0.5) * ch}%`;
+  r.animate([
+    { transform: 'translate(-50%, -50%) scale(0.4)', opacity: 0.55, offset: 0 },
+    { transform: 'translate(-50%, -50%) scale(1.3)', opacity: 0.4,  offset: 0.45 },
+    { transform: 'translate(-50%, -50%) scale(2.2)', opacity: 0,    offset: 1 },
+  ], { duration: 560, easing: 'ease-out' });
 }
 
 async function doMove(d) {
@@ -405,6 +447,7 @@ async function doMove(d) {
     if (next[i] === G.pos[i]) {
       bumpPiece(rm, d);
       showBumpGlow(rm, G.pos[i], d); // ぶつかった面を光らせる
+      showRipple(rm, G.pos[i], d);   // 衝撃リップル(レバー6)
     } else {
       setCellXY(rm.piece, next[i] % G.w, (next[i] - (next[i] % G.w)) / G.w);
       squashMove(rm.ball, d); // 進行軸へ伸び→着地でつぶれて戻る(settle)
@@ -662,7 +705,7 @@ async function answerForward(animate) {
   if (AV.blockSet.has(AV.k)) {
     // 妙手の可視化: ぶつかった壁/外周の、ぶつかった側面だけを光らせる
     G.rooms.forEach((rm, i) => {
-      if (next[i] === cur[i]) showBumpGlow(rm, cur[i], d);
+      if (next[i] === cur[i]) { showBumpGlow(rm, cur[i], d); showRipple(rm, cur[i], d); }
     });
   }
   G.rooms.forEach((rm, i) => {
@@ -928,6 +971,33 @@ document.addEventListener('touchend', (e) => {
   const d = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 3 : 2) : (dy > 0 ? 1 : 0);
   doMove(d);
 }, { passive: true });
+
+// PC向け: マスのクリックでも操作できる(マウス/テスト用)。
+// スワイプと同じく「方向を1つ決めて1マスだけ動く」に翻訳する(行き先へのワープではない)。
+// クリックした部屋のボールから、クリック位置の優勢な軸で方向を出し、全部屋へ連動(doMove)。
+// マウス限定(pointerType==='mouse'): スマホのタップは現状どおり無反応のままにし、出荷時の挙動を変えない。
+$('#boards').addEventListener('pointerup', (e) => {
+  if (e.pointerType !== 'mouse' || e.button !== 0) return;
+  if (!G || G.busy || G.cleared) return;
+  if ($('#view-play').hidden) return;
+  if (!$('#overlay-gap').hidden || !$('#overlay-miss').hidden) return;
+  if (AV) return; // 答えビューア中はクリック操作しない
+  const board = e.target.closest('.board');
+  if (!board) return;
+  const i = G.rooms.findIndex((rm) => rm.board === board);
+  if (i < 0) return;
+  const rect = board.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const cx = Math.min(G.w - 1, Math.max(0, Math.floor((e.clientX - rect.left) / rect.width * G.w)));
+  const cy = Math.min(G.h - 1, Math.max(0, Math.floor((e.clientY - rect.top) / rect.height * G.h)));
+  const p = G.pos[i];
+  const bx = p % G.w, by = (p - (p % G.w)) / G.w;
+  const ddx = cx - bx, ddy = cy - by;
+  if (ddx === 0 && ddy === 0) return; // ボール自身のマス=方向が決まらない
+  // 優勢な軸で方向(0上1下2左3右)。45度ちょうど(|dx|==|dy|)は横を優先。
+  const d = Math.abs(ddx) >= Math.abs(ddy) ? (ddx > 0 ? 3 : 2) : (ddy > 0 ? 1 : 0);
+  doMove(d);
+});
 
 // ---- 起動 ----
 applyTheme(); // data-theme を確定し、トグルの状態を反映

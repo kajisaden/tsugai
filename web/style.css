@@ -11,6 +11,7 @@
   --text-dim: #9d9a8e;
   --gold: #e8d9b0;
   --glow: rgba(240, 220, 170, 0.55);
+  --bump-hot: #fffaf0;  /* 壁当ての一瞬の白熱(ダーク: 暖白) */
   --move-ms: 240ms;  /* キャラ移動(スライド)。半分の速さに(旧120ms)。app.js の MOVE_MS と一致 */
   --bump-ms: 200ms;  /* 壁当て */
   /* 盤の縦並びサイズ計算: 一辺 = (画面高 - 上下UI - 盤間余白) / 2(盤数)。
@@ -308,11 +309,25 @@ button:active { transform: translateY(1px); }
   opacity: 0;
   pointer-events: none;
 }
-.bump-glow.show { animation: bump-glow 600ms ease-out; }
+/* レバー6: 衝撃リップル。細いリングが接触点から広がって消える。サイズ/位置/拡大は JS(WAAPI)が制御。
+   色は --glow でテーマ自動追従(ダーク=金/ライト=琥珀)。実不透明度は WAAPI 側で更に抑える */
+.bump-ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid var(--glow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%); /* 中心合わせ(WAAPIが scale を上乗せ) */
+}
+.bump-glow.show { animation: bump-glow 750ms ease-out; }
+/* 壁当ての強調(1+2+3+4): 鋭い立ち上がり→一瞬の白熱(--bump-hot)→金へ落として残光。
+   にじみ(box-shadow)を二層にし、外層は当たった壁の反対(開いた室内)側へ --bloom-x/y で寄せる方向ブルーム(2)。
+   色は --gold/--glow/--bump-hot でテーマ自動追従。ピーク(10%≈75ms)は bumpPiece のめり込み頂点(≈80ms)に重なる */
 @keyframes bump-glow {
-  0% { opacity: 0; }
-  25% { opacity: 1; }
-  100% { opacity: 0; }
+  0%   { opacity: 0;    background: var(--bump-hot); box-shadow: 0 0 8px 2px var(--glow); }
+  10%  { opacity: 1;    background: var(--bump-hot); box-shadow: 0 0 18px 5px var(--glow), var(--bloom-x, 0px) var(--bloom-y, 0px) 36px 12px var(--glow); }
+  34%  { opacity: 0.92; background: var(--gold);     box-shadow: 0 0 14px 4px var(--glow), calc(var(--bloom-x, 0px) * 0.55) calc(var(--bloom-y, 0px) * 0.55) 26px 8px var(--glow); }
+  100% { opacity: 0;    background: var(--gold);     box-shadow: 0 0 10px 2px var(--glow); }
 }
 
 /* 壁ヒント: 解でぶつかる面に沿って静かに息づく(ヒント表示中ずっと) */
@@ -333,6 +348,7 @@ button:active { transform: translateY(1px); }
   position: absolute;
   inset: 0;
   display: grid;
+  cursor: pointer; /* PCでマスを押して操作できることを示す(マウス時のみ意味を持つ) */
 }
 .cell { border: 0.5px solid var(--line); }
 .cell.wall {
@@ -388,6 +404,18 @@ button:active { transform: translateY(1px); }
   background: radial-gradient(circle at 38% 32%, #fffdf6 0%, #f3e3bd 45%, #c9b585 100%);
   box-shadow: 0 0 10px rgba(240, 220, 170, 0.35);
   will-change: transform; /* 移動/壁当ての squash&stretch(WAAPIでscale)を滑らかに */
+}
+/* 壁当ての一瞬の発光。ボールに重なる白いディスク(既定は透明)。WAAPIで opacity を瞬間的に上げる。
+   主にライトの黒石用: brightness では光らないため、白く発光させてダーク相当の手応えを出す */
+.ball-flash {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  /* 壁当ての光と同じ色で発光(--bump-hot=壁のピーク色 / --glow=にじみ)。テーマ自動追従(ライト=琥珀/ダーク=暖白) */
+  background: radial-gradient(circle at 50% 45%, var(--bump-hot) 0%, var(--glow) 55%, transparent 78%);
+  box-shadow: 0 0 14px 3px var(--glow);
+  opacity: 0;
+  pointer-events: none;
 }
 /* 静止時の息づき(ゆっくりした明滅) */
 .ball::after {
@@ -644,6 +672,7 @@ button:active { transform: translateY(1px); }
   --text-dim: #8a8276;
   --gold: #a8801f;      /* 濃い琥珀(紙の上で読める) */
   --glow: rgba(168, 128, 31, 0.40); /* 光のにじみ→淡い琥珀の影に転用 */
+  --bump-hot: #e7c25a; /* 壁当ての一瞬の強調(ライト: 紙の上で白飛びせず映える明るい琥珀) */
 }
 :root[data-theme="light"] body {
   background: radial-gradient(120% 100% at 50% 0%, #fbf8f1 0%, var(--bg) 60%);
@@ -670,6 +699,16 @@ button:active { transform: translateY(1px); }
 :root[data-theme="light"] .bump-glow {
   background: #ecd07e;
   box-shadow: 0 0 5px 1px rgba(206, 164, 64, 0.5), 0 0 11px 3px rgba(206, 164, 64, 0.2);
+}
+/* ライト(紙)向けの壁当て: ダークの白熱処方は白地で濁るため別キーフレームにする。
+   澄んだ琥珀(#ecd07e)のまま軽く増光＋締まった2層のにじみ(最大11→18px)。時間/カーブ(750ms ease-out)は共通。
+   ダークの強調(@keyframes bump-glow)とは独立して紙向けに上品さを保つ */
+:root[data-theme="light"] .bump-glow.show { animation-name: bump-glow-light; }
+@keyframes bump-glow-light {
+  0%   { opacity: 0;    background: #ecd07e; box-shadow: 0 0 5px 1px rgba(206, 164, 64, 0.5), 0 0 11px 3px rgba(206, 164, 64, 0.2); }
+  10%  { opacity: 1;    background: #f4e3a6; box-shadow: 0 0 8px 2px rgba(206, 164, 64, 0.6), calc(var(--bloom-x, 0px) * 0.7) calc(var(--bloom-y, 0px) * 0.7) 20px 5px rgba(206, 164, 64, 0.3); }
+  34%  { opacity: 0.92; background: #ecd07e; box-shadow: 0 0 6px 1px rgba(206, 164, 64, 0.5), calc(var(--bloom-x, 0px) * 0.4) calc(var(--bloom-y, 0px) * 0.4) 14px 3px rgba(206, 164, 64, 0.24); }
+  100% { opacity: 0;    background: #ecd07e; box-shadow: 0 0 5px 1px rgba(206, 164, 64, 0.5), 0 0 11px 3px rgba(206, 164, 64, 0.2); }
 }
 /* ヒントの息づき: 実体バーなので透明まで消えず、浅い濃淡でゆっくり呼吸させる */
 :root[data-theme="light"] .hint-glow {
