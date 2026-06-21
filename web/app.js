@@ -925,6 +925,10 @@ function goToGap() {
     `${t('chapter', { n: CHAPTERS.indexOf(curChapter) + 1 })}　<b>${done}</b> / ${levels.length}`;
   // 「もう一度」は常に表示(次の問題への下)。同じ問題をいつでもやり直せる
   $('#overlay-gap').hidden = false; // SPEC.md 6章の広告差し込み口もここ
+  if (!REDUCED) { // ① つなぎ演出: 背景フェード＋カード立ち上がり＋2球が寄り集まる(.enter を付け直して毎回再生)
+    const ov = $('#overlay-gap');
+    ov.classList.remove('enter'); void ov.offsetWidth; ov.classList.add('enter');
+  }
 }
 
 $('#btn-next').addEventListener('click', () => {

@@ -638,6 +638,28 @@ button:active { transform: translateY(1px); }
   box-shadow: 0 0 26px 7px rgba(228, 236, 252, 0.8);
 }
 
+/* ① クリア→A画面のつなぎ: 背景フェード＋カードが立ち上がり、2球が外から寄り集まって(つがい)エンブレムになる。
+   goToGap で .enter を付け直して毎回再生。REDUCED 時は付けない(瞬時表示)。位置(left/top)は据え置きで transform だけ動かす */
+#overlay-gap.enter { animation: gap-bg 360ms ease-out; }
+@keyframes gap-bg { from { opacity: 0; } to { opacity: 1; } }
+#overlay-gap.enter .gap-card { animation: gap-card-rise 480ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes gap-card-rise {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+#overlay-gap.enter .eb1 { animation: gather-eb1 580ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+#overlay-gap.enter .eb2 { animation: gather-eb2 580ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes gather-eb1 {
+  0%   { opacity: 0; transform: translate(-28px, 32px) scale(0.9); }
+  62%  { opacity: 1; transform: translate(3px, -3px) scale(1.05); }
+  100% { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+@keyframes gather-eb2 {
+  0%   { opacity: 0; transform: translate(28px, -32px) scale(0.9); }
+  62%  { opacity: 1; transform: translate(-3px, 3px) scale(1.05); }
+  100% { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+
 
 /* 次の一手の矢印: 盤の上に静かに一瞬だけ */
 #hint-arrow {
