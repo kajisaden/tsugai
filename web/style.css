@@ -299,6 +299,21 @@ button:active { transform: translateY(1px); }
   box-shadow: inset 0 2px 9px rgba(0, 0, 0, 0.55);
   overflow: hidden;
 }
+/* C: 反則(おてつき)の一拍。盤に淡い赤みが一瞬差す(JSで .foul を一時付与)。overflow:hidden で角丸にクリップ */
+.board::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(200, 60, 50, 0.30) 0%, rgba(200, 60, 50, 0.12) 68%, transparent 100%);
+  opacity: 0;
+  pointer-events: none;
+}
+.board.foul::after { animation: board-foul 520ms ease-out; }
+@keyframes board-foul {
+  0%   { opacity: 0; }
+  22%  { opacity: 1; }
+  100% { opacity: 0; }
+}
 
 /* 壁当ての可視化: ぶつかった面に沿って一瞬光る(答え再生時) */
 .bump-glow {
@@ -515,6 +530,8 @@ button:active { transform: translateY(1px); }
   background: rgba(8, 8, 11, 0.92);
   z-index: 10;
 }
+/* 反則メッセージは薄いスクリムにして、戻った盤が透けて見えるように(クリアの overlay-gap は据え置き) */
+#overlay-miss { background: rgba(8, 8, 11, 0.5); }
 
 /* 反則オーバーレイ: ゴールに非同時で入ったとき。静かに選択を促す */
 .miss-note {
@@ -522,6 +539,13 @@ button:active { transform: translateY(1px); }
   color: var(--text);
   letter-spacing: 0.18em;
   font-size: 15px;
+}
+/* 「画面をタップ」ヒント: 控えめに(ボタンを廃しタップ操作にしたため) */
+.miss-hint {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  color: var(--text-dim);
+  letter-spacing: 0.18em;
+  font-size: 12px;
 }
 /* 初手から戻すボタン: 金で主役を示すテキストボタン */
 #btn-miss-restart { border-color: rgba(232, 217, 176, 0.3); color: var(--gold); }
@@ -852,7 +876,7 @@ button:active { transform: translateY(1px); }
 /* オーバーレイの暗幕 → 明るい紙の幕 */
 :root[data-theme="light"] #overlay-gap,
 :root[data-theme="light"] #overlay-miss {
-  background: rgba(243, 239, 230, 0.93);
+  background: rgba(243, 239, 230, 0.6);
 }
 
 /* クリアの弾み(ライト): スケールでなく translateY で跳ねる。接地影は別要素(.ball-glow)で床に残し、

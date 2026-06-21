@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=1ef6e80b18">
+<link rel="stylesheet" href="style.css?v=d18649272d">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
   </div>
   <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
        data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
-  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">4</span></h1>
+  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">5</span></h1>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -84,10 +84,10 @@
 <!-- 次の一手: 盤の上に方向を静かに一瞬示す -->
 <div id="hint-arrow" hidden><span class="arrow-mark"></span><span class="arrow-sub"></span></div>
 
-<!-- 反則(同時でないのにゴールへ入った): 初手から戻してやり直す -->
+<!-- 反則(同時でないのにゴールへ入った): 赤みの一拍→自動で初形へ戻す→このメッセージを重ね、任意の画面タップ/キーで閉じる -->
 <div id="overlay-miss" hidden>
   <p class="miss-note" data-i18n="missNote">ゴールは、ふたつ同時でなければ開かない</p>
-  <button id="btn-miss-restart" data-i18n="restart">初手から</button>
+  <p class="miss-hint" data-i18n="tapHint">画面をタップ</p>
 </div>
 
 <!-- 問題間の切れ目 = A画面(クリア結果＋次へ)。SPEC.md 6章の広告差し込み口もここ(盤面は聖域) -->
@@ -187,7 +187,7 @@
 </div>
 
 <script src="pool.js?v=b15ee5deb3"></script>
-<script src="strings.js?v=ae6f7b8758"></script>
-<script src="app.js?v=35cc7a9967"></script>
+<script src="strings.js?v=60016cba20"></script>
+<script src="app.js?v=10fe39b519"></script>
 </body>
 </html>

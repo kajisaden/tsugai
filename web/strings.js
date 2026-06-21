@@ -22,6 +22,7 @@ window.NIKENZUME_STRINGS = {
     // メッセージ
     controlsHint: '矢印キー / スワイプで両方の部屋が動く',
     missNote: 'ゴールは、ふたつ同時でなければ開かない',
+    tapHint: '画面をタップ',
     noSolution: 'この局面からは進めません',
     moreSettings: '— 設定は今後ここに —',
     // 動的(数字埋め込み)
@@ -51,6 +52,7 @@ window.NIKENZUME_STRINGS = {
     restart: 'Retry', nextPuzzle: 'Next puzzle', levels: 'Levels', retryAgain: 'Try again',
     controlsHint: 'Arrow keys or swipe move both rooms',
     missNote: 'The goal opens only when both arrive together.',
+    tapHint: 'Tap to continue',
     noSolution: 'No solution from here',
     moreSettings: '— more settings soon —',
     puzzlePar: ({ n }) => `Solve in ${n}`,

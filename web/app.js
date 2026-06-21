@@ -45,6 +45,8 @@ const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MOVE_MS = REDUCED ? 0 : 240; // 移動(スライド)。120→240=体感ほぼ半分の速さ。CSS --move-ms と必ず一致させる
 const BUMP_MS = REDUCED ? 0 : 200;
 const ANSWER_AUTO_GAP = REDUCED ? 260 : 520; // 答え自動再生の手間
+const MISS_HOLD_MS = REDUCED ? 0 : 600; // 反則の局面＋赤みを見せる一拍(戻り開始まで)
+const RETURN_MS = REDUCED ? 0 : 340;    // 反則から初形へ「直線で」戻るスライド時間(手数に依らず一定)
 
 // ---- 章編成: 2段階構造 (章=気づき / 章内=サイズ→手数) ----
 // 外側(章) = episodes(ズレ調整エピソード数 = プレイヤーが要する「気づき」の数)。最大の難度区分。
@@ -307,6 +309,78 @@ function haptic(ms) {
   try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {}
 }
 
+// ---- 効果音(Web Audio 合成。音源ファイル不要)。静かな高級感に合わせ低音量・短い減衰 ----
+// AudioContext は自動再生ポリシー対策で、入力(ユーザー操作)中に遅延生成し resume する。
+// master に lowpass を噛ませ角の立たない丸い音に。鳴動は設定 seOn で制御(既定ON)。
+let audioCtx = null, audioMaster = null;
+function audio() {
+  try {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      audioCtx = new AC();
+      audioMaster = audioCtx.createGain();
+      audioMaster.gain.value = 0.9;
+      const lp = audioCtx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 3200; lp.Q.value = 0.6;
+      audioMaster.connect(lp).connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  } catch (e) { return null; }
+}
+// 1音: 周波数/波形/長さ/音量/ピッチ滑り/開始遅延を指定して鳴らす(指数減衰)
+function tone(ctx, { freq, type = 'sine', dur = 0.12, gain = 0.07, glideTo = null, attack = 0.005, t0 = 0, cutoff = null }) {
+  const start = ctx.currentTime + t0;
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, start);
+  if (glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, start + dur);
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.exponentialRampToValueAtTime(gain, start + attack);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  osc.connect(g);
+  if (cutoff) {
+    // この音だけさらに低域寄りに丸める(こもり/サイレンサー感)。クリアには通さない
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = cutoff; lp.Q.value = 0.7;
+    g.connect(lp); lp.connect(audioMaster);
+  } else {
+    g.connect(audioMaster);
+  }
+  osc.start(start);
+  osc.stop(start + dur + 0.03);
+}
+// 移動: サイレンサー風。低く暗く・とても静か。鋭い立ち上がりを消す(やわらかいアタック)＋低めのlowpass
+function playMove() {
+  if (!seOn) return;
+  const ctx = audio(); if (!ctx) return;
+  tone(ctx, { freq: 360, glideTo: 260, type: 'sine', dur: 0.09, gain: 0.035, attack: 0.012, cutoff: 760 });
+}
+// 壁当て: 軽くこもった当たり。低い重さを抜いて高め・短く・小さめに(軽い「トッ」寄り)。lowpassで丸さは維持
+function playBump() {
+  if (!seOn) return;
+  const ctx = audio(); if (!ctx) return;
+  tone(ctx, { freq: 300, glideTo: 235, type: 'sine', dur: 0.075, gain: 0.055, attack: 0.005, cutoff: 1300 });
+}
+// クリア「ふわ〜ん」: やわらかいサインの上昇アルペジオ(C-E-G)＋余韻。最短は C6 のきらめきを追加
+function playClear(best) {
+  if (!seOn) return;
+  const ctx = audio(); if (!ctx) return;
+  tone(ctx, { freq: 523.25, dur: 0.9, gain: 0.05,  attack: 0.02, t0: 0.00 }); // C5
+  tone(ctx, { freq: 659.25, dur: 0.9, gain: 0.045, attack: 0.02, t0: 0.08 }); // E5
+  tone(ctx, { freq: 783.99, dur: 1.1, gain: 0.05,  attack: 0.02, t0: 0.16 }); // G5
+  if (best) tone(ctx, { freq: 1046.5, dur: 1.0, gain: 0.04, attack: 0.02, t0: 0.30 }); // C6
+}
+// 反則(おてつき): やさしい否定。下行する2音(完全4度下げ)。角を取って低め・小さめ
+function playFoul() {
+  if (!seOn) return;
+  const ctx = audio(); if (!ctx) return;
+  tone(ctx, { freq: 392, glideTo: 372, type: 'sine', dur: 0.13, gain: 0.05, attack: 0.006, cutoff: 1400, t0: 0.00 }); // G4
+  tone(ctx, { freq: 294, glideTo: 262, type: 'sine', dur: 0.24, gain: 0.06, attack: 0.006, cutoff: 1100, t0: 0.10 }); // D4→C4(沈む余韻)
+}
+
 // 移動の手応え: 進行軸へ少し伸び → 着地で直交に潰れて戻る(settle)。「スッと行ってコトッ」
 function squashMove(ball, d) {
   if (REDUCED || !ball || !ball.animate) return;
@@ -453,9 +527,9 @@ async function doMove(d) {
       squashMove(rm.ball, d); // 進行軸へ伸び→着地でつぶれて戻る(settle)
     }
   });
-  // 触覚: ぶつかれば firm / きれいに動けば light。一手につき一度(両部屋で二度鳴らさない)。
-  if (anyBumped) haptic(14);
-  else if (anyMoved) haptic(7);
+  // 触覚＋効果音: ぶつかれば firm/「コッ」、きれいに動けば light/「トッ」。一手につき一度(両部屋で二度鳴らさない)。
+  if (anyBumped) { haptic(14); playBump(); }
+  else if (anyMoved) { haptic(7); playMove(); }
 
   if (!anyMoved) {
     // 全員スキップ=無意味手。状態も手数も変えず、壁当てbumpだけ見せる(SPEC.md 3-1)
@@ -477,9 +551,17 @@ async function doMove(d) {
 
   // 同時でないのにゴールへ入った=反則。行って見せてから → 初形へ戻す
   if (anyGoal && !allGoal) {
-    await sleep(REDUCED ? 0 : 260);
-    $('#overlay-miss').hidden = false;
-    return; // G.busy のまま選択を待つ
+    playFoul(); // C: やさしい否定音
+    if (!REDUCED) G.rooms.forEach((rm) => { // C: 盤に一拍の赤み
+      rm.board.classList.remove('foul'); void rm.board.offsetWidth; rm.board.classList.add('foul');
+      clearTimeout(rm.board._foulT); rm.board._foulT = setTimeout(() => rm.board.classList.remove('foul'), 560);
+    });
+    // 反則の局面(＋赤み)を一拍見せてから、履歴を逆再生して初形まで巻き戻す。メッセージは出さない。
+    if (REDUCED) { startPuzzle(curChapter, curIndex); return; } // モーション無効は即復帰
+    await sleep(MISS_HOLD_MS);
+    await slideToStart();
+    startPuzzle(curChapter, curIndex); // 状態を完全リセット(見た目は初形のまま)
+    return;
   }
 
   G.busy = false;
@@ -488,9 +570,21 @@ async function doMove(d) {
 }
 
 // 反則からの復帰: 初形へ戻してやり直す
-function restartFromMistake() {
+// 反則メッセージを閉じる。初形への復帰は反則検出時(doMove)に済んでいるので、ここでは消すだけ
+function dismissMiss() {
   $('#overlay-miss').hidden = true;
-  startPuzzle(curChapter, curIndex); // 初形へ
+}
+
+// 反則からの復帰: 現局面から初形へ、ボールを「直線で」一回のスライドで戻す。
+// 手数が伸びても所要時間は一定(逆再生のように長くならない)。startPuzzle 前に見た目だけ先に戻す。
+async function slideToStart() {
+  const starts = G.puz.rooms.map((r) => r.start);
+  const root = document.documentElement;
+  const prev = root.style.getPropertyValue('--move-ms'); // インラインの上書き(通常は空=CSSの240ms)
+  root.style.setProperty('--move-ms', RETURN_MS + 'ms'); // 戻りのスライド速度
+  G.rooms.forEach((rm, i) => setCellXY(rm.piece, starts[i] % G.w, (starts[i] - (starts[i] % G.w)) / G.w));
+  await sleep(RETURN_MS);
+  if (prev) root.style.setProperty('--move-ms', prev); else root.style.removeProperty('--move-ms');
 }
 
 async function checkClear() {
@@ -505,7 +599,26 @@ async function checkClear() {
   lastClear = { moves: G.moves, min, best }; // A画面で出すため確保
   // 盤上のボールが金(最短)/白(クリア)に発光して弾む。約1秒見せて A画面(切れ目)へ。タップで早送り
   $('#boards').classList.add(best ? 'clear-best' : 'clear-win', 'bouncing');
+  playClear(best); // クリアの効果音(最短はきらめきを追加)。音はモーション無効でも鳴らす
   if (REDUCED) { goToGap(); return; } // モーション無効: 演出を飛ばして A画面へ
+  // A: つがいが同時に座る瞬間の一発演出(チャイムと同期)。両部屋のボールが祝福発光し、ゴールが一拍明るむ。
+  // 既存のメダリオン/バウンスを壊さないよう、ジオメトリ非干渉(opacity/filter)だけで重ねる。
+  G.rooms.forEach((rm) => {
+    if (rm.ballFlash && rm.ballFlash.animate) {
+      rm.ballFlash.animate([
+        { opacity: 0,    offset: 0 },
+        { opacity: 0.95, offset: 0.22 },
+        { opacity: 0,    offset: 1 },
+      ], { duration: 600, easing: 'ease-out' });
+    }
+    if (rm.goal && rm.goal.animate) {
+      rm.goal.animate([
+        { filter: 'brightness(1)',   offset: 0 },
+        { filter: 'brightness(1.6)', offset: 0.28 },
+        { filter: 'brightness(1)',   offset: 1 },
+      ], { duration: 620, easing: 'ease-out' });
+    }
+  });
   await sleep(200); // グローが出るのを一拍見せる
   if (!G.cleared || !$('#overlay-gap').hidden) return; // 既に遷移済みなら何もしない
   // 球の発光＋弾みを約1秒見せてから A画面へ自動遷移(画面を覆う幕は廃止)
@@ -892,7 +1005,7 @@ $('#settings-drawer').addEventListener('click', (e) => {
 });
 
 $('#btn-reset').addEventListener('click', resetPuzzle);
-$('#btn-miss-restart').addEventListener('click', restartFromMistake);
+$('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア
 $('#btn-answer-open').addEventListener('click', () => watchRewardAd(enterAnswer));
 // 光ヒント = 1回消費してその問題で点灯(点灯済みなら据え置き=消費しない)
@@ -925,7 +1038,7 @@ document.addEventListener('keydown', (e) => {
     return; // 設定表示中は盤操作を受けない
   }
   if (!$('#overlay-miss').hidden) {
-    if (e.key === 'Enter' || e.key === ' ') restartFromMistake(); // 初形へ戻す
+    dismissMiss(); // 任意キーで閉じる(復帰は済んでいる)
     return;
   }
   if (!$('#overlay-gap').hidden) return;
