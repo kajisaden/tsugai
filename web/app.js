@@ -333,12 +333,12 @@ function step(p, d, wallSet, w, h) {
 // .piece には移動の transition が乗るので、scale は子の .ball にだけ重ねる(競合しない)。
 const AXIS_H = (d) => d === 2 || d === 3; // 横移動(左/右)なら true
 
-// 触覚: 設定ONかつモーション許可時のみ。短い tick。
+// 触覚: 設定ONかつモーション許可時のみ。引数は ms(単発tick)または [待ち,振動,...] のパターン配列。
 // ※iOS Safari/WKWebView は Vibration API 非対応で無反応(Androidのみ効く)。
 // ネイティブ化(Capacitor)時に @capacitor/haptics へ差し替える前提のフック。[[tsugai-distribution-strategy]]
-function haptic(ms) {
+function haptic(pattern) {
   if (REDUCED || !hapticsOn) return;
-  try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {}
+  try { navigator.vibrate && navigator.vibrate(pattern); } catch (e) {}
 }
 
 // ---- 効果音(Web Audio 合成。音源ファイル不要)。静かな高級感に合わせ低音量・短い減衰 ----
@@ -590,6 +590,7 @@ async function doMove(d) {
   // 同時でないのにゴールへ入った=反則。行って見せてから → 初形へ戻す
   if (anyGoal && !allGoal) {
     playFoul(); // C: やさしい否定音
+    haptic([0, 14, 50, 22]); // 反則の手触り: 短→長の二度打ち(「あっ」)。否定音に合わせ控えめ。iOS非対応/REDUCED/設定OFFは無音
     if (!REDUCED) G.rooms.forEach((rm) => { // C: 盤に一拍の赤み
       rm.board.classList.remove('foul'); void rm.board.offsetWidth; rm.board.classList.add('foul');
       clearTimeout(rm.board._foulT); rm.board._foulT = setTimeout(() => rm.board.classList.remove('foul'), 560);
@@ -638,6 +639,7 @@ async function checkClear() {
   // 盤上のボールが金(最短)/白(クリア)に発光して弾む。約1秒見せて A画面(切れ目)へ。タップで早送り
   $('#boards').classList.add(best ? 'clear-best' : 'clear-win', 'bouncing');
   playClear(best); // クリアの効果音(最短はきらめきを追加)。音はモーション無効でも鳴らす
+  haptic(best ? [0, 12, 50, 14, 50, 20] : [0, 12, 55, 16]); // クリアの祝福(最短は三つ打ち)。触覚はチャイムと別軸でREDUCED/設定OFF時は無音
   if (REDUCED) { goToGap(); return; } // モーション無効: 演出を飛ばして A画面へ
   // A: つがいが同時に座る瞬間の一発演出(チャイムと同期)。両部屋のボールが祝福発光し、ゴールが一拍明るむ。
   // 既存のメダリオン/バウンスを壊さないよう、ジオメトリ非干渉(opacity/filter)だけで重ねる。
@@ -997,7 +999,7 @@ $('#btn-settings-close').addEventListener('click', closeSettings);
 $('#settings-drawer').querySelector('.drawer-scrim').addEventListener('click', closeSettings);
 
 // ---- 設定の中身 ----
-// 音/触覚: 機能本体は後日。今は設定値だけ保存(実装時に参照)。既定ON
+// 音/触覚: 本体は実装済み(seOn=playMove/Bump/Clear/Foul/Tap、hapticsOn=haptic())。ここは設定値の保存/トグルのみ。既定ON
 const SE_KEY = 'nikenzume.se.v1', HAPTICS_KEY = 'nikenzume.haptics.v1';
 let seOn = localStorage.getItem(SE_KEY) !== '0';
 let hapticsOn = localStorage.getItem(HAPTICS_KEY) !== '0';
