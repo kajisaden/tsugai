@@ -415,15 +415,13 @@ button:active { transform: translateY(1px); }
 }
 /* ゴール吸着: クリアの一手で球が収まる瞬間、輪が一旦締まって(吸い込み)から弾けて据わる。
    ::before は transform 未使用なので scale を安全に載せられる(位置の translate は .goal 側)。
-   ダークは球自体が発光しているので、金のにじみは出さず「白い輪の伸縮+引き締まった白リム」で見せる
-   (金の球×白の輪でコントラスト、にじみで濁らせない)。ライトは球がマットなので琥珀のにじみを足す
-   (下の data-theme="light" 上書き)。点火/解除は JS(クリア手のみ) */
+   色/光は --gold/--bump-hot/--glow でテーマ自動追従。点火/解除は JS(クリア手のみ) */
 .goal.sucking::before { animation: goal-suck 320ms ease-out; }
 @keyframes goal-suck {
   0%   { transform: scale(1);    border-color: var(--gold);     box-shadow: 0 0 0 0 transparent; }
-  58%  { transform: scale(0.82); border-color: var(--bump-hot); box-shadow: 0 0 6px 1px rgba(255, 250, 240, 0.5); } /* 締まる=吸い込み(白い輪) */
-  78%  { transform: scale(1.14); border-color: var(--bump-hot); box-shadow: 0 0 10px 2px rgba(255, 250, 240, 0.7); } /* 据わる瞬間に弾ける */
-  100% { transform: scale(1);    border-color: var(--gold);     box-shadow: 0 0 0 0 transparent; }
+  58%  { transform: scale(0.82); border-color: var(--bump-hot); box-shadow: 0 0 10px 2px var(--glow); } /* 締まる=吸い込み */
+  78%  { transform: scale(1.14); border-color: var(--bump-hot); box-shadow: 0 0 16px 5px var(--glow); } /* 据わる瞬間に弾ける */
+  100% { transform: scale(1);    border-color: var(--gold);     box-shadow: 0 0 8px 1px var(--glow); }
 }
 
 /* キャラ: .piece はセルサイズのラッパー。移動は transform を 100〜140ms / ease-out */
@@ -811,15 +809,6 @@ button:active { transform: translateY(1px); }
 :root[data-theme="light"] .goal.on::before { border-color: rgba(168, 128, 31, 0.85); }
 :root[data-theme="light"] .goal.filled::before {
   background: radial-gradient(circle, rgba(168, 128, 31, 0.28) 0%, rgba(168, 128, 31, 0.06) 70%);
-}
-/* ゴール吸着: ライトは球がマットなので、吸着に琥珀のにじみを足して映えさせる(ダークは白い輪のみ)。
-   shorthand の duration/easing は据え置き、animation-name だけ差し替える */
-:root[data-theme="light"] .goal.sucking::before { animation-name: goal-suck-light; }
-@keyframes goal-suck-light {
-  0%   { transform: scale(1);    border-color: var(--gold);     box-shadow: 0 0 0 0 transparent; }
-  58%  { transform: scale(0.82); border-color: var(--bump-hot); box-shadow: 0 0 10px 2px var(--glow); }
-  78%  { transform: scale(1.14); border-color: var(--bump-hot); box-shadow: 0 0 16px 5px var(--glow); }
-  100% { transform: scale(1);    border-color: var(--gold);     box-shadow: 0 0 8px 1px var(--glow); }
 }
 
 /* クリア演出(案A 金メダリオン): ぼかしグローは出さず、ゴールを金/銀の円盤にして黒石を上に乗せる。
