@@ -423,6 +423,37 @@ button:active { transform: translateY(1px); }
   78%  { transform: scale(1.14); border-color: var(--bump-hot); box-shadow: 0 0 16px 5px var(--glow); } /* 据わる瞬間に弾ける */
   100% { transform: scale(1);    border-color: var(--gold);     box-shadow: 0 0 8px 1px var(--glow); }
 }
+/* ゴール吸着の黒皿(ダーク): クリアの一手で、発光する球が収まる先に黒漆の皿がすっと現れて座になる。
+   goal は piece より前に append=皿(::after)は球の下に敷かれる。皿が輪(::before)を覆うので、
+   皿自身に細い金縁を持たせて連続性を保つ。ライトは金/銀の円盤演出があるので出さない(下で display:none)。 */
+.goal::after {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, #30303b 0%, #18181f 54%, #0a0a0e 100%);
+  border: 1px solid rgba(232, 217, 176, 0.30);
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.65),        /* 皿の凹み */
+    inset 0 -1px 1px rgba(255, 255, 255, 0.05),
+    0 3px 9px rgba(0, 0, 0, 0.5);               /* 盤への接地影 */
+  opacity: 0;
+  transform: scale(1.22);
+  transition: opacity 240ms ease-out, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+/* 吸着で現れ、クリアの祝福まで座として残す(sucking→filled の橋渡しで途切れさせない) */
+.goal.sucking::after,
+.goal.filled::after { opacity: 1; transform: scale(1); }
+/* ダークは黒皿が座になるので、輪の金グロー(にじみ)は出さず皿に集中させる(scale/縁は皿の下で不可視)。
+   ライト(下の data-theme="light")は従来の goal-suck(金のにじみ)のまま=変更しない */
+:root:not([data-theme="light"]) .goal.sucking::before { animation-name: goal-suck-dark; }
+@keyframes goal-suck-dark {
+  0%   { transform: scale(1);    border-color: var(--gold); }
+  58%  { transform: scale(0.82); border-color: var(--gold); }
+  78%  { transform: scale(1.14); border-color: var(--gold); }
+  100% { transform: scale(1);    border-color: var(--gold); }
+}
 
 /* キャラ: .piece はセルサイズのラッパー。移動は transform を 100〜140ms / ease-out */
 .piece {
@@ -807,6 +838,7 @@ button:active { transform: translateY(1px); }
 /* ゴール: 金の破線/実線を濃い琥珀へ */
 :root[data-theme="light"] .goal::before { border-color: rgba(168, 128, 31, 0.5); }
 :root[data-theme="light"] .goal.on::before { border-color: rgba(168, 128, 31, 0.85); }
+:root[data-theme="light"] .goal::after { display: none; } /* 黒皿はダーク専用。ライトは金/銀の円盤演出を使う */
 :root[data-theme="light"] .goal.filled::before {
   background: radial-gradient(circle, rgba(168, 128, 31, 0.28) 0%, rgba(168, 128, 31, 0.06) 70%);
 }
@@ -967,6 +999,9 @@ button:active { transform: translateY(1px); }
   :root[data-theme="light"] #boards.bouncing .ball-glow { animation: none; }
   /* ライトの金箔ヒントはライト上書きの方が詳細度が高いので、ここで明示的に止める */
   :root[data-theme="light"] .hint-glow { animation: none; opacity: 0.9; }
+  /* 黒皿はフェードのみ(スケールのモーションは出さない)。REDUCED では filled で即座に座る */
+  .goal::after { transition: opacity 200ms ease; transform: none; }
+  .goal.sucking::after, .goal.filled::after { transform: none; }
 }
 
 /* ---- 設定: 右サイドシート(ドロワー) ---- */

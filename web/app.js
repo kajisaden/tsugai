@@ -634,7 +634,8 @@ async function doMove(d) {
   // 反則(anyGoal && !allGoal)は祝福しないので対象外。スライドに重なるよう、await の前=今ここで点火する。
   if (allGoal && !REDUCED) G.rooms.forEach((rm) => {
     rm.goal.classList.remove('sucking'); void rm.goal.offsetWidth; rm.goal.classList.add('sucking');
-    clearTimeout(rm.goal._suckT); rm.goal._suckT = setTimeout(() => rm.goal.classList.remove('sucking'), 360);
+    // 420ms まで保持: 黒皿の表示を sucking から filled(点火 ~380ms)へ途切れず橋渡しする
+    clearTimeout(rm.goal._suckT); rm.goal._suckT = setTimeout(() => rm.goal.classList.remove('sucking'), 420);
   });
   G.history.push(G.pos);
   G.pos = next;
