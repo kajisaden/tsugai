@@ -562,6 +562,15 @@ function showRipple(rm, p, d) {
   r.style.height = `${dia}%`;
   r.style.left = `${(x + 0.5 + DIRS[d][0] * 0.5) * cw}%`;
   r.style.top = `${(y + 0.5 + DIRS[d][1] * 0.5) * ch}%`;
+  if (document.documentElement.dataset.theme === 'light') {
+    // ライト=墨汁のシミ: 小さく濃い墨が落ち、紙へ滲んで吸われる(輪でなく塊が広がって退色)。回転で不定形に見せる
+    r.animate([
+      { transform: 'translate(-50%, -50%) scale(0.22) rotate(0deg)', opacity: 0.9,  offset: 0 },
+      { transform: 'translate(-50%, -50%) scale(0.95) rotate(7deg)', opacity: 0.75, offset: 0.4 },
+      { transform: 'translate(-50%, -50%) scale(1.5) rotate(11deg)', opacity: 0,    offset: 1 },
+    ], { duration: 720, easing: 'ease-out' });
+    return;
+  }
   r.animate([
     { transform: 'translate(-50%, -50%) scale(0.4)', opacity: 0.55, offset: 0 },
     { transform: 'translate(-50%, -50%) scale(1.3)', opacity: 0.4,  offset: 0.45 },
