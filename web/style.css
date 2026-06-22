@@ -413,6 +413,16 @@ button:active { transform: translateY(1px); }
   border-style: solid;
   background: radial-gradient(circle, rgba(240, 220, 170, 0.35) 0%, rgba(240, 220, 170, 0.08) 70%);
 }
+/* ゴール吸着: クリアの一手で球が収まる瞬間、輪が一旦締まって(吸い込み)から弾けて据わる。
+   ::before は transform 未使用なので scale を安全に載せられる(位置の translate は .goal 側)。
+   色/光は --gold/--bump-hot/--glow でテーマ自動追従。点火/解除は JS(クリア手のみ) */
+.goal.sucking::before { animation: goal-suck 320ms ease-out; }
+@keyframes goal-suck {
+  0%   { transform: scale(1);    border-color: var(--gold);     box-shadow: 0 0 0 0 transparent; }
+  58%  { transform: scale(0.82); border-color: var(--bump-hot); box-shadow: 0 0 10px 2px var(--glow); } /* 締まる=吸い込み */
+  78%  { transform: scale(1.14); border-color: var(--bump-hot); box-shadow: 0 0 16px 5px var(--glow); } /* 据わる瞬間に弾ける */
+  100% { transform: scale(1);    border-color: var(--gold);     box-shadow: 0 0 8px 1px var(--glow); }
+}
 
 /* キャラ: .piece はセルサイズのラッパー。移動は transform を 100〜140ms / ease-out */
 .piece {

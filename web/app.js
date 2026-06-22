@@ -627,6 +627,12 @@ async function doMove(d) {
 
   const allGoal = next.every((np, i) => np === G.rooms[i].goalIndex);
   const anyGoal = next.some((np, i) => np === G.rooms[i].goalIndex);
+  // ゴール吸着: クリアの一手(=両球が同時にゴールへ収まる)では、滑り込む間に輪がきゅっと締まって弾ける。
+  // 反則(anyGoal && !allGoal)は祝福しないので対象外。スライドに重なるよう、await の前=今ここで点火する。
+  if (allGoal && !REDUCED) G.rooms.forEach((rm) => {
+    rm.goal.classList.remove('sucking'); void rm.goal.offsetWidth; rm.goal.classList.add('sucking');
+    clearTimeout(rm.goal._suckT); rm.goal._suckT = setTimeout(() => rm.goal.classList.remove('sucking'), 360);
+  });
   G.history.push(G.pos);
   G.pos = next;
   G.moves++;
