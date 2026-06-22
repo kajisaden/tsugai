@@ -47,6 +47,9 @@ const BUMP_MS = REDUCED ? 0 : 200;
 const ANSWER_AUTO_GAP = REDUCED ? 260 : 520; // 答え自動再生の手間
 const MISS_HOLD_MS = REDUCED ? 0 : 600; // 反則の局面＋赤みを見せる一拍(戻り開始まで)
 const RETURN_MS = REDUCED ? 0 : 340;    // 反則から初形へ「直線で」戻るスライド時間(手数に依らず一定)
+// クリア時、ゴール吸着(白い輪の伸縮 ~320ms)の余韻を見せてから球を点火するまでの待ち。ダークのみ使用。
+// checkClear は着地(MOVE_MS=240)で走るので、ここを足すと点火が吸着の収まり(~320)直後に来る
+const GOAL_SUCK_HOLD_MS = REDUCED ? 0 : 140;
 
 // ---- 章編成: 2段階構造 (章=気づき / 章内=サイズ→手数) ----
 // 外側(章) = episodes(ズレ調整エピソード数 = プレイヤーが要する「気づき」の数)。最大の難度区分。
@@ -684,40 +687,48 @@ async function checkClear() {
   if (!G.pos.every((p, i) => p === G.puz.rooms[i].goal)) return;
   G.cleared = true;
   G.busy = true;
-  G.rooms.forEach((rm) => rm.goal.classList.add('filled')); // 光が満ちる
   const min = G.puz.solution.minMoves;
   const best = G.moves === min; // 最短達成か
   markCleared(G.puz.id);
   if (best) markBest(G.puz.id);
   lastClear = { moves: G.moves, min, best }; // A画面で出すため確保
-  // 盤上のボールが金(最短)/白(クリア)に発光して弾む。約1秒見せて A画面(切れ目)へ。タップで早送り
-  $('#boards').classList.add(best ? 'clear-best' : 'clear-win', 'bouncing');
-  playClear(best); // クリアの効果音(最短はきらめきを追加)。音はモーション無効でも鳴らす
-  haptic(best ? [0, 12, 50, 14, 50, 20] : [0, 12, 55, 16]); // クリアの祝福(最短は三つ打ち)。触覚はチャイムと別軸でREDUCED/設定OFF時は無音
-  if (REDUCED) { goToGap(); return; } // モーション無効: 演出を飛ばして A画面へ
-  // A: つがいが同時に座る瞬間の一発演出(チャイムと同期)。両部屋のボールが祝福発光し、ゴールが一拍明るむ。
-  // 既存のメダリオン/バウンスを壊さないよう、ジオメトリ非干渉(opacity/filter)だけで重ねる。
-  G.rooms.forEach((rm) => {
-    if (rm.ballFlash && rm.ballFlash.animate) {
-      rm.ballFlash.animate([
-        { opacity: 0,    offset: 0 },
-        { opacity: 0.95, offset: 0.22 },
-        { opacity: 0,    offset: 1 },
-      ], { duration: 600, easing: 'ease-out' });
-    }
-    if (rm.goal && rm.goal.animate) {
-      rm.goal.animate([
-        { filter: 'brightness(1)',   offset: 0 },
-        { filter: 'brightness(1.6)', offset: 0.28 },
-        { filter: 'brightness(1)',   offset: 1 },
-      ], { duration: 620, easing: 'ease-out' });
-    }
-  });
-  await sleep(200); // グローが出るのを一拍見せる
-  if (!G.cleared || !$('#overlay-gap').hidden) return; // 既に遷移済みなら何もしない
-  // 球の発光＋弾みを約1秒見せてから A画面へ自動遷移(画面を覆う幕は廃止)
-  clearTimeout(tsumiTimer);
-  tsumiTimer = setTimeout(goToGap, 1000);
+
+  // 点火: ボールが金(最短)/白(クリア)に発光して弾み、ゴールに光が満ちる。約1秒見せて A画面へ。
+  // ダークは球が自発光するため、ゴール吸着(白い輪の伸縮 ~320ms)が収まってから点火し、吸着を潰さない。
+  // ライト/モーション無効は球がマット or 演出なしで干渉しないので即時(従来どおり)。
+  const afterSuck = !REDUCED && document.documentElement.dataset.theme !== 'light';
+  const ignite = () => {
+    if (!G.cleared || !$('#overlay-gap').hidden) return; // 待ちの間に遷移済みなら何もしない
+    G.rooms.forEach((rm) => rm.goal.classList.add('filled')); // 光が満ちる
+    $('#boards').classList.add(best ? 'clear-best' : 'clear-win', 'bouncing');
+    playClear(best); // クリアの効果音(最短はきらめきを追加)。音はモーション無効でも鳴らす
+    haptic(best ? [0, 12, 50, 14, 50, 20] : [0, 12, 55, 16]); // クリアの祝福(最短は三つ打ち)。触覚はチャイムと別軸でREDUCED/設定OFF時は無音
+    if (REDUCED) { goToGap(); return; } // モーション無効: 演出を飛ばして A画面へ
+    // A: つがいが同時に座る瞬間の一発演出(チャイムと同期)。両部屋のボールが祝福発光し、ゴールが一拍明るむ。
+    // 既存のメダリオン/バウンスを壊さないよう、ジオメトリ非干渉(opacity/filter)だけで重ねる。
+    G.rooms.forEach((rm) => {
+      if (rm.ballFlash && rm.ballFlash.animate) {
+        rm.ballFlash.animate([
+          { opacity: 0,    offset: 0 },
+          { opacity: 0.95, offset: 0.22 },
+          { opacity: 0,    offset: 1 },
+        ], { duration: 600, easing: 'ease-out' });
+      }
+      if (rm.goal && rm.goal.animate) {
+        rm.goal.animate([
+          { filter: 'brightness(1)',   offset: 0 },
+          { filter: 'brightness(1.6)', offset: 0.28 },
+          { filter: 'brightness(1)',   offset: 1 },
+        ], { duration: 620, easing: 'ease-out' });
+      }
+    });
+    // 球の発光＋弾みを約1秒見せてから A画面へ自動遷移(幕は廃止)。旧 200ms の余韻＋1秒を畳む
+    clearTimeout(tsumiTimer);
+    tsumiTimer = setTimeout(goToGap, 1200);
+  };
+
+  if (afterSuck) setTimeout(ignite, GOAL_SUCK_HOLD_MS); // 吸着の収まりを見せてから点火
+  else ignite();
 }
 
 function resetPuzzle() {
