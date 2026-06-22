@@ -442,25 +442,21 @@ button:active { transform: translateY(1px); }
   transition: opacity 240ms ease-out, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
 }
-/* 吸着で現れ、クリアの祝福まで座として残す(sucking→filled の橋渡しで途切れさせない) */
-.goal.sucking::after,
-.goal.filled::after { opacity: 1; transform: scale(1); }
-/* 着座の瞬間に金縁が一瞬発光する。transition は opacity/transform だけなので border-color/box-shadow を
-   キーフレームで重ねても干渉しない。ピーク(~72%≈300ms)は皿が収まる頃=球の点火(~380ms)より前で濁らない */
-.goal.sucking::after { animation: plate-rim 420ms ease-out; }
-@keyframes plate-rim {
-  0%, 60% {
-    border-color: rgba(232, 217, 176, 0.30);
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5);
-  }
-  72% { /* 着座=金縁が白熱して一瞬発光 */
-    border-color: var(--bump-hot);
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5), 0 0 7px 1px var(--bump-hot), 0 0 15px 4px var(--glow);
-  }
-  100% {
-    border-color: rgba(232, 217, 176, 0.30);
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5);
-  }
+/* 黒皿のバウンド一発: フェードイン→着座で金縁が発光しつつ皿が一瞬拡大(バウンド)→
+   そのまま scale 0 まで縮んで消える。座としては残さず、消えた跡で球が発光する。
+   キーフレームで opacity/transform/border-color/box-shadow を一括制御(forwards で終端=不可視を保持) */
+.goal.sucking::after { animation: plate-pop 440ms ease-out forwards; }
+@keyframes plate-pop {
+  0%   { opacity: 0; transform: scale(1.25); border-color: rgba(232, 217, 176, 0.30);
+         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
+  28%  { opacity: 1; transform: scale(1.1);  border-color: rgba(232, 217, 176, 0.30);
+         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
+  52%  { opacity: 1; transform: scale(1);    border-color: rgba(232, 217, 176, 0.30); /* 着座(球到達 ~240ms) */
+         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
+  66%  { opacity: 1; transform: scale(1.3);  border-color: var(--bump-hot); /* 発光+枠拡大バウンド */
+         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5), 0 0 7px 1px var(--bump-hot), 0 0 16px 4px var(--glow); }
+  100% { opacity: 0; transform: scale(0);    border-color: rgba(232, 217, 176, 0.30); /* 0まで縮小して消える */
+         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
 }
 /* ダークは黒皿が座になるので、輪の金グロー(にじみ)は出さず皿に集中させる(scale/縁は皿の下で不可視)。
    ライト(下の data-theme="light")は従来の goal-suck(金のにじみ)のまま=変更しない */
