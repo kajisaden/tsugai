@@ -350,9 +350,12 @@ function audio() {
     if (!audioCtx) {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return null;
-      audioCtx = new AC();
+      // latencyHint:'interactive' = 出力バッファを小さくし操作→発音の遅延を最小化。
+      // 古い webkitAudioContext は options 非対応なので失敗時は無引数で生成。
+      try { audioCtx = new AC({ latencyHint: 'interactive' }); }
+      catch (e) { audioCtx = new AC(); }
       audioMaster = audioCtx.createGain();
-      audioMaster.gain.value = 1.4; // 全体音量の底上げ(個々のgainはクリアに揃えた上で master で一律up)
+      audioMaster.gain.value = 1.75; // 全体音量の底上げ(個々のgainはクリアに揃えた上で master で一律up)
       const lp = audioCtx.createBiquadFilter();
       lp.type = 'lowpass'; lp.frequency.value = 3200; lp.Q.value = 0.6;
       audioMaster.connect(lp).connect(audioCtx.destination);
@@ -361,6 +364,22 @@ function audio() {
     return audioCtx;
   } catch (e) { return null; }
 }
+// 遅延対策: 入力の最初の瞬間(capture段)に AudioContext を生成・resume して「温めて」おく。
+// モバイルは無操作で AudioContext を suspend するため、温めずに鳴らすと初鳴り/間隔後の一手が
+// 「currentTime に積んだのに resume 完了待ちで遅れて鳴る」状態になる。capture で doMove より先に
+// resume を始め、初回だけ無音バッファでグラフを始動。実際の発音は各 playXxx が同じgesture内で即時スケジュール。
+function warmAudio() {
+  const ctx = audio();
+  if (!ctx || ctx._warmed) return;
+  ctx._warmed = true;
+  try {
+    const src = ctx.createBufferSource();
+    src.buffer = ctx.createBuffer(1, 1, ctx.sampleRate); // 無音1サンプルでオーディオグラフを始動
+    src.connect(ctx.destination); src.start(0);
+  } catch (e) {}
+}
+['pointerdown', 'keydown', 'touchstart'].forEach((ev) =>
+  document.addEventListener(ev, warmAudio, { passive: true, capture: true }));
 // 1音: 周波数/波形/長さ/音量/ピッチ滑り/開始遅延を指定して鳴らす(指数減衰)
 function tone(ctx, { freq, type = 'sine', dur = 0.12, gain = 0.07, glideTo = null, attack = 0.005, t0 = 0, cutoff = null }) {
   const start = ctx.currentTime + t0;
