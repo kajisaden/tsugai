@@ -525,14 +525,6 @@ button:active { transform: translateY(1px); }
   16%  { opacity: 1;    box-shadow: 0 0 18px 5px var(--glow); } /* 綻びの一拍を二球同時に張る */
   100% { opacity: 0.35; box-shadow: 0 0 14px 2px rgba(240, 220, 170, 0.25); }
 }
-/* 寄り添い: 壁に阻まれず全部屋が動いた=完全同期の一手。二球の息がそろって柔らかく据わる。
-   綻びの鋭い張りと対に、こちらはゆるやかで控えめ(毎手出ても煩くない息のレベル)。ダークのみ・点火/解除は JS。 */
-#boards.sync .ball::after { animation: sync-settle 540ms ease-out; }
-@keyframes sync-settle {
-  0%   { opacity: 0.45; box-shadow: 0 0 14px 2px rgba(240, 220, 170, 0.25); }
-  44%  { opacity: 0.85; box-shadow: 0 0 16px 3px rgba(240, 220, 170, 0.40); } /* 二球そろって据わる=寄り添い */
-  100% { opacity: 0.35; box-shadow: 0 0 14px 2px rgba(240, 220, 170, 0.25); }
-}
 
 /* ---- 操作系: 上段=ヘルプ(リワード) / 下段=最初から(無料・フル幅) ---- */
 #controls {
