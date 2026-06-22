@@ -236,8 +236,9 @@ function buildBoard(room, w, h) {
   piece.append(el('ball-glow'), ball);
   const bumpGlow = el('bump-glow'); // 壁当ての面ハイライト用(答え再生時)
   const ripple = el('bump-ripple'); // 壁当ての衝撃リップル(レバー6)
-  board.append(cells, goal, piece, bumpGlow, ripple);
-  return { board, goal, piece, ball, ballFlash, wallSet, goalIndex: room.goal, bumpGlow, ripple };
+  const trailLayer = el('trail-layer'); // 通り道の尾引き(球の下に敷く)
+  board.append(cells, goal, trailLayer, piece, bumpGlow, ripple); // trailLayer は piece より前=球の下
+  return { board, goal, piece, ball, ballFlash, wallSet, goalIndex: room.goal, bumpGlow, ripple, trailLayer };
 }
 
 // ② 問題の登場: 盤がフェードイン(上→下の軽いスタッガー) → ゴールが現れる → 球がコトッと収まる(着地squash・2球同時=つがい)。
@@ -565,6 +566,33 @@ function showRipple(rm, p, d) {
   ], { duration: 560, easing: 'ease-out' });
 }
 
+// 通り道の尾引き: きれいに滑ったとき、通過したマスを順に一瞬照らして後ろへ消す。
+// 壁当ての反発演出に対し「すっと通った」側の手応えを足し、どこを通ったかも読みやすくする。
+// from→to は直線(片軸のみ移動)。着地マスは球自身が居るので除き、出発〜一つ手前を照らす。
+function showTrail(rm, from, to, d) {
+  if (REDUCED || !rm.trailLayer || !rm.trailLayer.animate) return;
+  const [dx, dy] = DIRS[d];
+  const fx = from % G.w, fy = (from - (from % G.w)) / G.w;
+  const tx = to % G.w, ty = (to - (to % G.w)) / G.w;
+  const steps = Math.abs(tx - fx) + Math.abs(ty - fy);
+  if (steps <= 0) return;
+  for (let s = 0; s < steps; s++) {
+    const cx = fx + dx * s, cy = fy + dy * s;
+    const cell = el('trail-cell');
+    cell.style.width = 100 / G.w + '%';
+    cell.style.height = 100 / G.h + '%';
+    cell.style.transform = `translate(${cx * 100}%, ${cy * 100}%)`;
+    rm.trailLayer.append(cell);
+    const reach = (s / steps) * MOVE_MS; // 球がそのマスに差し掛かる頃に点灯(進行方向へ流れる)
+    const a = cell.animate([
+      { opacity: 0,    offset: 0 },
+      { opacity: 0.65, offset: 0.18 },
+      { opacity: 0,    offset: 1 },
+    ], { duration: 420, delay: reach, easing: 'ease-out', fill: 'backwards' });
+    a.onfinish = a.oncancel = () => cell.remove(); // 退色しきったら DOM を片付ける
+  }
+}
+
 async function doMove(d) {
   if (!G || G.busy || G.cleared) return;
   clearWallHints(); // 局面が動くと壁ヒントの位置がずれるので消す
@@ -582,6 +610,7 @@ async function doMove(d) {
     } else {
       setCellXY(rm.piece, next[i] % G.w, (next[i] - (next[i] % G.w)) / G.w);
       squashMove(rm.ball, d); // 進行軸へ伸び→着地でつぶれて戻る(settle)
+      showTrail(rm, G.pos[i], next[i], d); // 通り道の尾引き(G.pos はこの後で next に更新される=ここは旧位置)
     }
   });
   // 触覚＋効果音: ぶつかれば firm/「コッ」、きれいに動けば light/「トッ」。一手につき一度(両部屋で二度鳴らさない)。
@@ -882,7 +911,7 @@ async function answerForward(animate) {
   }
   G.rooms.forEach((rm, i) => {
     if (next[i] === cur[i]) bumpPiece(rm, d);
-    else { setCellXY(rm.piece, next[i] % G.w, (next[i] - (next[i] % G.w)) / G.w); squashMove(rm.ball, d); }
+    else { setCellXY(rm.piece, next[i] % G.w, (next[i] - (next[i] % G.w)) / G.w); squashMove(rm.ball, d); showTrail(rm, cur[i], next[i], d); }
   });
   G.pos = next;
   AV.k++;

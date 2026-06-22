@@ -359,6 +359,23 @@ button:active { transform: translateY(1px); }
   50% { opacity: 1; }
 }
 
+/* 通り道の尾引き: きれいに滑ったとき、通過したマスを順に一瞬照らして後ろへ消す。
+   .trail-layer は球(.piece)の下に敷く透明レイヤ。マスの点灯/退色は JS(WAAPI)が制御。
+   色は --glow でテーマ自動追従(ダーク=金/ライト=琥珀のにじみ) */
+.trail-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.trail-cell {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: radial-gradient(closest-side, var(--glow) 0%, transparent 76%);
+  opacity: 0;
+  pointer-events: none;
+}
+
 .cells {
   position: absolute;
   inset: 0;
