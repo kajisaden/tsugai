@@ -638,6 +638,12 @@ async function doMove(d) {
     be.classList.remove('strain'); void be.offsetWidth; be.classList.add('strain');
     clearTimeout(be._strainT); be._strainT = setTimeout(() => be.classList.remove('strain'), 460);
   }
+  // 寄り添い: 壁に阻まれず全部屋が動いた=完全同期の一手。二球の息がそろって柔らかく据わる(綻びの対)。
+  else if (anyMoved && !anyBumped && !anyGoal && !REDUCED && document.documentElement.dataset.theme !== 'light') {
+    const be = $('#boards');
+    be.classList.remove('sync'); void be.offsetWidth; be.classList.add('sync');
+    clearTimeout(be._syncT); be._syncT = setTimeout(() => be.classList.remove('sync'), 540);
+  }
   // ゴール吸着: クリアの一手(=両球が同時にゴールへ収まる)では、滑り込む間に輪がきゅっと締まって弾ける。
   // 反則(anyGoal && !allGoal)は祝福しないので対象外。スライドに重なるよう、await の前=今ここで点火する。
   if (allGoal && !REDUCED) G.rooms.forEach((rm) => {
