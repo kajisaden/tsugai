@@ -825,35 +825,23 @@ button:active { transform: translateY(1px); }
   /* 上辺ハイライト廃止(案2 単線): ライトは .5 と強く、継ぎ目の浮きがダークより目立っていた */
 }
 
-/* 壁の印 ライト: ヒント(amber=導き)と壁当て(墨=衝撃)を色で分ける。ヒントは従来の琥珀のにじみ。 */
-:root[data-theme="light"] .hint-glow {
+/* 壁の印(ヒント/壁当て)ライト: ダークの「発光」に対する「滲み」。明るい金の芯＋金の顔料が紙にじわっと
+   広がる対称なハロー(オフセット無し)。印は縦横どちらの壁面にも出る(縦4x52 / 横52x4)ので、方向性のある
+   影/グラデは使わず、対称な滲みで縦横を揃え壁に密着させる */
+:root[data-theme="light"] .hint-glow,
+:root[data-theme="light"] .bump-glow {
   background: #ecd07e;
   box-shadow: 0 0 5px 1px rgba(206, 164, 64, 0.5), 0 0 11px 3px rgba(206, 164, 64, 0.2);
 }
-/* 壁当て=墨汁が紙に染みる表現。面に沿う墨だまり(.bump-glow)＋接触点の不定形なシミ(.bump-ripple)。
-   琥珀は washi 上で低コントラスト=目立たないため墨色にし、mix-blend-mode: multiply で黒が紙に吸われたように沈ませる */
-:root[data-theme="light"] .bump-glow {
-  background: rgba(28, 25, 30, 0.6);
-  box-shadow: 0 0 5px 2px rgba(28, 25, 30, 0.28), 0 0 11px 5px rgba(28, 25, 30, 0.14);
-  mix-blend-mode: multiply;
-}
-/* 墨の芯: 白熱せず、紙に押し付けた墨だまりが一瞬濃くなって退く(2層のにじみ)。時間/カーブは共通(750ms) */
-:root[data-theme="light"] .bump-glow.show { animation-name: bump-glow-ink; }
-@keyframes bump-glow-ink {
-  0%   { opacity: 0;   background: rgba(22, 20, 24, 0.7);  box-shadow: 0 0 5px 2px rgba(28, 25, 30, 0.28); }
-  10%  { opacity: 1;   background: rgba(18, 16, 20, 0.86); box-shadow: 0 0 9px 3px rgba(24, 21, 27, 0.5), calc(var(--bloom-x, 0px) * 0.7) calc(var(--bloom-y, 0px) * 0.7) 20px 7px rgba(28, 25, 30, 0.26); }
-  34%  { opacity: 0.9; background: rgba(28, 25, 30, 0.62); box-shadow: 0 0 6px 2px rgba(28, 25, 30, 0.32), calc(var(--bloom-x, 0px) * 0.4) calc(var(--bloom-y, 0px) * 0.4) 14px 4px rgba(28, 25, 30, 0.2); }
-  100% { opacity: 0;   background: rgba(28, 25, 30, 0.6);  box-shadow: 0 0 5px 2px rgba(28, 25, 30, 0.28); }
-}
-/* 接触点の墨のシミ: 円の輪郭(border)をやめ、濃淡のある不定形の黒い塊にする。広がり/退色/回転は JS(WAAPI) */
-:root[data-theme="light"] .bump-ripple {
-  border: none;
-  border-radius: 47% 53% 52% 48% / 50% 47% 53% 50%;
-  background:
-    radial-gradient(circle at 44% 42%, rgba(24, 22, 27, 0.52) 0%, rgba(32, 29, 35, 0.30) 42%, transparent 72%),
-    radial-gradient(circle at 64% 60%, rgba(28, 25, 31, 0.34) 0%, transparent 56%),
-    radial-gradient(circle at 50% 50%, rgba(40, 36, 44, 0.20) 0%, transparent 82%);
-  mix-blend-mode: multiply;
+/* ライト(紙)向けの壁当て: ダークの白熱処方は白地で濁るため別キーフレームにする。
+   澄んだ琥珀(#ecd07e)のまま軽く増光＋締まった2層のにじみ(最大11→18px)。時間/カーブ(750ms ease-out)は共通。
+   ダークの強調(@keyframes bump-glow)とは独立して紙向けに上品さを保つ */
+:root[data-theme="light"] .bump-glow.show { animation-name: bump-glow-light; }
+@keyframes bump-glow-light {
+  0%   { opacity: 0;    background: #ecd07e; box-shadow: 0 0 5px 1px rgba(206, 164, 64, 0.5), 0 0 11px 3px rgba(206, 164, 64, 0.2); }
+  10%  { opacity: 1;    background: #f4e3a6; box-shadow: 0 0 8px 2px rgba(206, 164, 64, 0.6), calc(var(--bloom-x, 0px) * 0.7) calc(var(--bloom-y, 0px) * 0.7) 20px 5px rgba(206, 164, 64, 0.3); }
+  34%  { opacity: 0.92; background: #ecd07e; box-shadow: 0 0 6px 1px rgba(206, 164, 64, 0.5), calc(var(--bloom-x, 0px) * 0.4) calc(var(--bloom-y, 0px) * 0.4) 14px 3px rgba(206, 164, 64, 0.24); }
+  100% { opacity: 0;    background: #ecd07e; box-shadow: 0 0 5px 1px rgba(206, 164, 64, 0.5), 0 0 11px 3px rgba(206, 164, 64, 0.2); }
 }
 /* ヒントの息づき: 実体バーなので透明まで消えず、浅い濃淡でゆっくり呼吸させる */
 :root[data-theme="light"] .hint-glow {
