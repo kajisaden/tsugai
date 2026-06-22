@@ -630,6 +630,14 @@ async function doMove(d) {
 
   const allGoal = next.every((np, i) => np === G.rooms[i].goalIndex);
   const anyGoal = next.some((np, i) => np === G.rooms[i].goalIndex);
+  // つがいの連動感: 片方が壁で止まり片方が進む=対が引き裂かれた「綻び」(章名の核)。二球の息を同時に
+  // 一拍ひるませ、対であることを直感させる。クリア/反則(ゴール絡み)は専用演出があるので !anyGoal に限る。
+  // ダークのみ(ライトは黒石を発光させない)。#boards 共有クラス=両球が完全同期。
+  if (anyMoved && anyBumped && !anyGoal && !REDUCED && document.documentElement.dataset.theme !== 'light') {
+    const be = $('#boards');
+    be.classList.remove('strain'); void be.offsetWidth; be.classList.add('strain');
+    clearTimeout(be._strainT); be._strainT = setTimeout(() => be.classList.remove('strain'), 460);
+  }
   // ゴール吸着: クリアの一手(=両球が同時にゴールへ収まる)では、滑り込む間に輪がきゅっと締まって弾ける。
   // 反則(anyGoal && !allGoal)は祝福しないので対象外。スライドに重なるよう、await の前=今ここで点火する。
   if (allGoal && !REDUCED) G.rooms.forEach((rm) => {

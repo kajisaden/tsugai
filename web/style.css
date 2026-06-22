@@ -516,6 +516,15 @@ button:active { transform: translateY(1px); }
   0%, 100% { opacity: 0.35; }
   50% { opacity: 1; }
 }
+/* つがいの連動感: 「綻び」(放送入力で片方だけ壁に阻まれ対が引き裂かれる一手=章名の核)の一拍、
+   二球の息(.ball::after)が同時にひるんで張る。#boards 共有クラスなので両球が完全同期=対であると直感させる。
+   点火/解除は JS(綻びの手のみ・ダークのみ)。ライトは黒石を発光させない方針なので出さない。 */
+#boards.strain .ball::after { animation: strain-flinch 460ms ease-out; }
+@keyframes strain-flinch {
+  0%   { opacity: 0.5;  box-shadow: 0 0 14px 2px rgba(240, 220, 170, 0.25); }
+  16%  { opacity: 1;    box-shadow: 0 0 18px 5px var(--glow); } /* 綻びの一拍を二球同時に張る */
+  100% { opacity: 0.35; box-shadow: 0 0 14px 2px rgba(240, 220, 170, 0.25); }
+}
 
 /* ---- 操作系: 上段=ヘルプ(リワード) / 下段=最初から(無料・フル幅) ---- */
 #controls {
