@@ -238,9 +238,9 @@ function buildBoard(room, w, h) {
   ball.append(ballFlash);
   piece.append(el('ball-glow'), ball);
   const bumpGlow = el('bump-glow'); // 壁当ての面ハイライト用(答え再生時)
-  const ripple = el('bump-ripple'); // 壁当ての衝撃リップル(レバー6)
+  const ripple = el('bump-ripple'); // 壁当ての衝撃リップル(レバー6)。盤の外にはみ出すため #boards に置く
   const trailLayer = el('trail-layer'); // 通り道の尾引き(球の下に敷く)
-  board.append(cells, goal, trailLayer, piece, bumpGlow, ripple); // trailLayer は piece より前=球の下
+  board.append(cells, goal, trailLayer, piece, bumpGlow); // trailLayer は piece より前=球の下
   return { board, goal, piece, ball, ballFlash, wallSet, goalIndex: room.goal, bumpGlow, ripple, trailLayer };
 }
 
@@ -293,6 +293,7 @@ function startPuzzle(ch, index, entrance = true) {
   const rooms = puz.rooms.map((r) => {
     const b = buildBoard(r, w, h);
     boardsEl.append(b.board);
+    boardsEl.append(b.ripple); // リップルは盤の外にはみ出すため #boards 直下に置く
     return b;
   });
   G = {
@@ -550,23 +551,30 @@ function showBumpGlow(rm, p, d) {
   g._bumpTimer = setTimeout(() => g.classList.remove('show'), 750); // 強調アニメ(750ms)を切らないよう延長
 }
 
-// レバー6: 衝撃リップル。接触辺の中点から細いリングが広がって消える(短時間・低不透明度で上品に)。
+// レバー6: 衝撃リップル。接触辺の中点から金環が広がって消える。
+// リップルは #boards 直下に置き、盤の overflow:hidden を超えて広がる。
 function showRipple(rm, p, d) {
   if (REDUCED || !rm.ripple || !rm.ripple.animate) return;
   const r = rm.ripple;
+  const boardRect = rm.board.getBoundingClientRect();
+  const parentRect = rm.board.parentElement.getBoundingClientRect();
+  const cellW = boardRect.width / G.w;
+  const cellH = boardRect.height / G.h;
   const x = p % G.w, y = (p - (p % G.w)) / G.w;
-  const cw = 100 / G.w, ch = 100 / G.h;
-  const dia = Math.min(cw, ch) * 1.0; // 直径(盤%)。短辺基準で円を保つ。最大scaleで約2.2セルまで広がる
-  // 中心 = 当たった面(接触辺)の中点。セル中心から当たり方向 DIRS[d] へ半セル寄せる
-  r.style.width = `${dia}%`;
-  r.style.height = `${dia}%`;
-  r.style.left = `${(x + 0.5 + DIRS[d][0] * 0.5) * cw}%`;
-  r.style.top = `${(y + 0.5 + DIRS[d][1] * 0.5) * ch}%`;
+  const dia = Math.min(cellW, cellH);
+  // 中心 = 接触辺の中点(セル中心から当たり方向 DIRS[d] へ半セル寄せ)。#boards 相対の px 座標
+  const cx = (boardRect.left - parentRect.left) + (x + 0.5 + DIRS[d][0] * 0.5) * cellW;
+  const cy = (boardRect.top - parentRect.top) + (y + 0.5 + DIRS[d][1] * 0.5) * cellH;
+  r.style.width = `${dia}px`;
+  r.style.height = `${dia}px`;
+  r.style.left = `${cx}px`;
+  r.style.top = `${cy}px`;
+  const isLight = theme === 'light';
   r.animate([
-    { transform: 'translate(-50%, -50%) scale(0.4)', opacity: 0.55, offset: 0 },
-    { transform: 'translate(-50%, -50%) scale(1.3)', opacity: 0.4,  offset: 0.45 },
-    { transform: 'translate(-50%, -50%) scale(2.2)', opacity: 0,    offset: 1 },
-  ], { duration: 560, easing: 'ease-out' });
+    { transform: 'translate(-50%, -50%) scale(0.3)', opacity: isLight ? 0.65 : 0.55, offset: 0 },
+    { transform: 'translate(-50%, -50%) scale(1.5)', opacity: isLight ? 0.45 : 0.4,  offset: 0.35 },
+    { transform: 'translate(-50%, -50%) scale(3.0)', opacity: 0,                      offset: 1 },
+  ], { duration: isLight ? 720 : 560, easing: 'ease-out' });
 }
 
 // 通り道の尾引き: きれいに滑ったとき、通過したマスを順に一瞬照らして後ろへ消す。

@@ -275,6 +275,7 @@ button:active { transform: translateY(1px); }
 
 /* 盤は縦1列(スマホで各盤を大きく見せる)。横並びだと1枚が小さく潰れる */
 #boards {
+  position: relative; /* リップル(bump-ripple)の絶対配置の基準 */
   display: grid;
   grid-template-columns: 1fr;
   justify-items: center;
@@ -830,24 +831,29 @@ button:active { transform: translateY(1px); }
    影/グラデは使わず、対称な滲みで縦横を揃え壁に密着させる */
 :root[data-theme="light"] .hint-glow,
 :root[data-theme="light"] .bump-glow {
-  background: #ecd07e;
-  box-shadow: 0 0 5px 1px rgba(206, 164, 64, 0.5), 0 0 11px 3px rgba(206, 164, 64, 0.2);
+  background: #f0dfa0;
+  box-shadow: 0 0 6px 2px rgba(216, 192, 110, 0.48), 0 0 12px 3px rgba(216, 192, 110, 0.20);
 }
 /* ライト(紙)向けの壁当て: ダークの白熱処方は白地で濁るため別キーフレームにする。
    澄んだ琥珀(#ecd07e)のまま軽く増光＋締まった2層のにじみ(最大11→18px)。時間/カーブ(750ms ease-out)は共通。
    ダークの強調(@keyframes bump-glow)とは独立して紙向けに上品さを保つ */
 :root[data-theme="light"] .bump-glow.show { animation-name: bump-glow-light; }
 @keyframes bump-glow-light {
-  0%   { opacity: 0;    background: #ecd07e; box-shadow: 0 0 5px 1px rgba(206, 164, 64, 0.5), 0 0 11px 3px rgba(206, 164, 64, 0.2); }
-  10%  { opacity: 1;    background: #f4e3a6; box-shadow: 0 0 8px 2px rgba(206, 164, 64, 0.6), calc(var(--bloom-x, 0px) * 0.7) calc(var(--bloom-y, 0px) * 0.7) 20px 5px rgba(206, 164, 64, 0.3); }
-  34%  { opacity: 0.92; background: #ecd07e; box-shadow: 0 0 6px 1px rgba(206, 164, 64, 0.5), calc(var(--bloom-x, 0px) * 0.4) calc(var(--bloom-y, 0px) * 0.4) 14px 3px rgba(206, 164, 64, 0.24); }
-  100% { opacity: 0;    background: #ecd07e; box-shadow: 0 0 5px 1px rgba(206, 164, 64, 0.5), 0 0 11px 3px rgba(206, 164, 64, 0.2); }
+  0%   { opacity: 0;    background: #f8eecc; box-shadow: 0 0 5px 1px rgba(216, 192, 110, 0.4); }
+  10%  { opacity: 1;    background: #faf2d0; box-shadow: 0 0 10px 3px rgba(216, 192, 110, 0.55), calc(var(--bloom-x, 0px) * 0.7) calc(var(--bloom-y, 0px) * 0.7) 22px 6px rgba(216, 192, 110, 0.22); }
+  34%  { opacity: 0.90; background: #f0dfa0; box-shadow: 0 0 7px 2px rgba(216, 192, 110, 0.45), calc(var(--bloom-x, 0px) * 0.4) calc(var(--bloom-y, 0px) * 0.4) 15px 4px rgba(216, 192, 110, 0.18); }
+  100% { opacity: 0;    background: #f0dfa0; box-shadow: 0 0 6px 2px rgba(216, 192, 110, 0.48), 0 0 12px 3px rgba(216, 192, 110, 0.20); }
 }
 /* ヒントの息づき: 実体バーなので透明まで消えず、浅い濃淡でゆっくり呼吸させる */
 :root[data-theme="light"] .hint-glow {
   animation: hint-glow-leaf 2.6s ease-in-out infinite;
 }
 @keyframes hint-glow-leaf { 0%, 100% { opacity: 0.82; } 50% { opacity: 1; } }
+/* リップル(金環) ライト: 太く・シャンパンゴールドに揃え、にじみを足す */
+:root[data-theme="light"] .bump-ripple {
+  border: 2px solid rgba(216, 192, 110, 0.50);
+  box-shadow: 0 0 5px 1px rgba(216, 192, 110, 0.22);
+}
 
 /* ボール: マット黒の碁石(実体＋立体陰影)。静止(脈動なし)。光輪はクリア時だけ出す */
 :root[data-theme="light"] .ball {
