@@ -1069,6 +1069,7 @@ $('#btn-retry').addEventListener('click', () => {
 });
 
 $('#btn-theme').addEventListener('click', () => {
+  playTap();
   theme = theme === 'light' ? 'dark' : 'light';
   localStorage.setItem(THEME_KEY, theme);
   applyTheme();
@@ -1132,11 +1133,6 @@ $('#settings-drawer').addEventListener('click', (e) => {
 
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
-// ④ UI音: ボタンを押した瞬間に極小ティック(音設定トグル .sw は除外。押下感の見た目は既存の :active で担保)
-document.addEventListener('pointerdown', (e) => {
-  const b = e.target.closest('button');
-  if (b && !b.disabled && !b.classList.contains('sw')) playTap();
-}, { passive: true });
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア
 $('#btn-answer-open').addEventListener('click', () => watchRewardAd(enterAnswer));
 // 光ヒント = 1回消費してその問題で点灯(点灯済みなら据え置き=消費しない)
