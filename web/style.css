@@ -1209,6 +1209,7 @@ button.set-row:active { transform: none; }
   width: 90%; max-width: 320px; margin: 16px auto 0;
 }
 .ht-case { text-align: center; }
+.ht-fig02 .ht-mb { width: 100%; }
 .ht-case-label {
   font-size: 12px; margin-bottom: 6px; font-weight: 500;
 }
@@ -1224,6 +1225,7 @@ button.set-row:active { transform: none; }
   width: 95%; max-width: 360px; margin: 16px auto 0;
 }
 .ht-step { text-align: center; }
+.ht-fig03 .ht-mb { width: 100%; }
 .ht-step-label { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
 .ht-step-arrow { font-size: 20px; color: rgba(232,217,176,0.4); padding-top: 14px; }
 .ht-step .ht-pair { gap: 5px; }
