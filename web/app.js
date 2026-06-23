@@ -1124,6 +1124,11 @@ function showToast(msg) {
 }
 $('#set-lang').addEventListener('click', () => relocalize(locale === 'ja' ? 'en' : 'ja'));
 $('#set-reset').addEventListener('click', resetProgress);
+// 遊び方
+function openHowto() { closeSettings(); $('#howto-overlay').hidden = false; }
+function closeHowto() { $('#howto-overlay').hidden = true; }
+$('#set-howto').addEventListener('click', openHowto);
+$('#btn-howto-close').addEventListener('click', closeHowto);
 $('#sw-se').addEventListener('click', () => { seOn = !seOn; localStorage.setItem(SE_KEY, seOn ? '1' : '0'); updateSettingsUI(); });
 $('#sw-haptics').addEventListener('click', () => { hapticsOn = !hapticsOn; localStorage.setItem(HAPTICS_KEY, hapticsOn ? '1' : '0'); updateSettingsUI(); });
 // 未実装項目(data-soon)タップ → 「準備中」
@@ -1160,6 +1165,10 @@ const KEYMAP = {
   w: 0, s: 1, a: 2, d: 3,
 };
 document.addEventListener('keydown', (e) => {
+  if (!$('#howto-overlay').hidden) {
+    if (e.key === 'Escape') closeHowto();
+    return;
+  }
   if ($('#settings-drawer').classList.contains('open')) {
     if (e.key === 'Escape') closeSettings();
     return; // 設定表示中は盤操作を受けない

@@ -1097,3 +1097,43 @@ button.set-row:active { transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .drawer-scrim, .drawer-panel, .sw, .sw .k { transition: none; }
 }
+
+/* ---- 遊び方: フルスクリーンオーバーレイ ---- */
+#howto-overlay {
+  position: fixed; inset: 0; z-index: 40;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+#howto-overlay[hidden] { display: none; }
+:root[data-theme="light"] #howto-overlay { background: #f3efe6; }
+.howto-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 12px;
+  flex-shrink: 0;
+}
+.howto-title {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 19px; letter-spacing: 0.25em; text-indent: 0.25em; color: var(--gold);
+}
+.howto-close { font-size: 22px; line-height: 1; color: var(--text-dim); padding: 4px 6px; }
+.howto-body {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  max-width: 480px; margin: 0 auto; width: 100%;
+  padding: 0 24px calc(32px + env(safe-area-inset-bottom, 0px));
+}
+.ht-sec { margin: 24px 0; }
+.ht-num { font-size: 11px; color: var(--gold); letter-spacing: 0.12em; margin-bottom: 6px; }
+.ht-title { font-size: 17px; font-weight: 600; margin-bottom: 10px; color: var(--text); }
+.ht-text { font-size: 14px; line-height: 1.8; color: var(--text-dim); }
+.ht-text strong { color: var(--text); font-weight: 500; }
+.ht-sep { border: none; border-top: 1px solid var(--line); margin: 0; }
+.ht-tips {
+  list-style: none; margin: 10px 0 0;
+}
+.ht-tips li {
+  padding: 6px 0 6px 18px; position: relative;
+  font-size: 13px; color: var(--text-dim); line-height: 1.6;
+}
+.ht-tips li::before { content: "·"; position: absolute; left: 4px; color: var(--gold); font-weight: 700; }
+.ht-tips strong { color: var(--text); font-weight: 500; }

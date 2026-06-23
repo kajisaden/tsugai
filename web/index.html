@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=36b971ced3">
+<link rel="stylesheet" href="style.css?v=28ab1fcefb">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
   </div>
   <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
        data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
-  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">29</span></h1>
+  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">30</span></h1>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -173,7 +173,7 @@
       </button>
 
       <div class="set-sec" data-i18n="secInfo">情報</div>
-      <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="howto">遊び方</span><span class="set-r"><span class="chev">›</span></span></button>
+      <button class="set-row set-act" id="set-howto"><span class="set-lbl" data-i18n="howto">遊び方</span><span class="set-r"><span class="chev">›</span></span></button>
       <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="about">このアプリについて</span><span class="set-r">1.0 <span class="chev">›</span></span></button>
       <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="privacy">プライバシーポリシー</span><span class="set-r"><span class="ext">↗</span></span></button>
       <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="contact">お問い合わせ</span><span class="set-r"><span class="ext">↗</span></span></button>
@@ -186,8 +186,53 @@
   </div>
 </div>
 
+<!-- 遊び方: 設定から開くフルスクリーンのスクロール画面 -->
+<div id="howto-overlay" hidden>
+  <div class="howto-head">
+    <span class="howto-title" data-i18n="howto">遊び方</span>
+    <button id="btn-howto-close" class="ghost howto-close" data-i18n-aria="close" aria-label="とじる">✕</button>
+  </div>
+  <div class="howto-body">
+    <div class="ht-sec">
+      <div class="ht-num">01</div>
+      <h2 class="ht-title" data-i18n="ht1title">2つの部屋、1つの操作</h2>
+      <p class="ht-text" data-i18n="ht1body">画面には2つの部屋が並んでいます。それぞれの部屋に球が1つずつ。あなたの操作(上下左右)は、両方の球に同時に届きます。</p>
+    </div>
+    <hr class="ht-sep">
+    <div class="ht-sec">
+      <div class="ht-num">02</div>
+      <h2 class="ht-title" data-i18n="ht2title">同時にゴールへ</h2>
+      <p class="ht-text" data-i18n="ht2body">各部屋にある光の輪がゴールです。2つの球が同じ一手で同時にゴールに入るとクリア。片方だけ先にゴールに入るのは反則です。</p>
+    </div>
+    <hr class="ht-sep">
+    <div class="ht-sec">
+      <div class="ht-num">03</div>
+      <h2 class="ht-title" data-i18n="ht3title">壁がズレを生む</h2>
+      <p class="ht-text" data-i18n="ht3body">球が壁や外周にぶつかると、その球だけ止まります。もう片方の部屋の球は動く——このズレがパズルの核です。わざと壁にぶつけることで、2つの球の位置関係を調整できます。</p>
+    </div>
+    <hr class="ht-sep">
+    <div class="ht-sec">
+      <div class="ht-num">04</div>
+      <h2 class="ht-title" data-i18n="ht4title">ヒントと手戻り</h2>
+      <p class="ht-text" data-i18n="ht4body">詰まったら、画面下のヒントボタンを使えます。</p>
+      <ul class="ht-tips">
+        <li><strong data-i18n="light">光ヒント</strong> — <span data-i18n="ht4tip1">ぶつけるべき壁が光る</span></li>
+        <li><strong data-i18n="nextMove">次の手ヒント</strong> — <span data-i18n="ht4tip2">今の局面から最善の一手を示す</span></li>
+        <li><strong data-i18n="answer">答え</strong> — <span data-i18n="ht4tip3">正解を自動再生する</span></li>
+        <li><strong data-i18n="reset">最初から</strong> — <span data-i18n="ht4tip4">いつでも初形に戻せる</span></li>
+      </ul>
+    </div>
+    <hr class="ht-sep">
+    <div class="ht-sec">
+      <div class="ht-num">05</div>
+      <h2 class="ht-title" data-i18n="ht5title">最短を目指す</h2>
+      <p class="ht-text" data-i18n="ht5body">各問題には最短手数があります。最短でクリアすると金の印が付きます。まずはクリアを目指し、次に最短に挑戦してみてください。</p>
+    </div>
+  </div>
+</div>
+
 <script src="pool.js?v=b15ee5deb3"></script>
-<script src="strings.js?v=60016cba20"></script>
-<script src="app.js?v=a019ce578f"></script>
+<script src="strings.js?v=712e445324"></script>
+<script src="app.js?v=fc1eac0485"></script>
 </body>
 </html>
