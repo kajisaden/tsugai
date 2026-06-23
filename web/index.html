@@ -30,7 +30,7 @@
   </div>
   <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
        data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
-  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">30</span></h1>
+  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">31</span></h1>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -202,7 +202,7 @@
     <div class="ht-sec">
       <div class="ht-num">02</div>
       <h2 class="ht-title" data-i18n="ht2title">同時にゴールへ</h2>
-      <p class="ht-text" data-i18n="ht2body">各部屋にある光の輪がゴールです。2つの球が同じ一手で同時にゴールに入るとクリア。片方だけ先にゴールに入るのは反則です。</p>
+      <p class="ht-text" data-i18n="ht2body">各部屋にある光の輪がゴールです。2つの球が同じ一手で同時にゴールに入るとクリア。片方だけ先にゴールに入ると失敗です。</p>
     </div>
     <hr class="ht-sep">
     <div class="ht-sec">
@@ -232,7 +232,7 @@
 </div>
 
 <script src="pool.js?v=b15ee5deb3"></script>
-<script src="strings.js?v=712e445324"></script>
+<script src="strings.js?v=3ba91fb02d"></script>
 <script src="app.js?v=fc1eac0485"></script>
 </body>
 </html>
