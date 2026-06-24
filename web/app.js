@@ -1132,9 +1132,13 @@ $('#btn-howto-close').addEventListener('click', closeHowto);
 // 情報オーバーレイ(バージョン/PP/お問い合わせ)
 function openInfoOverlay(id) { closeSettings(); $(`#${id}-overlay`).hidden = false; }
 function closeInfoOverlay(id) { $(`#${id}-overlay`).hidden = true; }
-['version', 'privacy', 'contact'].forEach(id => {
+['version', 'privacy'].forEach(id => {
   $(`#set-${id}`).addEventListener('click', () => openInfoOverlay(id));
   $(`#btn-${id}-close`).addEventListener('click', () => closeInfoOverlay(id));
+});
+// お問い合わせ: Googleフォームへ外部遷移(TODO: URL差し替え)
+$('#set-contact').addEventListener('click', () => {
+  window.open('https://forms.gle/PLACEHOLDER', '_blank', 'noopener');
 });
 $('#sw-se').addEventListener('click', () => { seOn = !seOn; localStorage.setItem(SE_KEY, seOn ? '1' : '0'); updateSettingsUI(); });
 $('#sw-haptics').addEventListener('click', () => { hapticsOn = !hapticsOn; localStorage.setItem(HAPTICS_KEY, hapticsOn ? '1' : '0'); updateSettingsUI(); });
@@ -1176,7 +1180,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeHowto();
     return;
   }
-  for (const id of ['version', 'privacy', 'contact']) {
+  for (const id of ['version', 'privacy']) {
     if (!$(`#${id}-overlay`).hidden) {
       if (e.key === 'Escape') closeInfoOverlay(id);
       return;

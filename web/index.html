@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=f304036bf1">
+<link rel="stylesheet" href="style.css?v=dfbc8b0e75">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
   </div>
   <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
        data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
-  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">34</span></h1>
+  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">35</span></h1>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -176,7 +176,7 @@
       <button class="set-row set-act" id="set-howto"><span class="set-lbl" data-i18n="howto">遊び方</span><span class="set-r"><span class="chev">›</span></span></button>
       <button class="set-row set-act" id="set-version"><span class="set-lbl" data-i18n="version">バージョン履歴</span><span class="set-r">v1.0.0 <span class="chev">›</span></span></button>
       <button class="set-row set-act" id="set-privacy"><span class="set-lbl" data-i18n="privacy">プライバシーポリシー</span><span class="set-r"><span class="chev">›</span></span></button>
-      <button class="set-row set-act" id="set-contact"><span class="set-lbl" data-i18n="contact">お問い合わせ</span><span class="set-r"><span class="chev">›</span></span></button>
+      <button class="set-row set-act" id="set-contact"><span class="set-lbl" data-i18n="contact">お問い合わせ</span><span class="set-r"><span class="ext">↗</span></span></button>
       <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="review">レビューする</span><span class="set-r"><span class="ext">↗</span></span></button>
 
       <div class="set-sec" data-i18n="secPurchase">購入</div>
@@ -395,24 +395,10 @@
   </div>
 </div>
 
-<!-- お問い合わせ -->
-<div id="contact-overlay" class="info-overlay" hidden>
-  <div class="info-head">
-    <span class="info-title" data-i18n="contact">お問い合わせ</span>
-    <button id="btn-contact-close" class="ghost info-close" data-i18n-aria="close" aria-label="とじる">✕</button>
-  </div>
-  <div class="info-body info-body-center">
-    <p class="contact-desc" data-i18n="contactDesc">バグの報告やご意見・ご要望はメールでお送りください。</p>
-    <a id="contact-mail" class="contact-btn" href="mailto:kajisaden@gmail.com?subject=Tsugai%20フィードバック">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
-      <span data-i18n="contactSend">メールを送る</span>
-    </a>
-    <p class="contact-note">kajisaden@gmail.com</p>
-  </div>
-</div>
+<!-- お問い合わせ: Googleフォームへ外部リンク(set-contactのclickで直接遷移) -->
 
 <script src="pool.js?v=b15ee5deb3"></script>
 <script src="strings.js?v=7f659f02e2"></script>
-<script src="app.js?v=6e118174ff"></script>
+<script src="app.js?v=06a24e66d7"></script>
 </body>
 </html>

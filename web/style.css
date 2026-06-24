@@ -1337,22 +1337,3 @@ button.set-row:active { transform: none; }
 }
 .pp-ul li::before { content: "·"; position: absolute; left: 4px; color: var(--gold); font-weight: 700; }
 
-/* お問い合わせ */
-.contact-desc {
-  font-size: 14px; line-height: 1.8; color: var(--text-dim);
-  text-align: center; margin-bottom: 28px;
-}
-.contact-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 14px 32px; border-radius: 12px;
-  border: 1px solid rgba(232,217,176,0.25);
-  background: transparent; color: var(--gold);
-  font-size: 14px; letter-spacing: 0.05em;
-  text-decoration: none; cursor: pointer;
-}
-.contact-btn:active { background: rgba(232,217,176,0.08); }
-:root[data-theme="light"] .contact-btn { border-color: rgba(168,128,31,0.3); }
-:root[data-theme="light"] .contact-btn:active { background: rgba(168,128,31,0.08); }
-.contact-note {
-  font-size: 11px; color: var(--text-dim); margin-top: 16px; line-height: 1.6;
-}
