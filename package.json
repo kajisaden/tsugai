@@ -1,0 +1,29 @@
+{
+  "name": "tsugai",
+  "version": "1.0.0",
+  "description": "ふたつの部屋、ひとつの操作。詰将棋を目標体験とするターン制グリッドパズル。 設計の全体像は [docs/SPEC.md](docs/SPEC.md)、作業の現在地は [docs/HANDOVER.md](docs/HANDOVER.md)。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kajisaden/tsugai.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kajisaden/tsugai/issues"
+  },
+  "homepage": "https://github.com/kajisaden/tsugai#readme",
+  "dependencies": {
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/haptics": "^8.0.2"
+  }
+}

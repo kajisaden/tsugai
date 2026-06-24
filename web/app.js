@@ -338,12 +338,18 @@ function step(p, d, wallSet, w, h) {
 // .piece には移動の transition が乗るので、scale は子の .ball にだけ重ねる(競合しない)。
 const AXIS_H = (d) => d === 2 || d === 3; // 横移動(左/右)なら true
 
-// 触覚: 設定ONかつモーション許可時のみ。引数は ms(単発tick)または [待ち,振動,...] のパターン配列。
-// ※iOS Safari/WKWebView は Vibration API 非対応で無反応(Androidのみ効く)。
-// ネイティブ化(Capacitor)時に @capacitor/haptics へ差し替える前提のフック。[[tsugai-distribution-strategy]]
-function haptic(pattern) {
+// 触覚: Capacitor Haptics(iOS/Android ネイティブ)優先、Web Vibration API フォールバック。
+// style は 'light'(移動) / 'medium'(壁当て) / 'heavy'(反則・クリア)。
+// Capacitor 未ロード(PWA/ブラウザ)では navigator.vibrate にフォールバック(iOS非対応=無音)。
+const capHaptics = window.Capacitor?.Plugins?.Haptics;
+function haptic(style) {
   if (REDUCED || !hapticsOn) return;
-  try { navigator.vibrate && navigator.vibrate(pattern); } catch (e) {}
+  if (capHaptics) {
+    try { capHaptics.impact({ style: style || 'medium' }); } catch (e) {}
+  } else {
+    const ms = style === 'light' ? 7 : style === 'heavy' ? 20 : 14;
+    try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {}
+  }
 }
 
 // ---- 効果音(Web Audio 合成。音源ファイル不要)。静かな高級感に合わせ低音量・短い減衰 ----
@@ -625,8 +631,8 @@ async function doMove(d) {
     }
   });
   // 触覚＋効果音: ぶつかれば firm/「コッ」、きれいに動けば light/「トッ」。一手につき一度(両部屋で二度鳴らさない)。
-  if (anyBumped) { haptic(14); playBump(); }
-  else if (anyMoved) { haptic(7); playMove(); }
+  if (anyBumped) { haptic('medium'); playBump(); }
+  else if (anyMoved) { haptic('light'); playMove(); }
 
   if (!anyMoved) {
     // 全員スキップ=無意味手。状態も手数も変えず、壁当てbumpだけ見せる(SPEC.md 3-1)
@@ -664,7 +670,7 @@ async function doMove(d) {
   // 同時でないのにゴールへ入った=反則。行って見せてから → 初形へ戻す
   if (anyGoal && !allGoal) {
     playFoul(); // C: やさしい否定音
-    haptic([0, 14, 50, 22]); // 反則の手触り: 短→長の二度打ち(「あっ」)。否定音に合わせ控えめ。iOS非対応/REDUCED/設定OFFは無音
+    haptic('heavy'); // 反則の手触り
     if (!REDUCED) G.rooms.forEach((rm) => { // C: 盤に一拍の赤み
       rm.board.classList.remove('foul'); void rm.board.offsetWidth; rm.board.classList.add('foul');
       clearTimeout(rm.board._foulT); rm.board._foulT = setTimeout(() => rm.board.classList.remove('foul'), 560);
@@ -719,7 +725,7 @@ async function checkClear() {
     G.rooms.forEach((rm) => rm.goal.classList.add('filled')); // 光が満ちる
     $('#boards').classList.add(best ? 'clear-best' : 'clear-win', 'bouncing');
     playClear(best); // クリアの効果音(最短はきらめきを追加)。音はモーション無効でも鳴らす
-    haptic(best ? [0, 12, 50, 14, 50, 20] : [0, 12, 55, 16]); // クリアの祝福(最短は三つ打ち)。触覚はチャイムと別軸でREDUCED/設定OFF時は無音
+    haptic('heavy'); // クリアの祝福
     if (REDUCED) { goToGap(); return; } // モーション無効: 演出を飛ばして A画面へ
     // A: つがいが同時に座る瞬間の一発演出(チャイムと同期)。両部屋のボールが祝福発光し、ゴールが一拍明るむ。
     // 既存のメダリオン/バウンスを壊さないよう、ジオメトリ非干渉(opacity/filter)だけで重ねる。
