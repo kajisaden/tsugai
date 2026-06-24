@@ -235,6 +235,8 @@ button:active { transform: translateY(1px); }
   border-color: rgba(232, 217, 176, 0.35);
 }
 .level-tile.cleared .lv-no { color: var(--gold); }
+.level-tile.boss { border-color: rgba(232, 176, 80, 0.5); }
+.level-tile.boss .lv-no { font-weight: 700; }
 /* クリア印 = A画面のつがいエンブレム(縮小)。最短=金 / クリア=白(銀)。
    220x176座標の本物の意匠を transform: scale で縮小し、発光/影も比率を保つ。
    既定=ダーク(発光2球)。ライトは下で碁石+皿+後光に上書き */

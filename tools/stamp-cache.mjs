@@ -12,7 +12,7 @@ import { dirname, join } from 'node:path';
 const WEB = join(dirname(fileURLToPath(import.meta.url)), '..', 'web');
 const HTML = join(WEB, 'index.html');
 // index.html が src/href で読むローカルアセット(順不同)
-const ASSETS = ['style.css', 'pool.js', 'strings.js', 'app.js'];
+const ASSETS = ['style.css', 'pool.js', 'normal-levels.js', 'strings.js', 'app.js'];
 
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const hashOf = (file) =>

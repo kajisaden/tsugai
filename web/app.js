@@ -57,32 +57,20 @@ const GOAL_SUCK_HOLD_MS = REDUCED ? 0 : 200;
 // 章境界での手数リセットは「新章の自然な再上昇」になり、見た目(手数)と難度の逆行が消える。
 // 視認性の限界は 5x5。6x6 は本体から外す。導入(第一章の頭)は ep0 の 1〜2手のみ(ただ歩く体験)。
 const ep = (p) => p.analysis.episodes;
-const sz = (p) => p.size.w;
-const mv = (p) => p.solution.minMoves;
-const SMALL = (p) => p.size.w <= 5; // 6x6廃止(視認性の限界は5x5)
-// 章名は i18n(Chapter {n} / 第{n}章)。難度区分は気づき(ep)で、章番号≒気づき数。
-const CHAPTERS = [
-  { id: 'ch1', count: 20, pick: (p) => SMALL(p) && ((ep(p) === 0 && mv(p) <= 2) || ep(p) === 1) },
-  { id: 'ch2', count: 20, pick: (p) => SMALL(p) && ep(p) === 2 },
-  { id: 'ch3', count: 20, pick: (p) => SMALL(p) && ep(p) === 3 },
-  { id: 'ch4', count: 20, pick: (p) => SMALL(p) && ep(p) === 4 },
-  { id: 'ch5', count: 20, pick: (p) => SMALL(p) && ep(p) === 5 },
-  // ep6以上は MVP 除外(在庫僅少。プールには残し、将来のアップデート章に回す)
-];
-
-// 章内は サイズ→手数 の昇順(案X内側)。全域から等間隔に count 問とり、章内に勾配をつくる。
-function sliceChapter(ch) {
-  const all = POOL.puzzles
-    .filter(ch.pick)
-    .sort((a, b) => sz(a) - sz(b) || mv(a) - mv(b) || a.id - b.id);
-  if (all.length <= ch.count) return all;
-  const out = [];
-  for (let i = 0; i < ch.count; i++) {
-    out.push(all[Math.floor((i * (all.length - 1)) / (ch.count - 1))]);
-  }
-  return out;
+// 通常モード: 200問フラットリスト（select-normal.mjs が生成した ID 配列から構築）
+const NORMAL_IDS = window.NORMAL_LEVEL_IDS;
+const NORMAL_BOSS = window.NORMAL_BOSS_FLAGS;
+const poolById = new Map(POOL.puzzles.map(p => [p.id, p]));
+const NORMAL_LEVELS = NORMAL_IDS.map(id => poolById.get(id));
+const CHAPTER_SIZE = 50;
+const CHAPTERS = Array.from({ length: Math.ceil(NORMAL_LEVELS.length / CHAPTER_SIZE) }, (_, i) => ({
+  id: `ch${i + 1}`,
+  from: i * CHAPTER_SIZE,
+  to: Math.min((i + 1) * CHAPTER_SIZE, NORMAL_LEVELS.length),
+}));
+function chapterLevels(ch) {
+  return NORMAL_LEVELS.slice(ch.from, ch.to);
 }
-const chapterLevels = new Map(CHAPTERS.map((c) => [c.id, sliceChapter(c)]));
 
 // ---- クリア記録 ----
 const STORE_KEY = 'nikenzume.cleared.v1';
@@ -200,7 +188,7 @@ function showChapters() {
   const list = $('#chapter-list');
   list.replaceChildren();
   CHAPTERS.forEach((ch, i) => {
-    const levels = chapterLevels.get(ch.id);
+    const levels = chapterLevels(ch);
     const done = levels.filter((p) => cleared.has(p.id)).length;
     const btn = document.createElement('button');
     btn.className = 'chapter-card';
@@ -217,12 +205,13 @@ function showLevels(ch) {
   $('#levels-title').textContent = t('chapter', { n: CHAPTERS.indexOf(ch) + 1 });
   const grid = $('#level-grid');
   grid.replaceChildren();
-  chapterLevels.get(ch.id).forEach((p, i) => {
+  chapterLevels(ch).forEach((p, i) => {
+    const globalIdx = ch.from + i;
+    const isBoss = NORMAL_BOSS[globalIdx];
     const btn = document.createElement('button');
     const isCleared = cleared.has(p.id);
     const isBest = bestCleared.has(p.id);
-    btn.className = 'level-tile' + (isCleared ? ' cleared' : '') + (isBest ? ' best' : '');
-    // クリア印 = A画面のつがいエンブレム。最短=金 / クリア(非最短)=白 / 未クリア=手数
+    btn.className = 'level-tile' + (isCleared ? ' cleared' : '') + (isBest ? ' best' : '') + (isBoss ? ' boss' : '');
     const emblem = (state) =>
       `<span class="lv-emblem ${state}"><span class="le-inner">` +
       `<span class="le-halo"></span><span class="le-disc"></span>` +
@@ -232,7 +221,7 @@ function showLevels(ch) {
       : isCleared
         ? emblem('win')
         : t('levelMoves', { n: p.solution.minMoves });
-    btn.innerHTML = `<span class="lv-no">${i + 1}</span>` +
+    btn.innerHTML = `<span class="lv-no">${globalIdx + 1}</span>` +
       `<span class="lv-moves">${mark}</span>`;
     btn.addEventListener('click', () => startPuzzle(ch, i));
     grid.append(btn);
@@ -315,7 +304,7 @@ function startPuzzle(ch, index, entrance = true) {
   $('#controls').hidden = false;
   $('#hint-keys').hidden = false;
   $('#move-count').hidden = false;
-  const puz = chapterLevels.get(ch.id)[index];
+  const puz = chapterLevels(ch)[index];
   if (puz.id !== hintPuzzleId) { // 違う問題に移ったら光ヒントはオフから(同じ問題の再開では保持)
     hintSettings.light = false;
     hintPuzzleId = puz.id;
@@ -338,7 +327,8 @@ function startPuzzle(ch, index, entrance = true) {
     busy: false,
     cleared: false,
   };
-  $('#puzzle-label').textContent = t('puzzlePar', { n: puz.solution.minMoves });
+  const globalNo = curChapter.from + index + 1;
+  $('#puzzle-label').textContent = `#${globalNo}　${t('puzzlePar', { n: puz.solution.minMoves })}`;
   updateInfo();
   updateGoals();
   updateHintUI(); // トグル状態と「次の一手」ボタンを反映
@@ -1081,7 +1071,7 @@ function goToGap() {
   const em = $('#gap-emblem');
   em.classList.remove('best', 'win');
   em.classList.add(best ? 'best' : 'win');
-  const levels = chapterLevels.get(curChapter.id);
+  const levels = chapterLevels(curChapter);
   const done = levels.filter((p) => cleared.has(p.id)).length;
   $('#gap-progress').innerHTML =
     `${t('chapter', { n: CHAPTERS.indexOf(curChapter) + 1 })}　<b>${done}</b> / ${levels.length}`;
@@ -1096,7 +1086,7 @@ function goToGap() {
 
 $('#btn-next').addEventListener('click', () => {
   $('#overlay-gap').hidden = true;
-  const levels = chapterLevels.get(curChapter.id);
+  const levels = chapterLevels(curChapter);
   if (curIndex + 1 < levels.length) startPuzzle(curChapter, curIndex + 1);
   else showLevels(curChapter); // 章の最後なら一覧へ
 });
@@ -1141,7 +1131,8 @@ function relocalize(newLocale) {
   if (!$('#view-chapters').hidden) showChapters();
   else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
   if (!$('#view-play').hidden && G) {
-    $('#puzzle-label').textContent = t('puzzlePar', { n: G.puz.solution.minMoves });
+    const globalNo = curChapter.from + curIndex + 1;
+    $('#puzzle-label').textContent = `#${globalNo}　${t('puzzlePar', { n: G.puz.solution.minMoves })}`;
     updateInfo();
   }
   updateSettingsUI();

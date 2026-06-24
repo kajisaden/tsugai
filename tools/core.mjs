@@ -186,18 +186,18 @@ export function solve(puz) {
   }
 
   // 最短解の中で最小になる「ズレ調整エピソード数」(episodes)。
-  // エピソード = 連続する壁当て手のかたまり。プレイヤーが要する「気づき」の近似単位。
-  // 多解問題では最短解が複数あるので、最も楽な経路(エピソード最小)で測る(難度は最易解で決まる)。
-  // best を「直前手がブロックだったか」で2分し、非ブロック→ブロックの遷移で +1 する DP。
-  // 距離は上の BFS で確定済みなので、queue を BFS 順に再走するだけでよい。
-  const epN = new Float64Array(nStates).fill(Infinity); // 直前が非ブロック での最小ラン数
-  const epB = new Float64Array(nStates).fill(Infinity); // 直前がブロック での最小ラン数
-  epN[s0] = 0; // 初形=直前手なし→非ブロック扱い・ラン0
+  // エピソード = 壁当ての「部屋×方向」パターンが変わるたびに+1。
+  // 同じ部屋で同じ方向に連続して当たるのは1ep、方向や部屋が変われば別ep。
+  // DP状態: 各盤面状態 × 直前の壁当てsignature(NSIG通り)。
+  // sig=0: 壁当てなし(初期 or 直前が非ブロック)。
+  // sig=1+d*bmSize+(bitmask-1): 方向d で bitmask の部屋がブロックされた。
+  const bmSize = (1 << R) - 1; // R=2 → 3
+  const NSIG = 1 + 4 * bmSize;  // R=2 → 13
+  const epArr = new Float64Array(nStates * NSIG).fill(Infinity);
+  epArr[s0 * NSIG] = 0; // 初形: sig=0(壁当てなし), ep=0
   for (let k = 0; k < queue.length; k++) {
     const cur = queue[k];
     if (cur === goalId) continue;
-    const cN = epN[cur];
-    const cB = epB[cur];
     let c = cur;
     for (let i = 0; i < R; i++) {
       pos[i] = c % cells;
@@ -212,28 +212,37 @@ export function solve(puz) {
         if (np === goals[i]) anyGoal = true;
         else allGoal = false;
       }
-      if (anyGoal && !allGoal) continue; // 反則手(本 BFS と同じ枝刈り)
+      if (anyGoal && !allGoal) continue;
       let ns = 0;
       let moved = false;
-      let blocked = false;
+      let bitmask = 0;
       for (let i = R - 1; i >= 0; i--) {
         const np = npBuf[i];
-        if (np === pos[i]) blocked = true;
+        if (np === pos[i]) bitmask |= (1 << i);
         else moved = true;
         ns = ns * cells + np;
       }
-      if (!moved) continue; // 無意味手
-      if (dist[ns] !== dist[cur] + 1) continue; // 最短経路の辺だけ辿る
-      if (blocked) {
-        const v = Math.min(cN + 1, cB); // 非ブロック→ブロックで新ラン開始
-        if (v < epB[ns]) epB[ns] = v;
-      } else {
-        const v = Math.min(cN, cB);
-        if (v < epN[ns]) epN[ns] = v;
+      if (!moved) continue;
+      if (dist[ns] !== dist[cur] + 1) continue;
+      const newSig = bitmask === 0 ? 0 : 1 + d * bmSize + (bitmask - 1);
+      const curBase = cur * NSIG;
+      const nsBase = ns * NSIG;
+      for (let ps = 0; ps < NSIG; ps++) {
+        const prev = epArr[curBase + ps];
+        if (prev === Infinity) continue;
+        if (newSig === 0) {
+          if (prev < epArr[nsBase]) epArr[nsBase] = prev;
+        } else if (newSig === ps) {
+          if (prev < epArr[nsBase + newSig]) epArr[nsBase + newSig] = prev;
+        } else {
+          const v = prev + 1;
+          if (v < epArr[nsBase + newSig]) epArr[nsBase + newSig] = v;
+        }
       }
     }
   }
-  const episodes = Math.min(epN[goalId], epB[goalId]);
+  let episodes = Infinity;
+  for (let s = 0; s < NSIG; s++) episodes = Math.min(episodes, epArr[goalId * NSIG + s]);
 
   // 部屋別の独立最短手数(同期解があれば必ず解ける)
   const soloMin = rooms.map((r, i) => {

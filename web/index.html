@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=dfbc8b0e75">
+<link rel="stylesheet" href="style.css?v=ef66152340">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
   </div>
   <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
        data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
-  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">37</span></h1>
+  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">40</span></h1>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -397,8 +397,9 @@
 
 <!-- お問い合わせ: Googleフォームへ外部リンク(set-contactのclickで直接遷移) -->
 
-<script src="pool.js?v=b15ee5deb3"></script>
+<script src="pool.js?v=248cb71e15"></script>
+<script src="normal-levels.js?v=01adabee8e"></script>
 <script src="strings.js?v=7f659f02e2"></script>
-<script src="app.js?v=e6b78b3a5e"></script>
+<script src="app.js?v=899a632a3c"></script>
 </body>
 </html>
