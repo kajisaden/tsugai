@@ -1129,6 +1129,13 @@ function openHowto() { closeSettings(); $('#howto-overlay').hidden = false; }
 function closeHowto() { $('#howto-overlay').hidden = true; }
 $('#set-howto').addEventListener('click', openHowto);
 $('#btn-howto-close').addEventListener('click', closeHowto);
+// 情報オーバーレイ(バージョン/PP/お問い合わせ)
+function openInfoOverlay(id) { closeSettings(); $(`#${id}-overlay`).hidden = false; }
+function closeInfoOverlay(id) { $(`#${id}-overlay`).hidden = true; }
+['version', 'privacy', 'contact'].forEach(id => {
+  $(`#set-${id}`).addEventListener('click', () => openInfoOverlay(id));
+  $(`#btn-${id}-close`).addEventListener('click', () => closeInfoOverlay(id));
+});
 $('#sw-se').addEventListener('click', () => { seOn = !seOn; localStorage.setItem(SE_KEY, seOn ? '1' : '0'); updateSettingsUI(); });
 $('#sw-haptics').addEventListener('click', () => { hapticsOn = !hapticsOn; localStorage.setItem(HAPTICS_KEY, hapticsOn ? '1' : '0'); updateSettingsUI(); });
 // 未実装項目(data-soon)タップ → 「準備中」
@@ -1168,6 +1175,12 @@ document.addEventListener('keydown', (e) => {
   if (!$('#howto-overlay').hidden) {
     if (e.key === 'Escape') closeHowto();
     return;
+  }
+  for (const id of ['version', 'privacy', 'contact']) {
+    if (!$(`#${id}-overlay`).hidden) {
+      if (e.key === 'Escape') closeInfoOverlay(id);
+      return;
+    }
   }
   if ($('#settings-drawer').classList.contains('open')) {
     if (e.key === 'Escape') closeSettings();

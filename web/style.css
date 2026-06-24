@@ -1270,3 +1270,89 @@ button.set-row:active { transform: none; }
   background: var(--bump-hot);
   box-shadow: 0 0 6px 2px rgba(168,128,31,0.4);
 }
+
+/* ---- 情報オーバーレイ共通(バージョン/PP/お問い合わせ) ---- */
+.info-overlay {
+  position: fixed; inset: 0; z-index: 40;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.info-overlay[hidden] { display: none; }
+:root[data-theme="light"] .info-overlay { background: #f3efe6; }
+.info-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 12px;
+  flex-shrink: 0;
+}
+.info-title {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 19px; letter-spacing: 0.25em; text-indent: 0.25em; color: var(--gold);
+}
+.info-close { font-size: 22px; line-height: 1; color: var(--text-dim); padding: 4px 6px; }
+.info-body {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  max-width: 480px; margin: 0 auto; width: 100%;
+  padding: 0 24px calc(32px + env(safe-area-inset-bottom, 0px));
+}
+.info-body-center {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center;
+}
+
+/* バージョン履歴 */
+.ver-entry { margin-bottom: 28px; }
+.ver-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.ver-num { font-size: 17px; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
+.ver-date { font-size: 11px; color: var(--text-dim); }
+.ver-tag {
+  font-size: 9px; color: var(--gold);
+  border: 1px solid rgba(232,217,176,0.3); border-radius: 4px;
+  padding: 1px 6px; letter-spacing: 0.05em;
+}
+:root[data-theme="light"] .ver-tag { border-color: rgba(168,128,31,0.35); }
+.ver-list { list-style: none; }
+.ver-list li {
+  padding: 4px 0 4px 16px; position: relative;
+  font-size: 13px; color: var(--text-dim); line-height: 1.7;
+}
+.ver-list li::before {
+  content: ""; position: absolute; left: 4px; top: 12px;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: rgba(232,217,176,0.4);
+}
+:root[data-theme="light"] .ver-list li::before { background: rgba(168,128,31,0.4); }
+
+/* プライバシーポリシー */
+.pp-date { font-size: 11px; color: var(--text-dim); margin-bottom: 24px; }
+.pp-sec { margin-bottom: 24px; }
+.pp-h { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+.pp-p { font-size: 13px; line-height: 1.8; color: var(--text-dim); }
+.pp-link { margin-top: 6px; }
+.pp-link a { color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
+.pp-ul { list-style: none; margin: 8px 0; }
+.pp-ul li {
+  padding: 4px 0 4px 16px; position: relative;
+  font-size: 13px; color: var(--text-dim); line-height: 1.6;
+}
+.pp-ul li::before { content: "·"; position: absolute; left: 4px; color: var(--gold); font-weight: 700; }
+
+/* お問い合わせ */
+.contact-desc {
+  font-size: 14px; line-height: 1.8; color: var(--text-dim);
+  text-align: center; margin-bottom: 28px;
+}
+.contact-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px; border-radius: 12px;
+  border: 1px solid rgba(232,217,176,0.25);
+  background: transparent; color: var(--gold);
+  font-size: 14px; letter-spacing: 0.05em;
+  text-decoration: none; cursor: pointer;
+}
+.contact-btn:active { background: rgba(232,217,176,0.08); }
+:root[data-theme="light"] .contact-btn { border-color: rgba(168,128,31,0.3); }
+:root[data-theme="light"] .contact-btn:active { background: rgba(168,128,31,0.08); }
+.contact-note {
+  font-size: 11px; color: var(--text-dim); margin-top: 16px; line-height: 1.6;
+}

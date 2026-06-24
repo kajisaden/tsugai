@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=d97637d5e3">
+<link rel="stylesheet" href="style.css?v=f304036bf1">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
   </div>
   <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
        data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
-  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">33</span></h1>
+  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">34</span></h1>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -174,9 +174,9 @@
 
       <div class="set-sec" data-i18n="secInfo">情報</div>
       <button class="set-row set-act" id="set-howto"><span class="set-lbl" data-i18n="howto">遊び方</span><span class="set-r"><span class="chev">›</span></span></button>
-      <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="about">このアプリについて</span><span class="set-r">1.0 <span class="chev">›</span></span></button>
-      <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="privacy">プライバシーポリシー</span><span class="set-r"><span class="ext">↗</span></span></button>
-      <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="contact">お問い合わせ</span><span class="set-r"><span class="ext">↗</span></span></button>
+      <button class="set-row set-act" id="set-version"><span class="set-lbl" data-i18n="version">バージョン履歴</span><span class="set-r">v1.0.0 <span class="chev">›</span></span></button>
+      <button class="set-row set-act" id="set-privacy"><span class="set-lbl" data-i18n="privacy">プライバシーポリシー</span><span class="set-r"><span class="chev">›</span></span></button>
+      <button class="set-row set-act" id="set-contact"><span class="set-lbl" data-i18n="contact">お問い合わせ</span><span class="set-r"><span class="chev">›</span></span></button>
       <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="review">レビューする</span><span class="set-r"><span class="ext">↗</span></span></button>
 
       <div class="set-sec" data-i18n="secPurchase">購入</div>
@@ -332,8 +332,87 @@
   </div>
 </div>
 
+<!-- バージョン履歴 -->
+<div id="version-overlay" class="info-overlay" hidden>
+  <div class="info-head">
+    <span class="info-title" data-i18n="version">バージョン履歴</span>
+    <button id="btn-version-close" class="ghost info-close" data-i18n-aria="close" aria-label="とじる">✕</button>
+  </div>
+  <div class="info-body">
+    <div class="ver-entry">
+      <div class="ver-head">
+        <span class="ver-num">1.0.0</span>
+        <span class="ver-date">2026年6月</span>
+        <span class="ver-tag" data-i18n="verCurrent">現在</span>
+      </div>
+      <ul class="ver-list">
+        <li data-i18n="ver100a">初回リリース</li>
+        <li data-i18n="ver100b">第1章〜第3章（全30問）</li>
+        <li data-i18n="ver100c">光ヒント・次の手ヒント・答え再生</li>
+        <li data-i18n="ver100d">ダーク/ライトテーマ</li>
+        <li data-i18n="ver100e">日本語・英語対応</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- プライバシーポリシー -->
+<div id="privacy-overlay" class="info-overlay" hidden>
+  <div class="info-head">
+    <span class="info-title" data-i18n="privacy">プライバシーポリシー</span>
+    <button id="btn-privacy-close" class="ghost info-close" data-i18n-aria="close" aria-label="とじる">✕</button>
+  </div>
+  <div class="info-body">
+    <div class="pp-date" data-i18n="ppDate">最終更新: 2026年6月</div>
+    <div class="pp-sec">
+      <h2 class="pp-h" data-i18n="ppDataH">収集するデータ</h2>
+      <p class="pp-p" data-i18n="ppDataP">Tsugai はお名前・メールアドレス等の個人情報を収集しません。ゲームの進捗データはすべて端末内に保存されます。</p>
+    </div>
+    <div class="pp-sec">
+      <h2 class="pp-h" data-i18n="ppLocalH">端末内のデータ</h2>
+      <p class="pp-p" data-i18n="ppLocalP">以下のデータを端末内（localStorage）に保存します。</p>
+      <ul class="pp-ul">
+        <li data-i18n="ppLocal1">クリア状況・最短手数の記録</li>
+        <li data-i18n="ppLocal2">表示テーマ（ダーク/ライト）の設定</li>
+        <li data-i18n="ppLocal3">効果音・触覚のON/OFF設定</li>
+        <li data-i18n="ppLocal4">言語設定</li>
+      </ul>
+      <p class="pp-p" data-i18n="ppLocalNote">これらはサーバーには送信されません。設定画面の「進捗をリセット」で全消去できます。</p>
+    </div>
+    <div class="pp-sec">
+      <h2 class="pp-h" data-i18n="ppAdH">広告</h2>
+      <p class="pp-p" data-i18n="ppAdP">本アプリでは Google AdMob を利用して広告を表示します。AdMob は広告配信のために広告ID・デバイス情報を収集することがあります。詳細は Google のプライバシーポリシーをご確認ください。</p>
+      <p class="pp-p pp-link"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener" data-i18n="ppAdLink">Google プライバシーポリシー ↗</a></p>
+    </div>
+    <div class="pp-sec">
+      <h2 class="pp-h" data-i18n="ppAnalyticsH">アナリティクス</h2>
+      <p class="pp-p" data-i18n="ppAnalyticsP">アプリの改善のため、Firebase Analytics を利用して利用状況を匿名で収集します。個人を特定する情報は含まれません。</p>
+    </div>
+    <div class="pp-sec">
+      <h2 class="pp-h" data-i18n="ppContactH">お問い合わせ</h2>
+      <p class="pp-p" data-i18n="ppContactP">ご質問がある場合は、設定画面の「お問い合わせ」からご連絡ください。</p>
+    </div>
+  </div>
+</div>
+
+<!-- お問い合わせ -->
+<div id="contact-overlay" class="info-overlay" hidden>
+  <div class="info-head">
+    <span class="info-title" data-i18n="contact">お問い合わせ</span>
+    <button id="btn-contact-close" class="ghost info-close" data-i18n-aria="close" aria-label="とじる">✕</button>
+  </div>
+  <div class="info-body info-body-center">
+    <p class="contact-desc" data-i18n="contactDesc">バグの報告やご意見・ご要望はメールでお送りください。</p>
+    <a id="contact-mail" class="contact-btn" href="mailto:kajisaden@gmail.com?subject=Tsugai%20フィードバック">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+      <span data-i18n="contactSend">メールを送る</span>
+    </a>
+    <p class="contact-note">kajisaden@gmail.com</p>
+  </div>
+</div>
+
 <script src="pool.js?v=b15ee5deb3"></script>
-<script src="strings.js?v=46919bfa12"></script>
-<script src="app.js?v=fc1eac0485"></script>
+<script src="strings.js?v=7f659f02e2"></script>
+<script src="app.js?v=6e118174ff"></script>
 </body>
 </html>
