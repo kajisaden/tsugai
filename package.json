@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/kajisaden/tsugai#readme",
   "dependencies": {
+    "@capacitor-community/admob": "^8.0.0",
     "@capacitor/cli": "^8.4.1",
     "@capacitor/core": "^8.4.1",
     "@capacitor/haptics": "^8.0.2"

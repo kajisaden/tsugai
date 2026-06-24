@@ -124,8 +124,42 @@ function rolloverHints() {
     saveHintCredits();
   }
 }
-// リワード広告の差し込み口。配信形態(Capacitor等)が決まるまでは即時付与のプレースホルダ。
-function watchRewardAd(then) { /* TODO: リワード広告SDK。今は即時実行 */ then(); }
+// ---- 広告(AdMob via Capacitor) ----
+// ネイティブ(Capacitor)なら @capacitor-community/admob を使う。PWA/ブラウザでは広告なし(即時実行)。
+// テスト用 adId は Google 公式テストID。本番リリース前に実IDへ差し替える。
+const AdMob = window.Capacitor?.Plugins?.AdMob;
+const AD_IDS = {
+  interstitial: 'ca-app-pub-3940256099942544/1033173712',  // テストID
+  reward:       'ca-app-pub-3940256099942544/5224354917',  // テストID
+};
+let adReady = false;
+(async function initAdMob() {
+  if (!AdMob) return;
+  try {
+    await AdMob.initialize({ initializeForTesting: true });
+    adReady = true;
+    prepareInterstitial();
+  } catch (e) { /* PWA では無視 */ }
+})();
+async function prepareInterstitial() {
+  if (!adReady) return;
+  try { await AdMob.prepareInterstitial({ adId: AD_IDS.interstitial }); } catch (e) {}
+}
+async function showInterstitial() {
+  if (!adReady) return;
+  try { await AdMob.showInterstitial(); } catch (e) {}
+  prepareInterstitial();
+}
+function watchRewardAd(then) {
+  if (!adReady) { then(); return; }
+  (async () => {
+    try {
+      await AdMob.prepareRewardVideoAd({ adId: AD_IDS.reward });
+      const result = await AdMob.showRewardVideoAd();
+      if (result) then();
+    } catch (e) { then(); }
+  })();
+}
 // 残数を1消費して action。0なら広告(差し込み口)。
 function spendHint(kind, action) {
   rolloverHints();
@@ -1052,7 +1086,8 @@ function goToGap() {
   $('#gap-progress').innerHTML =
     `${t('chapter', { n: CHAPTERS.indexOf(curChapter) + 1 })}　<b>${done}</b> / ${levels.length}`;
   // 「もう一度」は常に表示(次の問題への下)。同じ問題をいつでもやり直せる
-  $('#overlay-gap').hidden = false; // SPEC.md 6章の広告差し込み口もここ
+  showInterstitial();
+  $('#overlay-gap').hidden = false;
   if (!REDUCED) { // ① つなぎ演出: 背景フェード＋カード立ち上がり＋2球が寄り集まる(.enter を付け直して毎回再生)
     const ov = $('#overlay-gap');
     ov.classList.remove('enter'); void ov.offsetWidth; ov.classList.add('enter');
