@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{var r=document.documentElement,g=localStorage.getItem.bind(localStorage);if(g('nikenzume.theme.v1')==='light')r.dataset.theme='light';r.dataset.board=g('nikenzume.board.v1')||(g('nikenzume.theme.v1')==='light'?'light':'dark');r.dataset.ball=g('nikenzume.ball.v1')||(g('nikenzume.theme.v1')==='light'?'light':'dark');}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=48261ba753">
+<link rel="stylesheet" href="style.css?v=ab4fc34640">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
   </div>
   <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
        data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
-  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">44</span></h1>
+  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">45</span></h1>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -429,6 +429,6 @@
 <script src="normal-levels.js?v=7366b4f2fb"></script>
 <script src="advanced-levels.js?v=40916070ee"></script>
 <script src="strings.js?v=48cde8a240"></script>
-<script src="app.js?v=09406bbd9a"></script>
+<script src="app.js?v=03541c3520"></script>
 </body>
 </html>

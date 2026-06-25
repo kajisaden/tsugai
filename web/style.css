@@ -500,7 +500,7 @@ button:active { transform: translateY(1px); }
 }
 /* ダークは黒皿が座になるので、輪の金グロー(にじみ)は出さず皿に集中させる(scale/縁は皿の下で不可視)。
    ライト(下の data-theme="light")は従来の goal-suck(金のにじみ)のまま=変更しない */
-:root:not([data-ball="light"]) .goal.sucking::before { animation-name: goal-suck-dark; }
+:root:not([data-board="light"]) .goal.sucking::before { animation-name: goal-suck-dark; }
 @keyframes goal-suck-dark {
   0%   { transform: scale(1);    border-color: var(--gold); }
   58%  { transform: scale(0.82); border-color: var(--gold); }
@@ -911,11 +911,11 @@ button:active { transform: translateY(1px); }
 :root[data-theme="light"] {
   --bg: #f3efe6;        /* 温かい紙 */
   --panel: #fbf8f1;
-  --line: rgba(43, 38, 32, 0.12);
   --text: #2b2620;      /* 墨 */
   --text-dim: #8a8276;
 }
 :root[data-board="light"] {
+  --line: rgba(43, 38, 32, 0.12);
   --gold: #a8801f;      /* 濃い琥珀(紙の上で読める) */
   --glow: rgba(168, 128, 31, 0.40); /* 光のにじみ→淡い琥珀の影に転用 */
   --bump-hot: #e7c25a; /* 壁当ての一瞬の強調(ライト: 紙の上で白飛びせず映える明るい琥珀) */
@@ -969,10 +969,10 @@ button:active { transform: translateY(1px); }
 :root[data-ball="light"] .ball::after { box-shadow: none; }
 :root[data-ball="light"] .ball-glow { inset: -22%; display: none; }
 
-:root[data-ball="light"] .goal::before { border-color: rgba(168, 128, 31, 0.5); }
-:root[data-ball="light"] .goal.on::before { border-color: rgba(168, 128, 31, 0.85); }
-:root[data-ball="light"] .goal::after { display: none; }
-:root[data-ball="light"] .goal.filled::before {
+:root[data-board="light"] .goal::before { border-color: rgba(168, 128, 31, 0.5); }
+:root[data-board="light"] .goal.on::before { border-color: rgba(168, 128, 31, 0.85); }
+:root[data-board="light"] .goal::after { display: none; }
+:root[data-board="light"] .goal.filled::before {
   background: radial-gradient(circle, rgba(168, 128, 31, 0.28) 0%, rgba(168, 128, 31, 0.06) 70%);
 }
 
@@ -984,16 +984,16 @@ button:active { transform: translateY(1px); }
   box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.10), 0 2px 5px rgba(40, 32, 16, 0.42);
 }
 /* ゴール円盤: 球(セルの約66%)より大きく(約90%)し、黒石の周りに金/銀の縁が出る */
-:root[data-ball="light"] #boards.clear-best .goal.filled::before,
-:root[data-ball="light"] #boards.clear-win .goal.filled::before {
+:root[data-board="light"] #boards.clear-best .goal.filled::before,
+:root[data-board="light"] #boards.clear-win .goal.filled::before {
   inset: 5%;
   border: none;
 }
-:root[data-ball="light"] #boards.clear-best .goal.filled::before {
+:root[data-board="light"] #boards.clear-best .goal.filled::before {
   background: radial-gradient(circle at 42% 38%, #f0dca0 0%, #d8b75f 55%, #b08a36 100%);
   box-shadow: 0 1px 3px rgba(80, 58, 18, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.5);
 }
-:root[data-ball="light"] #boards.clear-win .goal.filled::before {
+:root[data-board="light"] #boards.clear-win .goal.filled::before {
   background: radial-gradient(circle at 42% 38%, #e4e8ef 0%, #b9c0cc 55%, #8b93a1 100%);
   box-shadow: 0 1px 3px rgba(50, 58, 70, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.6);
 }

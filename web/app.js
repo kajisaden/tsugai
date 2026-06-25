@@ -808,7 +808,7 @@ async function checkClear() {
   // 点火: ボールが金(最短)/白(クリア)に発光して弾み、ゴールに光が満ちる。約1秒見せて A画面へ。
   // ダークは球が自発光するため、ゴール吸着(白い輪の伸縮 ~320ms)が収まってから点火し、吸着を潰さない。
   // ライト/モーション無効は球がマット or 演出なしで干渉しないので即時(従来どおり)。
-  const afterSuck = !REDUCED && ballSkin !== 'light';
+  const afterSuck = !REDUCED && boardSkin !== 'light';
   const ignite = () => {
     if (!G.cleared || !$('#overlay-gap').hidden) return; // 待ちの間に遷移済みなら何もしない
     G.rooms.forEach((rm) => rm.goal.classList.add('filled')); // 光が満ちる
