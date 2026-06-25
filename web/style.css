@@ -6,12 +6,14 @@
   --panel: #121218;
   --line: rgba(255, 255, 255, 0.06);
   --text: #d8d4ca;
-  /* カード外の薄字(戻る/操作系/ヒント文/章タイトル等)を地色の上で読みやすく。
-     カード上の薄字(.ch-meta/.lv-moves)もこの共通トークンで少し明るくなる */
   --text-dim: #9d9a8e;
   --gold: #e8d9b0;
   --glow: rgba(240, 220, 170, 0.55);
-  --bump-hot: #fffaf0;  /* 壁当ての一瞬の白熱(ダーク: 暖白) */
+  --bump-hot: #fffaf0;
+  /* 盤用トークン(デフォルト=ダーク盤)。盤・ゴール・ヒントグロー・壁当てが使う */
+  --b-gold: #e8d9b0;
+  --b-glow: rgba(240, 220, 170, 0.55);
+  --b-bump-hot: #fffaf0;
   --move-ms: 240ms;  /* キャラ移動(スライド)。半分の速さに(旧120ms)。app.js の MOVE_MS と一致 */
   --bump-ms: 200ms;  /* 壁当て */
   /* 盤の縦並びサイズ計算: 一辺 = (画面高 - 上下UI - 盤間余白) / 2(盤数)。
@@ -359,8 +361,8 @@ button:active { transform: translateY(1px); }
 .bump-glow {
   position: absolute;
   border-radius: 2px;
-  background: var(--gold);
-  box-shadow: 0 0 10px 2px var(--glow);
+  background: var(--b-gold);
+  box-shadow: 0 0 10px 2px var(--b-glow);
   opacity: 0;
   pointer-events: none;
 }
@@ -369,28 +371,28 @@ button:active { transform: translateY(1px); }
 .bump-ripple {
   position: absolute;
   border-radius: 50%;
-  border: 1.5px solid var(--glow);
+  border: 1.5px solid var(--b-glow);
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, -50%); /* 中心合わせ(WAAPIが scale を上乗せ) */
+  transform: translate(-50%, -50%);
 }
 .bump-glow.show { animation: bump-glow 750ms ease-out; }
 /* 壁当ての強調(1+2+3+4): 鋭い立ち上がり→一瞬の白熱(--bump-hot)→金へ落として残光。
    にじみ(box-shadow)を二層にし、外層は当たった壁の反対(開いた室内)側へ --bloom-x/y で寄せる方向ブルーム(2)。
    色は --gold/--glow/--bump-hot でテーマ自動追従。ピーク(10%≈75ms)は bumpPiece のめり込み頂点(≈80ms)に重なる */
 @keyframes bump-glow {
-  0%   { opacity: 0;    background: var(--bump-hot); box-shadow: 0 0 8px 2px var(--glow); }
-  10%  { opacity: 1;    background: var(--bump-hot); box-shadow: 0 0 18px 5px var(--glow), var(--bloom-x, 0px) var(--bloom-y, 0px) 36px 12px var(--glow); }
-  34%  { opacity: 0.92; background: var(--gold);     box-shadow: 0 0 14px 4px var(--glow), calc(var(--bloom-x, 0px) * 0.55) calc(var(--bloom-y, 0px) * 0.55) 26px 8px var(--glow); }
-  100% { opacity: 0;    background: var(--gold);     box-shadow: 0 0 10px 2px var(--glow); }
+  0%   { opacity: 0;    background: var(--b-bump-hot); box-shadow: 0 0 8px 2px var(--b-glow); }
+  10%  { opacity: 1;    background: var(--b-bump-hot); box-shadow: 0 0 18px 5px var(--b-glow), var(--bloom-x, 0px) var(--bloom-y, 0px) 36px 12px var(--b-glow); }
+  34%  { opacity: 0.92; background: var(--b-gold);     box-shadow: 0 0 14px 4px var(--b-glow), calc(var(--bloom-x, 0px) * 0.55) calc(var(--bloom-y, 0px) * 0.55) 26px 8px var(--b-glow); }
+  100% { opacity: 0;    background: var(--b-gold);     box-shadow: 0 0 10px 2px var(--b-glow); }
 }
 
 /* 壁ヒント: 解でぶつかる面に沿って静かに息づく(ヒント表示中ずっと) */
 .hint-glow {
   position: absolute;
   border-radius: 2px;
-  background: var(--gold);
-  box-shadow: 0 0 10px 2px var(--glow);
+  background: var(--b-gold);
+  box-shadow: 0 0 10px 2px var(--b-glow);
   pointer-events: none;
   animation: hint-glow-breathe 2.4s ease-in-out infinite;
 }
@@ -411,7 +413,7 @@ button:active { transform: translateY(1px); }
   position: absolute;
   left: 0;
   top: 0;
-  background: radial-gradient(closest-side, var(--glow) 0%, transparent 76%);
+  background: radial-gradient(closest-side, var(--b-glow) 0%, transparent 76%);
   opacity: 0;
   pointer-events: none;
 }
@@ -458,10 +460,10 @@ button:active { transform: translateY(1px); }
    色/光は --gold/--bump-hot/--glow でテーマ自動追従。点火/解除は JS(クリア手のみ) */
 .goal.sucking::before { animation: goal-suck 320ms ease-out; }
 @keyframes goal-suck {
-  0%   { transform: scale(1);    border-color: var(--gold);     box-shadow: 0 0 0 0 transparent; }
-  58%  { transform: scale(0.82); border-color: var(--bump-hot); box-shadow: 0 0 10px 2px var(--glow); } /* 締まる=吸い込み */
-  78%  { transform: scale(1.14); border-color: var(--bump-hot); box-shadow: 0 0 16px 5px var(--glow); } /* 据わる瞬間に弾ける */
-  100% { transform: scale(1);    border-color: var(--gold);     box-shadow: 0 0 8px 1px var(--glow); }
+  0%   { transform: scale(1);    border-color: var(--b-gold);     box-shadow: 0 0 0 0 transparent; }
+  58%  { transform: scale(0.82); border-color: var(--b-bump-hot); box-shadow: 0 0 10px 2px var(--b-glow); }
+  78%  { transform: scale(1.14); border-color: var(--b-bump-hot); box-shadow: 0 0 16px 5px var(--b-glow); }
+  100% { transform: scale(1);    border-color: var(--b-gold);     box-shadow: 0 0 8px 1px var(--b-glow); }
 }
 /* ゴール吸着の黒皿(ダーク): クリアの一手で、発光する球が収まる先に黒漆の皿がすっと現れて座になる。
    goal は piece より前に append=皿(::after)は球の下に敷かれる。皿が輪(::before)を覆うので、
@@ -493,8 +495,8 @@ button:active { transform: translateY(1px); }
          box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
   43%  { opacity: 1; transform: scale(1);    border-color: rgba(232, 217, 176, 0.30); /* 着座(球到達 ~240ms) */
          box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
-  66%  { opacity: 1; transform: scale(1.3);  border-color: var(--bump-hot); /* 発光+枠拡大バウンド(ゆっくり拡大) */
-         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5), 0 0 7px 1px var(--bump-hot), 0 0 16px 4px var(--glow); }
+  66%  { opacity: 1; transform: scale(1.3);  border-color: var(--b-bump-hot);
+         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5), 0 0 7px 1px var(--b-bump-hot), 0 0 16px 4px var(--b-glow); }
   100% { opacity: 0; transform: scale(0);    border-color: rgba(232, 217, 176, 0.30); /* 0まで縮小して消える */
          box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
 }
@@ -502,10 +504,10 @@ button:active { transform: translateY(1px); }
    ライト(下の data-theme="light")は従来の goal-suck(金のにじみ)のまま=変更しない */
 :root:not([data-board="light"]) .goal.sucking::before { animation-name: goal-suck-dark; }
 @keyframes goal-suck-dark {
-  0%   { transform: scale(1);    border-color: var(--gold); }
-  58%  { transform: scale(0.82); border-color: var(--gold); }
-  78%  { transform: scale(1.14); border-color: var(--gold); }
-  100% { transform: scale(1);    border-color: var(--gold); }
+  0%   { transform: scale(1);    border-color: var(--b-gold); }
+  58%  { transform: scale(0.82); border-color: var(--b-gold); }
+  78%  { transform: scale(1.14); border-color: var(--b-gold); }
+  100% { transform: scale(1);    border-color: var(--b-gold); }
 }
 
 /* キャラ: .piece はセルサイズのラッパー。移動は transform を 100〜140ms / ease-out */
@@ -909,16 +911,19 @@ button:active { transform: translateY(1px); }
    - クリア済み(非最短) = 白だと消えるので青灰(#8b94a3)で見分ける
    ============================================================ */
 :root[data-theme="light"] {
-  --bg: #f3efe6;        /* 温かい紙 */
+  --bg: #f3efe6;
   --panel: #fbf8f1;
-  --text: #2b2620;      /* 墨 */
+  --text: #2b2620;
   --text-dim: #8a8276;
+  --gold: #a8801f;
+  --glow: rgba(168, 128, 31, 0.40);
+  --bump-hot: #e7c25a;
 }
 :root[data-board="light"] {
   --line: rgba(43, 38, 32, 0.12);
-  --gold: #a8801f;      /* 濃い琥珀(紙の上で読める) */
-  --glow: rgba(168, 128, 31, 0.40); /* 光のにじみ→淡い琥珀の影に転用 */
-  --bump-hot: #e7c25a; /* 壁当ての一瞬の強調(ライト: 紙の上で白飛びせず映える明るい琥珀) */
+  --b-gold: #a8801f;
+  --b-glow: rgba(168, 128, 31, 0.40);
+  --b-bump-hot: #e7c25a;
 }
 :root[data-theme="light"] body {
   background: radial-gradient(120% 100% at 50% 0%, #fbf8f1 0%, var(--bg) 60%);
