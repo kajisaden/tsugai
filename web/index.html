@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{if(localStorage.getItem('nikenzume.theme.v1')==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=4aa966f115">
+<link rel="stylesheet" href="style.css?v=4aef7c2924">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
   </div>
   <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
        data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
-  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">42</span></h1>
+  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">43</span></h1>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -84,6 +84,16 @@
     <p id="hint-keys" data-i18n="controlsHint">矢印キー / スワイプで両方の部屋が動く</p>
   </section>
 </main>
+
+<!-- ログインボーナス: 7日サイクルカレンダー -->
+<div id="overlay-login" hidden>
+  <div class="login-card">
+    <p class="login-title" data-i18n="loginTitle">ログインボーナス</p>
+    <div class="login-days" id="login-days"></div>
+    <div class="login-reward" id="login-reward"></div>
+    <button id="btn-login-close" data-i18n="loginClaim">受け取る</button>
+  </div>
+</div>
 
 <!-- 次の一手: 盤の上に方向を静かに一瞬示す -->
 <div id="hint-arrow" hidden><span class="arrow-mark"></span><span class="arrow-sub"></span></div>
@@ -404,7 +414,7 @@
 <script src="pool.js?v=248cb71e15"></script>
 <script src="normal-levels.js?v=7366b4f2fb"></script>
 <script src="advanced-levels.js?v=40916070ee"></script>
-<script src="strings.js?v=358ea853f0"></script>
-<script src="app.js?v=7ce3f76b7c"></script>
+<script src="strings.js?v=2352af28a3"></script>
+<script src="app.js?v=7d02fe1d06"></script>
 </body>
 </html>

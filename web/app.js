@@ -102,24 +102,72 @@ function markBest(puzId) {
 const hintSettings = { light: false };
 let hintPuzzleId = null; // hintSettings が今ひもづく問題ID。別問題になったらオフへ戻す
 
-// ---- ヒント残数(毎日リセット) ----
-// 無料: 光ヒント 5回/日, 次の手ヒント 10回/日。0回で広告(差し込み口)。答えは毎回広告。コイン無し。
-const HINT_KEY = 'nikenzume.hints.v1';
-const HINT_FREE = { light: 5, next: 10 };
-function hintToday() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
+// ---- ヒント残数(ストック制: ログインボーナスで補充) ----
+const HINT_KEY = 'nikenzume.hints.v2';
 function loadHintCredits() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(HINT_KEY)); } catch (e) {}
-  if (!s || s.date !== hintToday()) s = { date: hintToday(), light: HINT_FREE.light, next: HINT_FREE.next };
+  if (!s) s = { light: 0, next: 0, answer: 0 };
+  if (s.answer === undefined) s.answer = 0;
   return s;
 }
 let hintCredits = loadHintCredits();
 function saveHintCredits() { localStorage.setItem(HINT_KEY, JSON.stringify(hintCredits)); }
-function rolloverHints() {
-  if (hintCredits.date !== hintToday()) {
-    hintCredits = { date: hintToday(), light: HINT_FREE.light, next: HINT_FREE.next };
-    saveHintCredits();
+function addHints(light, next, answer) {
+  hintCredits.light += light;
+  hintCredits.next += next;
+  hintCredits.answer += (answer || 0);
+  saveHintCredits();
+}
+
+// ---- ログインボーナス(7日サイクル) ----
+const LOGIN_KEY = 'nikenzume.login.v1';
+const LOGIN_REWARDS = [
+  { light: 3, next: 3, answer: 0 },
+  { light: 3, next: 5, answer: 0 },
+  { light: 5, next: 5, answer: 0 },
+  { light: 5, next: 5, answer: 1 },
+  { light: 5, next: 5, answer: 3 },
+  { light: 5, next: 5, answer: 5 },
+  { light: 8, next: 8, answer: 5 },
+];
+const FIRST_LOGIN_BONUS = { light: 10, next: 10, answer: 10 };
+
+function loginToday() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
+function loadLoginState() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(LOGIN_KEY)); } catch (e) {}
+  if (!s) s = { day: 0, lastDate: null, claimed: false, firstDone: false };
+  return s;
+}
+function saveLoginState(s) { localStorage.setItem(LOGIN_KEY, JSON.stringify(s)); }
+
+function checkLoginBonus() {
+  const s = loadLoginState();
+  const today = loginToday();
+  if (s.lastDate === today && s.claimed) return null;
+
+  if (!s.firstDone) {
+    addHints(FIRST_LOGIN_BONUS.light, FIRST_LOGIN_BONUS.next, FIRST_LOGIN_BONUS.answer);
+    s.firstDone = true;
+    s.day = 0;
+    s.lastDate = today;
+    s.claimed = true;
+    saveLoginState(s);
+    return { type: 'first', reward: FIRST_LOGIN_BONUS };
   }
+
+  if (s.lastDate !== today) {
+    const reward = LOGIN_REWARDS[s.day % 7];
+    addHints(reward.light, reward.next, reward.answer);
+    const dayIndex = s.day % 7;
+    s.day++;
+    s.lastDate = today;
+    s.claimed = true;
+    saveLoginState(s);
+    return { type: 'daily', dayIndex, reward };
+  }
+  return null;
 }
 // ---- 広告(AdMob via Capacitor) ----
 // ネイティブ(Capacitor)なら @capacitor-community/admob を使う。PWA/ブラウザでは広告なし(即時実行)。
@@ -159,7 +207,6 @@ function watchRewardAd(then) {
 }
 // 残数を1消費して action。0なら広告(差し込み口)。
 function spendHint(kind, action) {
-  rolloverHints();
   if (hintCredits[kind] > 0) { hintCredits[kind]--; saveHintCredits(); action(); }
   else watchRewardAd(action);
   updateHintUI();
@@ -858,13 +905,13 @@ function hintFromState(positions) {
 
 // ヘルプボタンの状態(光の点灯・残数バッジ)を反映
 function updateHintUI() {
-  rolloverHints();
   const lightBtn = $('#btn-hint-light');
   if (lightBtn) {
     lightBtn.classList.toggle('lit', hintSettings.light);
     setHintBadge(lightBtn, hintCredits.light);
   }
   setHintBadge($('#btn-hint-next'), hintCredits.next);
+  setHintBadge($('#btn-answer-open'), hintCredits.answer);
 }
 // 残数バッジ: 1以上は数字 / 0は ▶(広告)
 function setHintBadge(btn, n) {
@@ -1191,7 +1238,7 @@ $('#settings-drawer').addEventListener('click', (e) => {
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア
-$('#btn-answer-open').addEventListener('click', () => watchRewardAd(enterAnswer));
+$('#btn-answer-open').addEventListener('click', () => spendHint('answer', enterAnswer));
 // 光ヒント = 1回消費してその問題で点灯(点灯済みなら据え置き=消費しない)
 $('#btn-hint-light').addEventListener('click', () => {
   if (!G || G.busy || G.cleared || AV) return;
@@ -1306,8 +1353,51 @@ $('#boards').addEventListener('pointerup', (e) => {
   doMove(d);
 });
 
+// ---- ログインボーナス表示 ----
+function showLoginModal(result) {
+  const overlay = $('#overlay-login');
+  const daysEl = $('#login-days');
+  const rewardEl = $('#login-reward');
+  daysEl.replaceChildren();
+
+  if (result.type === 'first') {
+    for (let i = 0; i < 7; i++) {
+      const d = el('login-day');
+      d.textContent = `Day ${i + 1}`;
+      daysEl.appendChild(d);
+    }
+    rewardEl.innerHTML = `<span class="reward-line">${t('hintLight')} ×${result.reward.light}</span>`
+      + `<span class="reward-line">${t('hintNext')} ×${result.reward.next}</span>`
+      + `<span class="reward-line">${t('hintAnswer')} ×${result.reward.answer}</span>`;
+  } else {
+    const s = loadLoginState();
+    const cycleDay = (s.day - 1) % 7;
+    for (let i = 0; i < 7; i++) {
+      const d = el('login-day');
+      d.textContent = `Day ${i + 1}`;
+      if (i < cycleDay) d.classList.add('done');
+      if (i === cycleDay) d.classList.add('today');
+      daysEl.appendChild(d);
+    }
+    const rw = result.reward;
+    let lines = `<span class="reward-line">${t('hintLight')} ×${rw.light}</span>`
+      + `<span class="reward-line">${t('hintNext')} ×${rw.next}</span>`;
+    if (rw.answer > 0) lines += `<span class="reward-line">${t('hintAnswer')} ×${rw.answer}</span>`;
+    rewardEl.innerHTML = lines;
+  }
+
+  overlay.hidden = false;
+  $('#btn-login-close').onclick = () => {
+    overlay.hidden = true;
+    updateHintUI();
+  };
+}
+
 // ---- 起動 ----
 applyTheme(); // data-theme を確定し、トグルの状態を反映
 fillI18n(); // 静的文言(ボタン・タグライン等)をロケールで流し込む
 updateSettingsUI(); // 設定の言語値・スイッチ状態を反映
 showChapters();
+
+const loginResult = checkLoginBonus();
+if (loginResult) showLoginModal(loginResult);

@@ -10,6 +10,8 @@ window.NIKENZUME_STRINGS = {
     // ボタン
     back: '戻る', reset: '最初から', answer: '答え', theme: '表示テーマ', settings: '設定',
     light: '光ヒント', nextMove: '次の手ヒント',
+    hintLight: '光ヒント', hintNext: '次の手', hintAnswer: '答え',
+    loginTitle: 'ログインボーナス', loginClaim: '受け取る',
     // 設定
     language: '言語', se: '効果音', haptics: '触覚フィードバック',
     resetProgress: '進捗をリセット', howto: '遊び方', about: 'このアプリについて',
@@ -78,6 +80,8 @@ window.NIKENZUME_STRINGS = {
     modeNormal: 'Normal', modeAdvanced: 'Advanced',
     back: 'Back', reset: 'Restart', answer: 'Answer', theme: 'Theme', settings: 'Settings',
     light: 'Light hint', nextMove: 'Next move',
+    hintLight: 'Light', hintNext: 'Next move', hintAnswer: 'Answer',
+    loginTitle: 'Login Bonus', loginClaim: 'Claim',
     // settings
     language: 'Language', se: 'Sound', haptics: 'Haptics',
     resetProgress: 'Reset progress', howto: 'How to play', about: 'About',
