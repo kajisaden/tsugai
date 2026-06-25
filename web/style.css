@@ -206,6 +206,26 @@ button:active { transform: translateY(1px); }
   letter-spacing: 0.2em;
   margin: 8px 2px 16px;
 }
+#mode-tabs {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.mode-tab {
+  padding: 6px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.mode-tab.active {
+  background: var(--text);
+  color: var(--bg);
+}
 #level-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

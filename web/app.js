@@ -57,14 +57,28 @@ const GOAL_SUCK_HOLD_MS = REDUCED ? 0 : 200;
 // 章境界での手数リセットは「新章の自然な再上昇」になり、見た目(手数)と難度の逆行が消える。
 // 視認性の限界は 5x5。6x6 は本体から外す。導入(第一章の頭)は ep0 の 1〜2手のみ(ただ歩く体験)。
 const ep = (p) => p.analysis.episodes;
-// 通常モード: 200問フラットリスト（select-normal.mjs が生成した ID 配列から構築）
-const NORMAL_IDS = window.NORMAL_LEVEL_IDS;
-const NORMAL_BOSS = window.NORMAL_BOSS_FLAGS;
+// モード別レベルリスト（select-normal/advanced.mjs が生成した ID 配列から構築）
 const poolById = new Map(POOL.puzzles.map(p => [p.id, p]));
-const NORMAL_LEVELS = NORMAL_IDS.map(id => poolById.get(id));
-const CHAPTERS = [{ id: 'ch1', from: 0, to: NORMAL_LEVELS.length }];
+const MODES = {
+  normal: {
+    levels: window.NORMAL_LEVEL_IDS.map(id => poolById.get(id)),
+    boss: window.NORMAL_BOSS_FLAGS,
+  },
+  advanced: {
+    levels: window.ADVANCED_LEVEL_IDS.map(id => poolById.get(id)),
+    boss: window.ADVANCED_BOSS_FLAGS,
+  },
+};
+let curMode = 'normal';
+function modeData() { return MODES[curMode]; }
+const CHAPTERS = [{ id: 'ch1', from: 0, to: MODES.normal.levels.length }];
+function switchMode(mode) {
+  curMode = mode;
+  CHAPTERS[0].to = modeData().levels.length;
+  showLevels(CHAPTERS[0]);
+}
 function chapterLevels(ch) {
-  return NORMAL_LEVELS.slice(ch.from, ch.to);
+  return modeData().levels.slice(ch.from, ch.to);
 }
 
 // ---- クリア記録 ----
@@ -181,16 +195,29 @@ function showChapters() {
   showLevels(CHAPTERS[0]);
 }
 
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const mode = tab.dataset.mode;
+    if (mode === curMode) return;
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    switchMode(mode);
+  });
+});
+
 function showLevels(ch) {
   curChapter = ch;
   showView('levels');
+  document.querySelectorAll('.mode-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.mode === curMode);
+  });
   const done = chapterLevels(ch).filter((p) => cleared.has(p.id)).length;
   $('#levels-title').textContent = `${done} / ${chapterLevels(ch).length}`;
   const grid = $('#level-grid');
   grid.replaceChildren();
   chapterLevels(ch).forEach((p, i) => {
     const globalIdx = ch.from + i;
-    const isBoss = NORMAL_BOSS[globalIdx];
+    const isBoss = modeData().boss[globalIdx];
     const btn = document.createElement('button');
     const isCleared = cleared.has(p.id);
     const isBest = bestCleared.has(p.id);
