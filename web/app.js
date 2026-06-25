@@ -34,16 +34,16 @@ function fillI18n() {
 // テーマ(UI色) / 盤スキン / ボールスキン の3軸自由組み合わせ。
 // data-theme=dark|light, data-board=dark|light, data-ball=dark|light
 const THEME_KEY = 'nikenzume.theme.v1';
-const BOARD_SKIN_KEY = 'nikenzume.board.v1';
-const BALL_SKIN_KEY = 'nikenzume.ball.v1';
 let theme = localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
-let boardSkin = localStorage.getItem(BOARD_SKIN_KEY) || theme;
-let ballSkin = localStorage.getItem(BALL_SKIN_KEY) || theme;
+let boardSkin = theme;
+let ballSkin = theme;
 function applyTheme() {
   const root = document.documentElement;
+  boardSkin = theme;
+  ballSkin = theme;
   root.dataset.theme = theme;
-  root.dataset.board = boardSkin;
-  root.dataset.ball = ballSkin;
+  root.dataset.board = theme;
+  root.dataset.ball = theme;
   const btn = document.querySelector('#btn-theme');
   if (btn) btn.setAttribute('aria-pressed', String(theme === 'light'));
 }
@@ -1185,8 +1185,6 @@ function updateSettingsUI() {
   const lv = $('#lang-value'); if (lv) lv.textContent = locale === 'ja' ? '日本語' : 'English';
   const se = $('#sw-se'); if (se) se.setAttribute('aria-pressed', String(seOn));
   const hp = $('#sw-haptics'); if (hp) hp.setAttribute('aria-pressed', String(hapticsOn));
-  document.querySelectorAll('#skin-board .skin-opt').forEach(b => b.classList.toggle('active', b.dataset.val === boardSkin));
-  document.querySelectorAll('#skin-ball .skin-opt').forEach(b => b.classList.toggle('active', b.dataset.val === ballSkin));
 }
 // 言語切替: ロケール変更→保存→静的文言再翻訳→表示中ビューの動的文言を再描画
 function relocalize(newLocale) {
@@ -1240,24 +1238,6 @@ $('#set-contact').addEventListener('click', () => {
 });
 $('#sw-se').addEventListener('click', () => { seOn = !seOn; localStorage.setItem(SE_KEY, seOn ? '1' : '0'); updateSettingsUI(); });
 $('#sw-haptics').addEventListener('click', () => { hapticsOn = !hapticsOn; localStorage.setItem(HAPTICS_KEY, hapticsOn ? '1' : '0'); updateSettingsUI(); });
-$('#skin-board').addEventListener('click', (e) => {
-  const btn = e.target.closest('.skin-opt');
-  if (!btn || btn.dataset.val === boardSkin) return;
-  playTap();
-  boardSkin = btn.dataset.val;
-  localStorage.setItem(BOARD_SKIN_KEY, boardSkin);
-  applyTheme();
-  updateSettingsUI();
-});
-$('#skin-ball').addEventListener('click', (e) => {
-  const btn = e.target.closest('.skin-opt');
-  if (!btn || btn.dataset.val === ballSkin) return;
-  playTap();
-  ballSkin = btn.dataset.val;
-  localStorage.setItem(BALL_SKIN_KEY, ballSkin);
-  applyTheme();
-  updateSettingsUI();
-});
 // 未実装項目(data-soon)タップ → 「準備中」
 $('#settings-drawer').addEventListener('click', (e) => {
   if (e.target.closest('[data-soon]')) showToast(t('soon'));
