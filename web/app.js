@@ -31,11 +31,19 @@ function fillI18n() {
 }
 
 // ---- テーマ(ライト/ダーク): 手動トグル。localStorage 永続・既定はダーク ----
-// 実切替は <html data-theme> 属性で、配色は CSS 側(:root[data-theme="light"])がまとめて担う。
+// テーマ(UI色) / 盤スキン / ボールスキン の3軸自由組み合わせ。
+// data-theme=dark|light, data-board=dark|light, data-ball=dark|light
 const THEME_KEY = 'nikenzume.theme.v1';
+const BOARD_SKIN_KEY = 'nikenzume.board.v1';
+const BALL_SKIN_KEY = 'nikenzume.ball.v1';
 let theme = localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
+let boardSkin = localStorage.getItem(BOARD_SKIN_KEY) || theme;
+let ballSkin = localStorage.getItem(BALL_SKIN_KEY) || theme;
 function applyTheme() {
-  document.documentElement.dataset.theme = theme;
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  root.dataset.board = boardSkin;
+  root.dataset.ball = ballSkin;
   const btn = document.querySelector('#btn-theme');
   if (btn) btn.setAttribute('aria-pressed', String(theme === 'light'));
 }
@@ -587,7 +595,7 @@ function bumpPiece(rm, d) {
     ], { duration: (BUMP_MS || 1) * 2, easing: 'ease-out' });
     // ライトの黒石は brightness では光らないので、白いディスクを一瞬重ねて「白く発光」させる(ダーク相当)。
     // ダークは金球が brightness で十分光るため重ねない(承認済みの見えを変えない)。
-    if (rm.ballFlash && rm.ballFlash.animate && document.documentElement.dataset.theme === 'light') {
+    if (rm.ballFlash && rm.ballFlash.animate && ballSkin === 'light') {
       rm.ballFlash.animate([
         { opacity: 0,   offset: 0 },
         { opacity: 0.8, offset: 0.3 },
@@ -728,7 +736,7 @@ async function doMove(d) {
   // つがいの連動感: 片方が壁で止まり片方が進む=対が引き裂かれた「綻び」(章名の核)。二球の息を同時に
   // 一拍ひるませ、対であることを直感させる。クリア/反則(ゴール絡み)は専用演出があるので !anyGoal に限る。
   // ダークのみ(ライトは黒石を発光させない)。#boards 共有クラス=両球が完全同期。
-  if (anyMoved && anyBumped && !anyGoal && !REDUCED && document.documentElement.dataset.theme !== 'light') {
+  if (anyMoved && anyBumped && !anyGoal && !REDUCED && ballSkin !== 'light') {
     const be = $('#boards');
     be.classList.remove('strain'); void be.offsetWidth; be.classList.add('strain');
     clearTimeout(be._strainT); be._strainT = setTimeout(() => be.classList.remove('strain'), 460);
@@ -800,7 +808,7 @@ async function checkClear() {
   // 点火: ボールが金(最短)/白(クリア)に発光して弾み、ゴールに光が満ちる。約1秒見せて A画面へ。
   // ダークは球が自発光するため、ゴール吸着(白い輪の伸縮 ~320ms)が収まってから点火し、吸着を潰さない。
   // ライト/モーション無効は球がマット or 演出なしで干渉しないので即時(従来どおり)。
-  const afterSuck = !REDUCED && document.documentElement.dataset.theme !== 'light';
+  const afterSuck = !REDUCED && ballSkin !== 'light';
   const ignite = () => {
     if (!G.cleared || !$('#overlay-gap').hidden) return; // 待ちの間に遷移済みなら何もしない
     G.rooms.forEach((rm) => rm.goal.classList.add('filled')); // 光が満ちる
@@ -1177,6 +1185,8 @@ function updateSettingsUI() {
   const lv = $('#lang-value'); if (lv) lv.textContent = locale === 'ja' ? '日本語' : 'English';
   const se = $('#sw-se'); if (se) se.setAttribute('aria-pressed', String(seOn));
   const hp = $('#sw-haptics'); if (hp) hp.setAttribute('aria-pressed', String(hapticsOn));
+  document.querySelectorAll('#skin-board .skin-opt').forEach(b => b.classList.toggle('active', b.dataset.val === boardSkin));
+  document.querySelectorAll('#skin-ball .skin-opt').forEach(b => b.classList.toggle('active', b.dataset.val === ballSkin));
 }
 // 言語切替: ロケール変更→保存→静的文言再翻訳→表示中ビューの動的文言を再描画
 function relocalize(newLocale) {
@@ -1230,6 +1240,24 @@ $('#set-contact').addEventListener('click', () => {
 });
 $('#sw-se').addEventListener('click', () => { seOn = !seOn; localStorage.setItem(SE_KEY, seOn ? '1' : '0'); updateSettingsUI(); });
 $('#sw-haptics').addEventListener('click', () => { hapticsOn = !hapticsOn; localStorage.setItem(HAPTICS_KEY, hapticsOn ? '1' : '0'); updateSettingsUI(); });
+$('#skin-board').addEventListener('click', (e) => {
+  const btn = e.target.closest('.skin-opt');
+  if (!btn || btn.dataset.val === boardSkin) return;
+  playTap();
+  boardSkin = btn.dataset.val;
+  localStorage.setItem(BOARD_SKIN_KEY, boardSkin);
+  applyTheme();
+  updateSettingsUI();
+});
+$('#skin-ball').addEventListener('click', (e) => {
+  const btn = e.target.closest('.skin-opt');
+  if (!btn || btn.dataset.val === ballSkin) return;
+  playTap();
+  ballSkin = btn.dataset.val;
+  localStorage.setItem(BALL_SKIN_KEY, ballSkin);
+  applyTheme();
+  updateSettingsUI();
+});
 // 未実装項目(data-soon)タップ → 「準備中」
 $('#settings-drawer').addEventListener('click', (e) => {
   if (e.target.closest('[data-soon]')) showToast(t('soon'));

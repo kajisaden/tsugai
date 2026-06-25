@@ -226,6 +226,23 @@ button:active { transform: translateY(1px); }
   background: var(--text);
   color: var(--bg);
 }
+.skin-toggle {
+  display: flex;
+  gap: 4px;
+}
+.skin-opt {
+  padding: 4px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+}
+.skin-opt.active {
+  background: var(--text);
+  color: var(--bg);
+}
 #level-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -483,7 +500,7 @@ button:active { transform: translateY(1px); }
 }
 /* ダークは黒皿が座になるので、輪の金グロー(にじみ)は出さず皿に集中させる(scale/縁は皿の下で不可視)。
    ライト(下の data-theme="light")は従来の goal-suck(金のにじみ)のまま=変更しない */
-:root:not([data-theme="light"]) .goal.sucking::before { animation-name: goal-suck-dark; }
+:root:not([data-ball="light"]) .goal.sucking::before { animation-name: goal-suck-dark; }
 @keyframes goal-suck-dark {
   0%   { transform: scale(1);    border-color: var(--gold); }
   58%  { transform: scale(0.82); border-color: var(--gold); }
@@ -897,6 +914,8 @@ button:active { transform: translateY(1px); }
   --line: rgba(43, 38, 32, 0.12);
   --text: #2b2620;      /* 墨 */
   --text-dim: #8a8276;
+}
+:root[data-board="light"] {
   --gold: #a8801f;      /* 濃い琥珀(紙の上で読める) */
   --glow: rgba(168, 128, 31, 0.40); /* 光のにじみ→淡い琥珀の影に転用 */
   --bump-hot: #e7c25a; /* 壁当ての一瞬の強調(ライト: 紙の上で白飛びせず映える明るい琥珀) */
@@ -905,110 +924,103 @@ button:active { transform: translateY(1px); }
   background: radial-gradient(120% 100% at 50% 0%, #fbf8f1 0%, var(--bg) 60%);
 }
 
-/* 案A 額装インセット ライト: 紙では発光しないので暖色の弱い影で盆/額の凹みを表現 */
-:root[data-theme="light"] .board {
-  background: var(--panel); /* ダークの床グラデを打ち消し、ライトは紙色に戻す */
+/* 案A 額装インセット ライト盤: 紙では発光しないので暖色の弱い影で盆/額の凹みを表現 */
+:root[data-board="light"] .board {
+  background: #fbf8f1;
   border-color: rgba(43, 38, 32, 0.20);
   box-shadow: inset 0 2px 7px rgba(70, 55, 30, 0.12), 0 1px 2px rgba(70, 55, 30, 0.06);
 }
 
 /* 盤の壁: 暗いスレート → 温かいグレー */
-:root[data-theme="light"] .cell.wall {
+:root[data-board="light"] .cell.wall {
   background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
   border-color: rgba(43, 38, 32, 0.10);
-  /* 上辺ハイライト廃止(案2 単線): ライトは .5 と強く、継ぎ目の浮きがダークより目立っていた */
 }
 
 /* 壁の印(ヒント/壁当て)ライト: ダークの「発光」に対する「滲み」。明るい金の芯＋金の顔料が紙にじわっと
    広がる対称なハロー(オフセット無し)。印は縦横どちらの壁面にも出る(縦4x52 / 横52x4)ので、方向性のある
    影/グラデは使わず、対称な滲みで縦横を揃え壁に密着させる */
-:root[data-theme="light"] .hint-glow,
-:root[data-theme="light"] .bump-glow {
+:root[data-board="light"] .hint-glow,
+:root[data-board="light"] .bump-glow {
   background: #f0dfa0;
   box-shadow: 0 0 6px 2px rgba(216, 192, 110, 0.48), 0 0 12px 3px rgba(216, 192, 110, 0.20);
 }
-/* ライト(紙)向けの壁当て: ダークの白熱処方は白地で濁るため別キーフレームにする。
-   澄んだ琥珀(#ecd07e)のまま軽く増光＋締まった2層のにじみ(最大11→18px)。時間/カーブ(750ms ease-out)は共通。
-   ダークの強調(@keyframes bump-glow)とは独立して紙向けに上品さを保つ */
-:root[data-theme="light"] .bump-glow.show { animation-name: bump-glow-light; }
+:root[data-board="light"] .bump-glow.show { animation-name: bump-glow-light; }
 @keyframes bump-glow-light {
   0%   { opacity: 0;    background: #f8eecc; box-shadow: 0 0 5px 1px rgba(216, 192, 110, 0.4); }
   10%  { opacity: 1;    background: #faf2d0; box-shadow: 0 0 10px 3px rgba(216, 192, 110, 0.55), calc(var(--bloom-x, 0px) * 0.7) calc(var(--bloom-y, 0px) * 0.7) 22px 6px rgba(216, 192, 110, 0.22); }
   34%  { opacity: 0.90; background: #f0dfa0; box-shadow: 0 0 7px 2px rgba(216, 192, 110, 0.45), calc(var(--bloom-x, 0px) * 0.4) calc(var(--bloom-y, 0px) * 0.4) 15px 4px rgba(216, 192, 110, 0.18); }
   100% { opacity: 0;    background: #f0dfa0; box-shadow: 0 0 6px 2px rgba(216, 192, 110, 0.48), 0 0 12px 3px rgba(216, 192, 110, 0.20); }
 }
-/* ヒントの息づき: 実体バーなので透明まで消えず、浅い濃淡でゆっくり呼吸させる */
-:root[data-theme="light"] .hint-glow {
+:root[data-board="light"] .hint-glow {
   animation: hint-glow-leaf 2.6s ease-in-out infinite;
 }
 @keyframes hint-glow-leaf { 0%, 100% { opacity: 0.82; } 50% { opacity: 1; } }
-/* リップル(金環) ライト: 太く・シャンパンゴールドに揃え、にじみを足す */
-:root[data-theme="light"] .bump-ripple {
+:root[data-board="light"] .bump-ripple {
   border: 2px solid rgba(216, 192, 110, 0.50);
   box-shadow: 0 0 5px 1px rgba(216, 192, 110, 0.22);
 }
 
 /* ボール: マット黒の碁石(実体＋立体陰影)。静止(脈動なし)。光輪はクリア時だけ出す */
-:root[data-theme="light"] .ball {
+:root[data-ball="light"] .ball {
   background: radial-gradient(circle at 38% 30%, #4a4a52 0%, #26262c 40%, #131316 100%);
   box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.10), 0 3px 6px rgba(40, 32, 16, 0.32);
 }
-:root[data-theme="light"] .ball::after { box-shadow: none; } /* 球自体の縁グローは出さない */
-:root[data-theme="light"] .ball-glow { inset: -22%; display: none; } /* プレイ中は光輪なし。サイズだけ定義(クリア時に使う) */
+:root[data-ball="light"] .ball::after { box-shadow: none; }
+:root[data-ball="light"] .ball-glow { inset: -22%; display: none; }
 
-/* ゴール: 金の破線/実線を濃い琥珀へ */
-:root[data-theme="light"] .goal::before { border-color: rgba(168, 128, 31, 0.5); }
-:root[data-theme="light"] .goal.on::before { border-color: rgba(168, 128, 31, 0.85); }
-:root[data-theme="light"] .goal::after { display: none; } /* 黒皿はダーク専用。ライトは金/銀の円盤演出を使う */
-:root[data-theme="light"] .goal.filled::before {
+:root[data-ball="light"] .goal::before { border-color: rgba(168, 128, 31, 0.5); }
+:root[data-ball="light"] .goal.on::before { border-color: rgba(168, 128, 31, 0.85); }
+:root[data-ball="light"] .goal::after { display: none; }
+:root[data-ball="light"] .goal.filled::before {
   background: radial-gradient(circle, rgba(168, 128, 31, 0.28) 0%, rgba(168, 128, 31, 0.06) 70%);
 }
 
 /* クリア演出(案A 金メダリオン): ぼかしグローは出さず、ゴールを金/銀の円盤にして黒石を上に乗せる。
    最短=金箔の円盤 / クリア済み=銀の円盤。球は黒のまま clear-bounce で弾む。光輪(.ball-glow)は接地影として使う */
-:root[data-theme="light"] #boards.clear-best .ball,
-:root[data-theme="light"] #boards.clear-win .ball {
+:root[data-ball="light"] #boards.clear-best .ball,
+:root[data-ball="light"] #boards.clear-win .ball {
   background: radial-gradient(circle at 38% 30%, #4a4a52 0%, #26262c 40%, #131316 100%);
   box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.10), 0 2px 5px rgba(40, 32, 16, 0.42);
 }
 /* ゴール円盤: 球(セルの約66%)より大きく(約90%)し、黒石の周りに金/銀の縁が出る */
-:root[data-theme="light"] #boards.clear-best .goal.filled::before,
-:root[data-theme="light"] #boards.clear-win .goal.filled::before {
+:root[data-ball="light"] #boards.clear-best .goal.filled::before,
+:root[data-ball="light"] #boards.clear-win .goal.filled::before {
   inset: 5%;
   border: none;
 }
-:root[data-theme="light"] #boards.clear-best .goal.filled::before {
+:root[data-ball="light"] #boards.clear-best .goal.filled::before {
   background: radial-gradient(circle at 42% 38%, #f0dca0 0%, #d8b75f 55%, #b08a36 100%);
   box-shadow: 0 1px 3px rgba(80, 58, 18, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.5);
 }
-:root[data-theme="light"] #boards.clear-win .goal.filled::before {
+:root[data-ball="light"] #boards.clear-win .goal.filled::before {
   background: radial-gradient(circle at 42% 38%, #e4e8ef 0%, #b9c0cc 55%, #8b93a1 100%);
   box-shadow: 0 1px 3px rgba(50, 58, 70, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.6);
 }
 
 /* A画面エンブレム ライト(案C): 磨いた碁石2球＋漆金精緻化(最短)/精緻化銀(クリア)の楕円皿＋温かな後光halo。発光ではなく実体＋素材感 */
-:root[data-theme="light"] #gap-emblem .emblem-ball {
+:root[data-ball="light"] #gap-emblem .emblem-ball {
   background: radial-gradient(circle at 35% 26%, #6c6c77 0%, #37373f 30%, #1b1b21 68%, #0d0d11 100%);
   box-shadow: inset -2px -3px 7px rgba(0, 0, 0, 0.6), inset 3px 3px 6px rgba(255, 255, 255, 0.16), 0 5px 9px rgba(40, 32, 16, 0.42);
 }
-:root[data-theme="light"] .emblem-disc { display: block; }
+:root[data-ball="light"] .emblem-disc { display: block; }
 /* 漆金精緻化(ツヤ): 上面に磨きハイライト＋細い金縁。チープな均一黄でなく金箔の照り */
-:root[data-theme="light"] #gap-emblem.best .emblem-disc {
+:root[data-ball="light"] #gap-emblem.best .emblem-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
   box-shadow: 0 6px 13px rgba(70, 52, 18, 0.22), inset 0 2px 4px rgba(255, 248, 224, 0.7), inset 0 -6px 9px rgba(105, 78, 30, 0.42), inset 0 0 0 1px rgba(255, 242, 205, 0.18);
 }
 /* 銀も金と同じ精緻化ツヤで揃える */
-:root[data-theme="light"] #gap-emblem.win .emblem-disc {
+:root[data-ball="light"] #gap-emblem.win .emblem-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f7fafd 0%, #d4dae3 40%, #aeb6c3 72%, #79808d 100%);
   box-shadow: 0 6px 13px rgba(40, 48, 60, 0.22), inset 0 2px 4px rgba(248, 251, 255, 0.7), inset 0 -6px 9px rgba(70, 78, 92, 0.42), inset 0 0 0 1px rgba(238, 244, 250, 0.2);
 }
 /* 後光(halo) ライト: 状態で色を出し分け(最短=金 / クリア=銀)。背後に敷いて温かさを足す */
-:root[data-theme="light"] #gap-emblem.best .emblem-halo {
+:root[data-ball="light"] #gap-emblem.best .emblem-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(216, 183, 95, 0.42), rgba(216, 183, 95, 0.15) 46%, transparent 72%);
   filter: blur(3px);
 }
-:root[data-theme="light"] #gap-emblem.win .emblem-halo {
+:root[data-ball="light"] #gap-emblem.win .emblem-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(185, 192, 204, 0.4), rgba(185, 192, 204, 0.14) 46%, transparent 72%);
   filter: blur(3px);
@@ -1038,25 +1050,25 @@ button:active { transform: translateY(1px); }
 }
 
 /* レベル一覧のクリア印 ライト: 碁石2球＋金(最短)/銀(クリア)の楕円皿＋後光(A画面と同意匠) */
-:root[data-theme="light"] .lv-emblem .le-ball {
+:root[data-ball="light"] .lv-emblem .le-ball {
   background: radial-gradient(circle at 35% 26%, #6c6c77 0%, #37373f 30%, #1b1b21 68%, #0d0d11 100%);
   box-shadow: inset -2px -3px 7px rgba(0, 0, 0, 0.6), inset 3px 3px 6px rgba(255, 255, 255, 0.16), 0 5px 9px rgba(40, 32, 16, 0.42);
 }
-:root[data-theme="light"] .lv-emblem .le-disc { display: block; }
-:root[data-theme="light"] .lv-emblem.best .le-disc {
+:root[data-ball="light"] .lv-emblem .le-disc { display: block; }
+:root[data-ball="light"] .lv-emblem.best .le-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
   box-shadow: 0 6px 13px rgba(70, 52, 18, 0.22), inset 0 2px 4px rgba(255, 248, 224, 0.7), inset 0 -6px 9px rgba(105, 78, 30, 0.42), inset 0 0 0 1px rgba(255, 242, 205, 0.18);
 }
-:root[data-theme="light"] .lv-emblem.win .le-disc {
+:root[data-ball="light"] .lv-emblem.win .le-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f7fafd 0%, #d4dae3 40%, #aeb6c3 72%, #79808d 100%);
   box-shadow: 0 6px 13px rgba(40, 48, 60, 0.22), inset 0 2px 4px rgba(248, 251, 255, 0.7), inset 0 -6px 9px rgba(70, 78, 92, 0.42), inset 0 0 0 1px rgba(238, 244, 250, 0.2);
 }
-:root[data-theme="light"] .lv-emblem.best .le-halo {
+:root[data-ball="light"] .lv-emblem.best .le-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(216, 183, 95, 0.42), rgba(216, 183, 95, 0.15) 46%, transparent 72%);
   filter: blur(3px);
 }
-:root[data-theme="light"] .lv-emblem.win .le-halo {
+:root[data-ball="light"] .lv-emblem.win .le-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(185, 192, 204, 0.4), rgba(185, 192, 204, 0.14) 46%, transparent 72%);
   filter: blur(3px);
@@ -1101,11 +1113,11 @@ button:active { transform: translateY(1px); }
    球が上がると影は縮んで薄く・落ちると大きく濃く=視差で「跳ねている」ように見せる。
    接地影は球から外して別要素に持たせるので、弾み中の .ball からはドロップシャドウを抜く。
    (.bouncing は checkClear で付き dismissTsumi で外れる=クリア中だけ) */
-:root[data-theme="light"] #boards.bouncing .ball {
+:root[data-ball="light"] #boards.bouncing .ball {
   animation: clear-bounce 1100ms ease-in-out infinite;
   box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.10);
 }
-:root[data-theme="light"] #boards.bouncing .ball-glow {
+:root[data-ball="light"] #boards.bouncing .ball-glow {
   display: block;
   inset: auto;
   left: 22%; right: 22%; bottom: 8%; height: 11%;
@@ -1125,10 +1137,9 @@ button:active { transform: translateY(1px); }
 }
 /* アニメ無効時はライトの弾み・接地影も止める(上の @media より後に置き specificity 同等で勝たせる) */
 @media (prefers-reduced-motion: reduce) {
-  :root[data-theme="light"] #boards.bouncing .ball,
-  :root[data-theme="light"] #boards.bouncing .ball-glow { animation: none; }
-  /* ライトの金箔ヒントはライト上書きの方が詳細度が高いので、ここで明示的に止める */
-  :root[data-theme="light"] .hint-glow { animation: none; opacity: 0.9; }
+  :root[data-ball="light"] #boards.bouncing .ball,
+  :root[data-ball="light"] #boards.bouncing .ball-glow { animation: none; }
+  :root[data-board="light"] .hint-glow { animation: none; opacity: 0.9; }
   /* 黒皿はフェードのみ(スケールのモーションは出さない)。REDUCED では filled で即座に座る */
   .goal::after { transition: opacity 200ms ease; transform: none; }
   .goal.sucking::after, .goal.filled::after { transform: none; }
