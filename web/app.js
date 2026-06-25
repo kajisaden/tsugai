@@ -177,6 +177,90 @@ function checkLoginBonus() {
   }
   return null;
 }
+// ---- デイリーチャレンジ(毎日1問 + ストリーク + ヒント報酬) ----
+const DAILY_KEY = 'nikenzume.daily.v1';
+const DAILY_REWARDS = {
+  clear: { light: 1, next: 1, answer: 0 },
+  best:  { light: 2, next: 2, answer: 1 },
+};
+const STREAK_MILESTONES = [
+  { days: 7,  reward: { light: 5, next: 5, answer: 5 } },
+  { days: 14, reward: { light: 10, next: 10, answer: 10 } },
+  { days: 30, reward: { light: 15, next: 15, answer: 15 } },
+];
+let dailyMode = false;
+
+function loadDailyState() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(DAILY_KEY)); } catch (e) {}
+  if (!s) s = { date: null, cleared: false, best: false, streak: 0, lastClearDate: null, totalDays: 0, maxStreak: 0 };
+  if (s.maxStreak === undefined) s.maxStreak = s.streak || 0;
+  return s;
+}
+function saveDailyState(s) { localStorage.setItem(DAILY_KEY, JSON.stringify(s)); }
+
+function yesterdayStr() {
+  const d = new Date(); d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function refreshDailyState() {
+  const s = loadDailyState();
+  const today = loginToday();
+  if (s.date === today) return s;
+  if (s.lastClearDate !== yesterdayStr()) s.streak = 0;
+  s.date = today;
+  s.cleared = false;
+  s.best = false;
+  saveDailyState(s);
+  return s;
+}
+
+function getDailyPuzzle() {
+  const today = loginToday();
+  let hash = 0;
+  for (let i = 0; i < today.length; i++) {
+    hash = ((hash << 5) - hash) + today.charCodeAt(i);
+    hash |= 0;
+  }
+  return POOL.puzzles[((hash % POOL.puzzles.length) + POOL.puzzles.length) % POOL.puzzles.length];
+}
+
+function dailyDayNumber() {
+  const epoch = new Date(2026, 5, 25);
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  return Math.floor((now - epoch) / 86400000) + 1;
+}
+
+function handleDailyClear(moves, min) {
+  const s = loadDailyState();
+  const isBest = moves <= min;
+  if (s.cleared && (!isBest || s.best)) return null;
+  const isFirst = !s.cleared;
+  let reward, streakReward = null;
+  if (isFirst) {
+    s.cleared = true;
+    s.streak++;
+    if (s.streak > (s.maxStreak || 0)) s.maxStreak = s.streak;
+    s.totalDays++;
+    s.lastClearDate = loginToday();
+    reward = isBest ? { ...DAILY_REWARDS.best } : { ...DAILY_REWARDS.clear };
+    for (const m of STREAK_MILESTONES) {
+      if (s.streak === m.days) { streakReward = m; addHints(m.reward.light, m.reward.next, m.reward.answer); break; }
+    }
+  } else {
+    reward = {
+      light: DAILY_REWARDS.best.light - DAILY_REWARDS.clear.light,
+      next: DAILY_REWARDS.best.next - DAILY_REWARDS.clear.next,
+      answer: DAILY_REWARDS.best.answer - DAILY_REWARDS.clear.answer,
+    };
+  }
+  if (isBest) s.best = true;
+  saveDailyState(s);
+  addHints(reward.light, reward.next, reward.answer);
+  return { reward, best: isBest, streak: s.streak, streakReward, isFirst };
+}
+
 // ---- 広告(AdMob via Capacitor) ----
 // ネイティブ(Capacitor)なら @capacitor-community/admob を使う。PWA/ブラウザでは広告なし(即時実行)。
 // テスト用 adId は Google 公式テストID。本番リリース前に実IDへ差し替える。
@@ -243,7 +327,10 @@ function showView(name) {
   $('#btn-back').hidden = name === 'chapters';
 }
 $('#btn-back').addEventListener('click', () => {
-  if (!$('#view-play').hidden) showLevels(curChapter);
+  if (!$('#view-play').hidden) {
+    dailyMode = false;
+    showLevels(curChapter || CHAPTERS[0]);
+  }
 });
 
 function showChapters() {
@@ -260,9 +347,23 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
   });
 });
 
+function updateDailyCard() {
+  const s = refreshDailyState();
+  const puz = getDailyPuzzle();
+  $('#daily-par').textContent = t('puzzlePar', { n: puz.solution.minMoves });
+  const status = $('#daily-status');
+  if (s.best) { status.textContent = t('dailyBest'); status.className = 'daily-status best'; }
+  else if (s.cleared) { status.textContent = t('dailyCleared'); status.className = 'daily-status cleared'; }
+  else { status.textContent = t('dailyNew'); status.className = 'daily-status new'; }
+  const streak = $('#daily-streak');
+  if (s.streak > 0) { streak.textContent = t('dailyStreak', { n: s.streak }); streak.hidden = false; }
+  else streak.hidden = true;
+}
+
 function showLevels(ch) {
   curChapter = ch;
   showView('levels');
+  updateDailyCard();
   document.querySelectorAll('.mode-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.mode === curMode);
   });
@@ -359,29 +460,25 @@ function animatePuzzleEntrance() {
   });
 }
 
-function startPuzzle(ch, index, entrance = true) {
-  curChapter = ch;
-  curIndex = index;
-  hintGlows = []; // 盤を作り直すので壁ヒントの参照を捨てる
-  // 答えビューア状態を必ず終了させる(別問題を開いたとき前問の答えが残るバグ対策)
+function _initPuzzle(puz, label, entrance) {
+  hintGlows = [];
   AV = null;
   $('#answer-bar').hidden = true;
   $('#controls').hidden = false;
   $('#hint-keys').hidden = false;
   $('#move-count').hidden = false;
-  const puz = chapterLevels(ch)[index];
-  if (puz.id !== hintPuzzleId) { // 違う問題に移ったら光ヒントはオフから(同じ問題の再開では保持)
+  if (puz.id !== hintPuzzleId) {
     hintSettings.light = false;
     hintPuzzleId = puz.id;
   }
   const { w, h } = puz.size;
   const boardsEl = $('#boards');
   boardsEl.replaceChildren();
-  boardsEl.classList.remove('clear-best', 'clear-win', 'bouncing'); // 前問のクリア演出を消す
+  boardsEl.classList.remove('clear-best', 'clear-win', 'bouncing');
   const rooms = puz.rooms.map((r) => {
     const b = buildBoard(r, w, h);
     boardsEl.append(b.board);
-    boardsEl.append(b.ripple); // リップルは盤の外にはみ出すため #boards 直下に置く
+    boardsEl.append(b.ripple);
     return b;
   });
   G = {
@@ -392,14 +489,33 @@ function startPuzzle(ch, index, entrance = true) {
     busy: false,
     cleared: false,
   };
-  const globalNo = curChapter.from + index + 1;
-  $('#puzzle-label').textContent = `#${globalNo}　${t('puzzlePar', { n: puz.solution.minMoves })}`;
+  $('#puzzle-label').textContent = label;
   updateInfo();
   updateGoals();
-  updateHintUI(); // トグル状態と「次の一手」ボタンを反映
-  refreshWallHints(); // 光ONなら新しい盤でも光らせる
+  updateHintUI();
+  refreshWallHints();
   showView('play');
-  if (entrance) animatePuzzleEntrance(); // ② 問題の登場(盤→ゴール→球がコトッと収まる)
+  if (entrance) animatePuzzleEntrance();
+}
+
+function startPuzzle(ch, index, entrance = true) {
+  dailyMode = false;
+  curChapter = ch;
+  curIndex = index;
+  const puz = chapterLevels(ch)[index];
+  const globalNo = curChapter.from + index + 1;
+  _initPuzzle(puz, `#${globalNo}　${t('puzzlePar', { n: puz.solution.minMoves })}`, entrance);
+}
+
+function startDailyPuzzle(entrance = true) {
+  dailyMode = true;
+  const puz = getDailyPuzzle();
+  _initPuzzle(puz, `${t('dailyTitle')}　${t('puzzlePar', { n: puz.solution.minMoves })}`, entrance);
+}
+
+function restartCurrentPuzzle(entrance = true) {
+  if (dailyMode) startDailyPuzzle(entrance);
+  else startPuzzle(curChapter, curIndex, entrance);
 }
 
 function updateInfo() {
@@ -765,10 +881,10 @@ async function doMove(d) {
       clearTimeout(rm.board._foulT); rm.board._foulT = setTimeout(() => rm.board.classList.remove('foul'), 560);
     });
     // 反則の局面(＋赤み)を一拍見せてから、履歴を逆再生して初形まで巻き戻す。メッセージは出さない。
-    if (REDUCED) { startPuzzle(curChapter, curIndex); return; } // モーション無効は即復帰
+    if (REDUCED) { restartCurrentPuzzle(); return; }
     await sleep(MISS_HOLD_MS);
     await slideToStart();
-    startPuzzle(curChapter, curIndex, false); // 状態を完全リセット(巻き戻しで戻したので登場演出は出さない)
+    restartCurrentPuzzle(false);
     return;
   }
 
@@ -800,10 +916,12 @@ async function checkClear() {
   G.cleared = true;
   G.busy = true;
   const min = G.puz.solution.minMoves;
-  const best = G.moves === min; // 最短達成か
-  markCleared(G.puz.id);
-  if (best) markBest(G.puz.id);
-  lastClear = { moves: G.moves, min, best }; // A画面で出すため確保
+  const best = G.moves === min;
+  if (!dailyMode) {
+    markCleared(G.puz.id);
+    if (best) markBest(G.puz.id);
+  }
+  lastClear = { moves: G.moves, min, best };
 
   // 点火: ボールが金(最短)/白(クリア)に発光して弾み、ゴールに光が満ちる。約1秒見せて A画面へ。
   // ダークは球が自発光するため、ゴール吸着(白い輪の伸縮 ~320ms)が収まってから点火し、吸着を潰さない。
@@ -845,7 +963,7 @@ async function checkClear() {
 
 function resetPuzzle() {
   if (!G || G.busy || G.cleared) return;
-  startPuzzle(curChapter, curIndex);
+  restartCurrentPuzzle();
 }
 
 // ---- ヒント(妙手の数 → 次の一手 → 答え。SPEC.md 6章) ----
@@ -1097,7 +1215,7 @@ function toggleAnswerPlay() {
 
 function enterAnswer() {
   if (!G || G.busy) return;
-  startPuzzle(curChapter, curIndex); // 初形へ
+  restartCurrentPuzzle(); // 初形へ
   AV = {
     path: G.puz.solution.path,
     blockSet: new Set(G.puz.analysis.blockMoveIndices),
@@ -1120,7 +1238,7 @@ function closeAnswer() {
   $('#controls').hidden = false;
   $('#hint-keys').hidden = false;
   $('#move-count').hidden = false;
-  startPuzzle(curChapter, curIndex); // 初形へ戻して自力で挑戦(クリアにはしない)。光も復帰
+  restartCurrentPuzzle(); // 初形へ戻して自力で挑戦(クリアにはしない)。光も復帰
 }
 
 // ---- クリア後の流れ: 盤の演出(2秒) → A画面(切れ目) → 次へ/もう一度/一覧 ----
@@ -1136,10 +1254,33 @@ function goToGap() {
   const em = $('#gap-emblem');
   em.classList.remove('best', 'win');
   em.classList.add(best ? 'best' : 'win');
-  const levels = chapterLevels(curChapter);
-  const done = levels.filter((p) => cleared.has(p.id)).length;
-  $('#gap-progress').innerHTML = `<b>${done}</b> / ${levels.length}`;
-  // 「もう一度」は常に表示(次の問題への下)。同じ問題をいつでもやり直せる
+
+  if (dailyMode) {
+    const dr = handleDailyClear(moves, min);
+    if (dr) {
+      let html = `<span class="daily-streak-result">${t('dailyStreak', { n: dr.streak })}</span>`;
+      const rw = dr.reward;
+      html += `<span class="daily-reward-line">${t('dailyReward')}: ${t('hintLight')} ×${rw.light}　${t('hintNext')} ×${rw.next}`;
+      if (rw.answer > 0) html += `　${t('hintAnswer')} ×${rw.answer}`;
+      html += `</span>`;
+      if (dr.streakReward) {
+        const sr = dr.streakReward;
+        html += `<span class="daily-reward-line streak-bonus">${t('dailyStreakBonus', { n: sr.days })}</span>`;
+      }
+      $('#gap-progress').innerHTML = html;
+    } else {
+      const ds = loadDailyState();
+      $('#gap-progress').innerHTML = `<span class="daily-streak-result">${t('dailyStreak', { n: ds.streak })}</span>`;
+    }
+    $('#btn-next').textContent = t('levels');
+    $('#btn-share').hidden = false;
+  } else {
+    const levels = chapterLevels(curChapter);
+    const done = levels.filter((p) => cleared.has(p.id)).length;
+    $('#gap-progress').innerHTML = `<b>${done}</b> / ${levels.length}`;
+    $('#btn-next').textContent = t('nextPuzzle');
+    $('#btn-share').hidden = true;
+  }
   showInterstitial();
   $('#overlay-gap').hidden = false;
   if (!REDUCED) { // ① つなぎ演出: 背景フェード＋カード立ち上がり＋2球が寄り集まる(.enter を付け直して毎回再生)
@@ -1150,17 +1291,28 @@ function goToGap() {
 
 $('#btn-next').addEventListener('click', () => {
   $('#overlay-gap').hidden = true;
+  if (dailyMode) { dailyMode = false; showLevels(curChapter || CHAPTERS[0]); return; }
   const levels = chapterLevels(curChapter);
   if (curIndex + 1 < levels.length) startPuzzle(curChapter, curIndex + 1);
-  else showLevels(curChapter); // 章の最後なら一覧へ
+  else showLevels(curChapter);
 });
 $('#btn-list').addEventListener('click', () => {
   $('#overlay-gap').hidden = true;
-  showLevels(curChapter);
+  dailyMode = false;
+  showLevels(curChapter || CHAPTERS[0]);
 });
 $('#btn-retry').addEventListener('click', () => {
   $('#overlay-gap').hidden = true;
-  startPuzzle(curChapter, curIndex); // 同じ問題を初形から(最短を狙ってやり直す)
+  restartCurrentPuzzle();
+});
+$('#btn-share').addEventListener('click', async () => {
+  const s = loadDailyState();
+  const { moves, best } = lastClear;
+  const text = t('dailyShareText', { day: dailyDayNumber(), moves, best: best ? '1' : '0', streak: s.streak });
+  try {
+    if (navigator.share) await navigator.share({ text });
+    else { await navigator.clipboard.writeText(text); showToast(t('copied')); }
+  } catch (e) {}
 });
 
 $('#btn-theme').addEventListener('click', () => {
@@ -1206,6 +1358,7 @@ function resetProgress() {
   if (!confirm(t('resetConfirm'))) return;
   cleared.clear(); localStorage.removeItem(STORE_KEY);
   bestCleared.clear(); localStorage.removeItem(BEST_KEY);
+  localStorage.removeItem(DAILY_KEY);
   if (!$('#view-chapters').hidden) showChapters();
   else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
   closeSettings();
@@ -1232,6 +1385,46 @@ function closeInfoOverlay(id) { $(`#${id}-overlay`).hidden = true; }
   $(`#set-${id}`).addEventListener('click', () => openInfoOverlay(id));
   $(`#btn-${id}-close`).addEventListener('click', () => closeInfoOverlay(id));
 });
+// 統計・実績
+const ACHIEVEMENTS = [
+  { id: 'clear1',   icon: '🎯', req: () => cleared.size >= 1 },
+  { id: 'clear10',  icon: '🎯', req: () => cleared.size >= 10 },
+  { id: 'clear50',  icon: '🎯', req: () => cleared.size >= 50 },
+  { id: 'clear100', icon: '🎯', req: () => cleared.size >= 100 },
+  { id: 'best1',    icon: '⭐', req: () => bestCleared.size >= 1 },
+  { id: 'best10',   icon: '⭐', req: () => bestCleared.size >= 10 },
+  { id: 'best50',   icon: '⭐', req: () => bestCleared.size >= 50 },
+  { id: 'daily1',   icon: '📅', req: () => loadDailyState().totalDays >= 1 },
+  { id: 'streak7',  icon: '🔥', req: () => loadDailyState().maxStreak >= 7 },
+  { id: 'streak14', icon: '🔥', req: () => loadDailyState().maxStreak >= 14 },
+  { id: 'streak30', icon: '🔥', req: () => loadDailyState().maxStreak >= 30 },
+];
+function renderStats() {
+  const total = MODES.normal.levels.length;
+  const ds = loadDailyState();
+  const unlocked = ACHIEVEMENTS.filter(a => a.req()).length;
+  let html = '<div class="stat-grid">';
+  html += `<div class="stat-box"><div class="stat-val">${cleared.size}</div><div class="stat-lbl">${t('statCleared')}</div><div class="stat-sub">/ ${total}</div></div>`;
+  html += `<div class="stat-box"><div class="stat-val">${bestCleared.size}</div><div class="stat-lbl">${t('statBest')}</div><div class="stat-sub">/ ${total}</div></div>`;
+  html += '</div>';
+  html += `<div class="stat-sec">${t('statDaily')}</div>`;
+  html += '<div class="stat-grid tri">';
+  html += `<div class="stat-box"><div class="stat-val">${ds.totalDays}</div><div class="stat-lbl">${t('statDaysPlayed')}</div></div>`;
+  html += `<div class="stat-box"><div class="stat-val">${ds.streak}</div><div class="stat-lbl">${t('statCurrentStreak')}</div></div>`;
+  html += `<div class="stat-box"><div class="stat-val">${ds.maxStreak || 0}</div><div class="stat-lbl">${t('statMaxStreak')}</div></div>`;
+  html += '</div>';
+  html += `<div class="stat-sec">${t('statAchievements')} <span class="stat-dim">${unlocked} / ${ACHIEVEMENTS.length}</span></div>`;
+  html += '<div class="ach-list">';
+  for (const a of ACHIEVEMENTS) {
+    const done = a.req();
+    html += `<div class="ach-row${done ? ' done' : ''}"><span class="ach-icon">${done ? a.icon : '🔒'}</span><span class="ach-name">${t('ach_' + a.id)}</span></div>`;
+  }
+  html += '</div>';
+  $('#stats-content').innerHTML = html;
+}
+function openStats() { closeSettings(); renderStats(); $('#stats-overlay').hidden = false; }
+$('#set-stats').addEventListener('click', openStats);
+$('#btn-stats-close').addEventListener('click', () => { $('#stats-overlay').hidden = true; });
 // お問い合わせ: Googleフォームへ外部遷移(TODO: URL差し替え)
 $('#set-contact').addEventListener('click', () => {
   window.open('https://forms.gle/PLACEHOLDER', '_blank', 'noopener');
@@ -1243,6 +1436,7 @@ $('#settings-drawer').addEventListener('click', (e) => {
   if (e.target.closest('[data-soon]')) showToast(t('soon'));
 });
 
+$('#daily-card').addEventListener('click', () => startDailyPuzzle());
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア
@@ -1274,6 +1468,10 @@ const KEYMAP = {
 document.addEventListener('keydown', (e) => {
   if (!$('#howto-overlay').hidden) {
     if (e.key === 'Escape') closeHowto();
+    return;
+  }
+  if (!$('#stats-overlay').hidden) {
+    if (e.key === 'Escape') $('#stats-overlay').hidden = true;
     return;
   }
   for (const id of ['version', 'privacy']) {

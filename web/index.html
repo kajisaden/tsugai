@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{var r=document.documentElement,t=localStorage.getItem('nikenzume.theme.v1')==='light'?'light':'dark';r.dataset.theme=t;r.dataset.board=t;r.dataset.ball=t;}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=e7e11c3c65">
+<link rel="stylesheet" href="style.css?v=d68207f6ff">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
   </div>
   <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
        data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
-  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">49</span></h1>
+  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">51</span></h1>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -48,6 +48,17 @@
 
   <!-- 問題一覧 -->
   <section id="view-levels" hidden>
+    <!-- デイリーチャレンジ: 毎日1問、全員同じ問題。ストリーク＋ヒント報酬で毎日開くループを作る -->
+    <button id="daily-card">
+      <div class="daily-left">
+        <span class="daily-title" data-i18n="dailyTitle">デイリー</span>
+        <span class="daily-par" id="daily-par"></span>
+      </div>
+      <div class="daily-right">
+        <span class="daily-streak" id="daily-streak" hidden></span>
+        <span class="daily-status" id="daily-status"></span>
+      </div>
+    </button>
     <div id="mode-tabs">
       <button class="mode-tab active" data-mode="normal" data-i18n="modeNormal">通常</button>
       <button class="mode-tab" data-mode="advanced" data-i18n="modeAdvanced">上級</button>
@@ -130,6 +141,7 @@
     </div>
     <div class="gap-buttons">
       <button id="btn-next" data-i18n="nextPuzzle">次の問題へ</button>
+      <button id="btn-share" class="ghost" hidden data-i18n="dailyShare">シェア</button>
       <button id="btn-retry" class="ghost" data-i18n="retryAgain">もう一度</button>
     </div>
   </div>
@@ -187,6 +199,7 @@
       </button>
 
       <div class="set-sec" data-i18n="secInfo">情報</div>
+      <button class="set-row set-act" id="set-stats"><span class="set-lbl" data-i18n="stats">統計・実績</span><span class="set-r"><span class="chev">›</span></span></button>
       <button class="set-row set-act" id="set-howto"><span class="set-lbl" data-i18n="howto">遊び方</span><span class="set-r"><span class="chev">›</span></span></button>
       <button class="set-row set-act" id="set-version"><span class="set-lbl" data-i18n="version">バージョン履歴</span><span class="set-r">v1.0.0 <span class="chev">›</span></span></button>
       <button class="set-row set-act" id="set-privacy"><span class="set-lbl" data-i18n="privacy">プライバシーポリシー</span><span class="set-r"><span class="chev">›</span></span></button>
@@ -409,12 +422,21 @@
   </div>
 </div>
 
+<!-- 統計・実績 -->
+<div id="stats-overlay" class="info-overlay" hidden>
+  <div class="info-head">
+    <span class="info-title" data-i18n="stats">統計・実績</span>
+    <button id="btn-stats-close" class="ghost info-close" data-i18n-aria="close" aria-label="とじる">✕</button>
+  </div>
+  <div class="info-body" id="stats-content"></div>
+</div>
+
 <!-- お問い合わせ: Googleフォームへ外部リンク(set-contactのclickで直接遷移) -->
 
 <script src="pool.js?v=248cb71e15"></script>
 <script src="normal-levels.js?v=7366b4f2fb"></script>
 <script src="advanced-levels.js?v=40916070ee"></script>
-<script src="strings.js?v=2352af28a3"></script>
-<script src="app.js?v=9ec94b525e"></script>
+<script src="strings.js?v=bac14f712b"></script>
+<script src="app.js?v=ce602f3df5"></script>
 </body>
 </html>

@@ -281,6 +281,71 @@ button:active { transform: translateY(1px); }
   box-shadow: 0 0 26px 7px rgba(228, 236, 252, 0.8);
 }
 
+/* ---- デイリーチャレンジカード ---- */
+#daily-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(232, 176, 80, 0.3);
+  background: linear-gradient(135deg, rgba(232, 176, 80, 0.10) 0%, rgba(232, 176, 80, 0.04) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+#daily-card:active { background: rgba(232, 176, 80, 0.18); }
+.daily-left { display: flex; align-items: baseline; gap: 10px; }
+.daily-title {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+}
+.daily-par { font-size: 12px; color: var(--text-dim); }
+.daily-right { display: flex; align-items: center; gap: 10px; }
+.daily-streak { font-size: 12px; color: #e8b050; }
+.daily-status {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  letter-spacing: 0.05em;
+}
+.daily-status.new { background: rgba(232, 176, 80, 0.2); color: #e8b050; }
+.daily-status.cleared { background: rgba(200, 200, 200, 0.15); color: var(--text-dim); }
+.daily-status.best { background: rgba(232, 176, 80, 0.25); color: var(--gold); }
+/* A画面のデイリー報酬表示 */
+.daily-streak-result { font-size: 16px; display: block; margin-bottom: 4px; }
+.daily-reward-line { font-size: 13px; color: #e8b050; display: block; }
+.daily-reward-line.streak-bonus { color: var(--gold); font-weight: 600; margin-top: 4px; }
+/* シェアボタン */
+#btn-share {
+  min-width: 200px;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  border: 1px solid rgba(232, 217, 176, 0.25);
+  border-radius: 14px;
+  padding: 10px 18px;
+  background: transparent;
+  color: var(--gold);
+  cursor: pointer;
+}
+/* ライト */
+:root[data-theme="light"] #daily-card {
+  border-color: rgba(168, 128, 31, 0.3);
+  background: linear-gradient(135deg, rgba(168, 128, 31, 0.08) 0%, rgba(168, 128, 31, 0.03) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+:root[data-theme="light"] .daily-streak { color: #a8801f; }
+:root[data-theme="light"] .daily-status.new { background: rgba(168, 128, 31, 0.15); color: #a8801f; }
+:root[data-theme="light"] .daily-reward-line { color: #a8801f; }
+:root[data-theme="light"] #btn-share { border-color: rgba(168, 128, 31, 0.3); }
+
 /* ---- プレイ画面 ---- */
 #play-info {
   display: flex;
@@ -1423,6 +1488,53 @@ button.set-row:active { transform: none; }
   background: rgba(232,217,176,0.4);
 }
 :root[data-theme="light"] .ver-list li::before { background: rgba(168,128,31,0.4); }
+
+/* 統計・実績 */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stat-grid.tri { grid-template-columns: 1fr 1fr 1fr; }
+.stat-box {
+  text-align: center;
+  padding: 14px 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+}
+.stat-val {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--gold);
+  line-height: 1.2;
+}
+.stat-lbl { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+.stat-sub { font-size: 11px; color: var(--text-dim); opacity: 0.6; }
+.stat-sec {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.1em;
+  margin: 20px 0 10px;
+}
+.stat-dim { font-weight: 400; color: var(--text-dim); margin-left: 6px; }
+.ach-list { display: flex; flex-direction: column; gap: 2px; }
+.ach-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+.ach-row.done { color: var(--text); }
+.ach-icon { font-size: 18px; width: 26px; text-align: center; }
+.ach-row:not(.done) .ach-icon { opacity: 0.4; filter: grayscale(1); }
+.ach-row.done .ach-name { color: var(--gold); }
+:root[data-theme="light"] .stat-box { background: rgba(0, 0, 0, 0.03); }
 
 /* プライバシーポリシー */
 .pp-date { font-size: 11px; color: var(--text-dim); margin-bottom: 24px; }
