@@ -745,7 +745,7 @@ async function doMove(d) {
   // 反則(anyGoal && !allGoal)は祝福しないので対象外。スライドに重なるよう、await の前=今ここで点火する。
   if (allGoal && !REDUCED) G.rooms.forEach((rm) => {
     rm.goal.classList.remove('sucking'); void rm.goal.offsetWidth; rm.goal.classList.add('sucking');
-    // 600ms まで保持: 黒皿のバウンド一発(plate-pop 560ms: ゆっくり拡大→0へ縮小)を最後まで見せてから外す
+    // 600ms まで保持: 輪の吸着アニメを最後まで見せてから外す
     clearTimeout(rm.goal._suckT); rm.goal._suckT = setTimeout(() => rm.goal.classList.remove('sucking'), 600);
   });
   G.history.push(G.pos);
@@ -805,9 +805,7 @@ async function checkClear() {
   if (best) markBest(G.puz.id);
   lastClear = { moves: G.moves, min, best }; // A画面で出すため確保
 
-  // 点火: ボールが金(最短)/白(クリア)に発光して弾み、ゴールに光が満ちる。約1秒見せて A画面へ。
-  // ダークは球が自発光するため、ゴール吸着(白い輪の伸縮 ~320ms)が収まってから点火し、吸着を潰さない。
-  // ライト/モーション無効は球がマット or 演出なしで干渉しないので即時(従来どおり)。
+  // ダークは輪の伸縮(goal-suck-dark ~320ms)が収まってから点火。ライト/モーション無効は即時。
   const afterSuck = !REDUCED && boardSkin !== 'light';
   const ignite = () => {
     if (!G.cleared || !$('#overlay-gap').hidden) return; // 待ちの間に遷移済みなら何もしない
