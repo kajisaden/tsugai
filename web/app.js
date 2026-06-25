@@ -62,12 +62,7 @@ const NORMAL_IDS = window.NORMAL_LEVEL_IDS;
 const NORMAL_BOSS = window.NORMAL_BOSS_FLAGS;
 const poolById = new Map(POOL.puzzles.map(p => [p.id, p]));
 const NORMAL_LEVELS = NORMAL_IDS.map(id => poolById.get(id));
-const CHAPTER_SIZE = 50;
-const CHAPTERS = Array.from({ length: Math.ceil(NORMAL_LEVELS.length / CHAPTER_SIZE) }, (_, i) => ({
-  id: `ch${i + 1}`,
-  from: i * CHAPTER_SIZE,
-  to: Math.min((i + 1) * CHAPTER_SIZE, NORMAL_LEVELS.length),
-}));
+const CHAPTERS = [{ id: 'ch1', from: 0, to: NORMAL_LEVELS.length }];
 function chapterLevels(ch) {
   return NORMAL_LEVELS.slice(ch.from, ch.to);
 }
@@ -180,29 +175,17 @@ function showView(name) {
 }
 $('#btn-back').addEventListener('click', () => {
   if (!$('#view-play').hidden) showLevels(curChapter);
-  else showChapters();
 });
 
 function showChapters() {
-  showView('chapters');
-  const list = $('#chapter-list');
-  list.replaceChildren();
-  CHAPTERS.forEach((ch, i) => {
-    const levels = chapterLevels(ch);
-    const done = levels.filter((p) => cleared.has(p.id)).length;
-    const btn = document.createElement('button');
-    btn.className = 'chapter-card';
-    btn.innerHTML = `<span class="ch-name">${t('chapter', { n: i + 1 })}</span>` +
-      `<span class="ch-meta">${done} / ${levels.length}</span>`;
-    btn.addEventListener('click', () => showLevels(ch));
-    list.append(btn);
-  });
+  showLevels(CHAPTERS[0]);
 }
 
 function showLevels(ch) {
   curChapter = ch;
   showView('levels');
-  $('#levels-title').textContent = t('chapter', { n: CHAPTERS.indexOf(ch) + 1 });
+  const done = chapterLevels(ch).filter((p) => cleared.has(p.id)).length;
+  $('#levels-title').textContent = `${done} / ${chapterLevels(ch).length}`;
   const grid = $('#level-grid');
   grid.replaceChildren();
   chapterLevels(ch).forEach((p, i) => {
@@ -1073,8 +1056,7 @@ function goToGap() {
   em.classList.add(best ? 'best' : 'win');
   const levels = chapterLevels(curChapter);
   const done = levels.filter((p) => cleared.has(p.id)).length;
-  $('#gap-progress').innerHTML =
-    `${t('chapter', { n: CHAPTERS.indexOf(curChapter) + 1 })}　<b>${done}</b> / ${levels.length}`;
+  $('#gap-progress').innerHTML = `<b>${done}</b> / ${levels.length}`;
   // 「もう一度」は常に表示(次の問題への下)。同じ問題をいつでもやり直せる
   showInterstitial();
   $('#overlay-gap').hidden = false;
