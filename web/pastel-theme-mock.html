@@ -61,6 +61,10 @@ h1 {
   --accent: #d65d50;
   --accent2: #3f7fad;
   --goal: #d65d50;
+  --goal-fill: transparent;
+  --goal-border: color-mix(in srgb, var(--goal), white 12%);
+  --goal-inner: rgba(255,255,255,.42);
+  --goal-opacity: .8;
   position: relative;
   height: 620px;
   border-radius: 16px;
@@ -99,6 +103,49 @@ h1 {
   --piece-line: rgba(35, 75, 104, .34);
   --accent: #d75c51;
   --accent2: #3f7fad;
+  --goal: #3f7fad;
+}
+.goal-blue-ring {
+  --goal: #3f7fad;
+  --goal-fill: transparent;
+  --goal-border: #4f8fbb;
+  --goal-inner: rgba(255,255,255,.5);
+  --goal-opacity: .88;
+}
+.goal-blue-fill {
+  --goal: #3f7fad;
+  --goal-fill: color-mix(in srgb, var(--goal), white 72%);
+  --goal-border: #3f7fad;
+  --goal-inner: rgba(255,255,255,.45);
+  --goal-opacity: .86;
+}
+.goal-soft-blue {
+  --goal: #6fa7c7;
+  --goal-fill: color-mix(in srgb, var(--goal), white 84%);
+  --goal-border: #6fa7c7;
+  --goal-inner: rgba(255,255,255,.58);
+  --goal-opacity: .78;
+}
+.goal-target-blue {
+  --goal: #3f7fad;
+  --goal-fill: color-mix(in srgb, var(--goal), white 86%);
+  --goal-border: #3f7fad;
+  --goal-inner: color-mix(in srgb, var(--goal), white 58%);
+  --goal-opacity: .88;
+}
+.goal-inset-blue {
+  --goal: #3f7fad;
+  --goal-fill: rgba(255,255,255,.25);
+  --goal-border: color-mix(in srgb, var(--goal), white 10%);
+  --goal-inner: color-mix(in srgb, var(--goal), white 46%);
+  --goal-opacity: .84;
+}
+.goal-minimal-blue {
+  --goal: #3f7fad;
+  --goal-fill: transparent;
+  --goal-border: color-mix(in srgb, var(--goal), white 24%);
+  --goal-inner: transparent;
+  --goal-opacity: .72;
 }
 .paper-slate {
   --screen0: #f8f2e6;
@@ -259,9 +306,22 @@ h1 {
   width: 20%;
   height: 20%;
   border-radius: 10px;
-  border: 3px solid color-mix(in srgb, var(--goal), white 12%);
-  box-shadow: inset 0 0 0 4px rgba(255,255,255,.42), 0 0 12px color-mix(in srgb, var(--goal), transparent 68%);
-  opacity: .8;
+  background: var(--goal-fill);
+  border: 3px solid var(--goal-border);
+  box-shadow: inset 0 0 0 4px var(--goal-inner), 0 0 12px color-mix(in srgb, var(--goal), transparent 68%);
+  opacity: var(--goal-opacity);
+}
+.goal-target-blue .goal::before,
+.goal-inset-blue .goal::before {
+  content: "";
+  position: absolute;
+  inset: 28%;
+  border-radius: 6px;
+  background: var(--goal-inner);
+}
+.goal-minimal-blue .goal {
+  border-width: 2px;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--goal), transparent 78%);
 }
 .board:nth-child(2) .goal { left: 20%; top: 60%; }
 .piece {
@@ -406,32 +466,32 @@ svg {
 </style>
 </head>
 <body>
-<h1>Threes-Inspired Tsugai</h1>
-<p class="lead">Threes!の紙タイル感、クリーム地、赤青アクセントをTsugai向けに翻訳した配色モック。模倣ではなく、読みやすさと親しみやすさの要素を抽出。</p>
+<h1>Threes-Inspired Blue Goals</h1>
+<p class="lead">B案の赤青配色を固定し、ゴールだけをボール色の青に寄せた比較モック。赤は操作・接触の強調、青は駒と到達先の意味色として使う。</p>
 <main class="variants">
   <section class="variant">
-    <div class="meta"><span class="name">A Classic Paper</span><span class="tag">一番Threes寄り</span></div>
-    <div class="screen classic"></div>
+    <div class="meta"><span class="name">A Blue Ring</span><span class="tag">輪郭だけ青</span></div>
+    <div class="screen cream-redblue goal-blue-ring"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">B Red / Blue</span><span class="tag">意味色を強める</span></div>
-    <div class="screen cream-redblue"></div>
+    <div class="meta"><span class="name">B Blue Fill</span><span class="tag">到達先が明確</span></div>
+    <div class="screen cream-redblue goal-blue-fill"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">C Paper Slate</span><span class="tag">少し大人しい</span></div>
-    <div class="screen paper-slate"></div>
+    <div class="meta"><span class="name">C Soft Blue</span><span class="tag">やさしく馴染む</span></div>
+    <div class="screen cream-redblue goal-soft-blue"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">D Coral Focus</span><span class="tag">駒を主役にする</span></div>
-    <div class="screen coral-focus"></div>
+    <div class="meta"><span class="name">D Target Blue</span><span class="tag">目的地感が強い</span></div>
+    <div class="screen cream-redblue goal-target-blue"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">E Blue Focus</span><span class="tag">クールで読みやすい</span></div>
-    <div class="screen blue-focus"></div>
+    <div class="meta"><span class="name">E Inset Blue</span><span class="tag">内側だけ青</span></div>
+    <div class="screen cream-redblue goal-inset-blue"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">F Bold Readable</span><span class="tag">ストア映え重視</span></div>
-    <div class="screen bold-readable"></div>
+    <div class="meta"><span class="name">F Minimal Blue</span><span class="tag">情報量最小</span></div>
+    <div class="screen cream-redblue goal-minimal-blue"></div>
   </section>
 </main>
 <template id="screen-template">
