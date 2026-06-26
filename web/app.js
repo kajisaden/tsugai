@@ -709,12 +709,13 @@ function bumpPiece(rm, d) {
       { filter: 'brightness(1.55)', offset: 0.32 },
       { filter: 'brightness(1)',    offset: 1 },
     ], { duration: (BUMP_MS || 1) * 2, easing: 'ease-out' });
-    // ライトの黒石は brightness では光らないので、白いディスクを一瞬重ねて「白く発光」させる(ダーク相当)。
-    // ダークは金球が brightness で十分光るため重ねない(承認済みの見えを変えない)。
-    if (rm.ballFlash && rm.ballFlash.animate && ballSkin === 'light') {
+    // 球面側にも接触光を一瞬だけ重ねる。ライトの黒石は強め、ダークの金球は薄くして
+    // 既存の質感を保ったまま、壁当てがゲームの主役だと分かる手応えを出す。
+    if (rm.ballFlash && rm.ballFlash.animate) {
+      const peak = ballSkin === 'light' ? 0.8 : 0.32;
       rm.ballFlash.animate([
         { opacity: 0,   offset: 0 },
-        { opacity: 0.8, offset: 0.3 },
+        { opacity: peak, offset: 0.28 },
         { opacity: 0,   offset: 1 },
       ], { duration: (BUMP_MS || 1) * 2, easing: 'ease-out' });
     }
@@ -734,27 +735,27 @@ function placeEdgeGlow(g, p, d) {
     // 上(0)/下(1): 横辺
     g.style.left = `${x * cw}%`;
     g.style.width = `${cw}%`;
-    g.style.height = '4px';
+    g.style.height = '6px';
     g.style.top = `${(d === 0 ? y : y + 1) * ch}%`;
-    g.style.transform = d === 0 ? 'translateY(0)' : 'translateY(-4px)';
+    g.style.transform = d === 0 ? 'translateY(0)' : 'translateY(-6px)';
   } else {
     // 左(2)/右(3): 縦辺
     g.style.top = `${y * ch}%`;
     g.style.height = `${ch}%`;
-    g.style.width = '4px';
+    g.style.width = '6px';
     g.style.left = `${(d === 2 ? x : x + 1) * cw}%`;
-    g.style.transform = d === 2 ? 'translateX(0)' : 'translateX(-4px)';
+    g.style.transform = d === 2 ? 'translateX(0)' : 'translateX(-6px)';
   }
 }
 
 // 壁当ての可視化(答え再生時): ぶつかった面だけを一瞬光らせる
 function showBumpGlow(rm, p, d) {
   const g = rm.bumpGlow;
-  placeEdgeGlow(g, p, d); // バーは4pxのまま。強調はにじみ/白熱/タイミング(CSS)で出す
+  placeEdgeGlow(g, p, d); // バーは細いまま、接触面だけを白熱させる。強調はにじみ/タイミング(CSS)で出す
   // レバー2: にじみ外層を、当たった壁の反対=開いた室内側へ寄せる方向ベクトル(キーフレームが使う)。
   // 当たり方向 DIRS[d] は壁側を指すので、室内側はその逆 -DIRS[d]。
-  g.style.setProperty('--bloom-x', `${-DIRS[d][0] * 9}px`);
-  g.style.setProperty('--bloom-y', `${-DIRS[d][1] * 9}px`);
+  g.style.setProperty('--bloom-x', `${-DIRS[d][0] * 12}px`);
+  g.style.setProperty('--bloom-y', `${-DIRS[d][1] * 12}px`);
   g.classList.remove('show');
   void g.offsetWidth; // アニメ再始動
   g.classList.add('show');

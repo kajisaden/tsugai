@@ -408,9 +408,9 @@ button:active { transform: translateY(1px); }
 /* 壁当ての可視化: ぶつかった面に沿って一瞬光る(答え再生時) */
 .bump-glow {
   position: absolute;
-  border-radius: 2px;
+  border-radius: 4px;
   background: var(--b-gold);
-  box-shadow: 0 0 10px 2px var(--b-glow);
+  box-shadow: 0 0 12px 3px var(--b-glow);
   opacity: 0;
   pointer-events: none;
 }
@@ -430,8 +430,8 @@ button:active { transform: translateY(1px); }
    色は --gold/--glow/--bump-hot でテーマ自動追従。ピーク(10%≈75ms)は bumpPiece のめり込み頂点(≈80ms)に重なる */
 @keyframes bump-glow {
   0%   { opacity: 0;    background: var(--b-bump-hot); box-shadow: 0 0 8px 2px var(--b-glow); }
-  10%  { opacity: 1;    background: var(--b-bump-hot); box-shadow: 0 0 18px 5px var(--b-glow), var(--bloom-x, 0px) var(--bloom-y, 0px) 36px 12px var(--b-glow); }
-  34%  { opacity: 0.92; background: var(--b-gold);     box-shadow: 0 0 14px 4px var(--b-glow), calc(var(--bloom-x, 0px) * 0.55) calc(var(--bloom-y, 0px) * 0.55) 26px 8px var(--b-glow); }
+  9%   { opacity: 1;    background: var(--b-bump-hot); box-shadow: 0 0 22px 7px var(--b-glow), var(--bloom-x, 0px) var(--bloom-y, 0px) 46px 16px var(--b-glow); }
+  30%  { opacity: 0.96; background: var(--b-gold);     box-shadow: 0 0 18px 5px var(--b-glow), calc(var(--bloom-x, 0px) * 0.62) calc(var(--bloom-y, 0px) * 0.62) 32px 10px var(--b-glow); }
   100% { opacity: 0;    background: var(--b-gold);     box-shadow: 0 0 10px 2px var(--b-glow); }
 }
 
@@ -585,7 +585,7 @@ button:active { transform: translateY(1px); }
    主にライトの黒石用: brightness では光らないため、白く発光させてダーク相当の手応えを出す */
 .ball-flash {
   position: absolute;
-  inset: 0;
+  inset: -7%;
   border-radius: 50%;
   /* 壁当ての光と同じ色で発光(--bump-hot=壁のピーク色 / --glow=にじみ)。テーマ自動追従(ライト=琥珀/ダーク=暖白) */
   background: radial-gradient(circle at 50% 45%, var(--bump-hot) 0%, var(--glow) 55%, transparent 78%);
@@ -996,14 +996,14 @@ button:active { transform: translateY(1px); }
 :root[data-board="light"] .hint-glow,
 :root[data-board="light"] .bump-glow {
   background: #f0dfa0;
-  box-shadow: 0 0 6px 2px rgba(216, 192, 110, 0.48), 0 0 12px 3px rgba(216, 192, 110, 0.20);
+  box-shadow: 0 0 8px 2px rgba(216, 192, 110, 0.56), 0 0 15px 4px rgba(216, 192, 110, 0.24);
 }
 :root[data-board="light"] .bump-glow.show { animation-name: bump-glow-light; }
 @keyframes bump-glow-light {
   0%   { opacity: 0;    background: #f8eecc; box-shadow: 0 0 5px 1px rgba(216, 192, 110, 0.4); }
-  10%  { opacity: 1;    background: #faf2d0; box-shadow: 0 0 10px 3px rgba(216, 192, 110, 0.55), calc(var(--bloom-x, 0px) * 0.7) calc(var(--bloom-y, 0px) * 0.7) 22px 6px rgba(216, 192, 110, 0.22); }
-  34%  { opacity: 0.90; background: #f0dfa0; box-shadow: 0 0 7px 2px rgba(216, 192, 110, 0.45), calc(var(--bloom-x, 0px) * 0.4) calc(var(--bloom-y, 0px) * 0.4) 15px 4px rgba(216, 192, 110, 0.18); }
-  100% { opacity: 0;    background: #f0dfa0; box-shadow: 0 0 6px 2px rgba(216, 192, 110, 0.48), 0 0 12px 3px rgba(216, 192, 110, 0.20); }
+  9%   { opacity: 1;    background: #faf2d0; box-shadow: 0 0 13px 4px rgba(216, 192, 110, 0.62), calc(var(--bloom-x, 0px) * 0.76) calc(var(--bloom-y, 0px) * 0.76) 28px 8px rgba(216, 192, 110, 0.26); }
+  30%  { opacity: 0.92; background: #f0dfa0; box-shadow: 0 0 9px 3px rgba(216, 192, 110, 0.50), calc(var(--bloom-x, 0px) * 0.46) calc(var(--bloom-y, 0px) * 0.46) 18px 5px rgba(216, 192, 110, 0.20); }
+  100% { opacity: 0;    background: #f0dfa0; box-shadow: 0 0 8px 2px rgba(216, 192, 110, 0.56), 0 0 15px 4px rgba(216, 192, 110, 0.24); }
 }
 :root[data-board="light"] .hint-glow {
   animation: hint-glow-leaf 2.6s ease-in-out infinite;
