@@ -735,16 +735,16 @@ function placeEdgeGlow(g, p, d) {
     // 上(0)/下(1): 横辺
     g.style.left = `${x * cw}%`;
     g.style.width = `${cw}%`;
-    g.style.height = '6px';
+    g.style.height = '4px';
     g.style.top = `${(d === 0 ? y : y + 1) * ch}%`;
-    g.style.transform = d === 0 ? 'translateY(0)' : 'translateY(-6px)';
+    g.style.transform = d === 0 ? 'translateY(0)' : 'translateY(-4px)';
   } else {
     // 左(2)/右(3): 縦辺
     g.style.top = `${y * ch}%`;
     g.style.height = `${ch}%`;
-    g.style.width = '6px';
+    g.style.width = '4px';
     g.style.left = `${(d === 2 ? x : x + 1) * cw}%`;
-    g.style.transform = d === 2 ? 'translateX(0)' : 'translateX(-6px)';
+    g.style.transform = d === 2 ? 'translateX(0)' : 'translateX(-4px)';
   }
 }
 
