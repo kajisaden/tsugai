@@ -480,6 +480,12 @@ button:active { transform: translateY(1px); }
   0% { transform: scale(1.06); }
   100% { transform: scale(0.74); }
 }
+:root[data-theme="light"] .trail-cell::before {
+  border-color: rgba(18, 17, 14, 0.34);
+  box-shadow:
+    0 0 12px 3px rgba(168, 128, 31, 0.14),
+    inset 0 0 8px 1px rgba(18, 17, 14, 0.06);
+}
 
 .cells {
   position: absolute;
