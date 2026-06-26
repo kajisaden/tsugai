@@ -184,6 +184,17 @@ button.ghost {
 }
 button.ghost:hover { color: var(--text); }
 button:active { transform: translateY(1px); }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* ---- 章一覧 ---- */
 #chapter-list { display: grid; gap: 12px; }
@@ -648,14 +659,33 @@ button:active { transform: translateY(1px); }
 /* ヘルプ = 盤床色のカード(一覧タイル/結果カードと同家系)。背後の一枚板は置かない */
 .help {
   position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
   font: inherit; font-size: 13px; letter-spacing: 0.04em;
   color: var(--text);
   border-radius: 11px;
-  padding: 11px 14px;
+  padding: 0;
   cursor: pointer;
   background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.help svg,
+.reset-btn svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#btn-answer-open svg {
+  fill: currentColor;
+  stroke: none;
+  transform: translateX(1px);
 }
 /* 光ヒント点灯中(この問題): 金で強調 */
 .help.lit { color: var(--gold); border-color: rgba(232, 217, 176, 0.35); }
@@ -673,6 +703,8 @@ button:active { transform: translateY(1px); }
 .reset-btn {
   margin-top: 14px;
   width: 100%;
+  display: grid;
+  place-items: center;
   font: inherit; font-size: 15px; letter-spacing: 0.08em;
   color: var(--text);
   background: transparent;
@@ -683,6 +715,7 @@ button:active { transform: translateY(1px); }
 }
 .reset-btn:active { transform: translateY(1px); }
 #hint-keys {
+  display: none;
   text-align: center;
   font-size: 11px;
   color: var(--text-dim);
