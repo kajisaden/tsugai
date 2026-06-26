@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tsugai light trail ring compare</title>
+<style>
+* { box-sizing: border-box; }
+html, body { min-height: 100%; margin: 0; background: #f6f2e8; color: #2b2923; }
+body {
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", system-ui, sans-serif;
+  padding: 22px 14px 34px;
+}
+h1 {
+  margin: 0 auto 8px;
+  max-width: 720px;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  color: #8a6a19;
+}
+.lead {
+  max-width: 720px;
+  margin: 0 auto 18px;
+  color: #6d6758;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.compare {
+  display: grid;
+  gap: 18px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.sample {
+  display: grid;
+  gap: 8px;
+}
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+.name {
+  color: #8a6a19;
+  font-size: 15px;
+  letter-spacing: .08em;
+}
+.tag {
+  color: #777064;
+  font-size: 11px;
+  letter-spacing: .06em;
+}
+.stage {
+  position: relative;
+  height: 300px;
+  border: 1px solid rgba(82, 72, 48, .16);
+  border-radius: 12px;
+  overflow: hidden;
+  background: radial-gradient(120% 120% at 50% 40%, #fbf8ef 0%, #eee7d8 78%);
+}
+.board {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(280px, 88vw);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #ece5d6 0%, #ddd3c0 100%);
+  border: 1px solid rgba(82, 72, 48, .22);
+  box-shadow: inset 0 1px 4px rgba(255,255,255,.72), inset 0 -8px 18px rgba(82,72,48,.07);
+}
+.grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+}
+.cell { border: .5px solid rgba(82, 72, 48, .18); }
+.wall {
+  background: linear-gradient(160deg, #beb39e 0%, #aa9e87 100%);
+  border-color: rgba(82, 72, 48, .2);
+}
+.trail {
+  position: absolute;
+  width: 20%;
+  height: 20%;
+  border-radius: 50%;
+}
+.trail::before {
+  content: "";
+  position: absolute;
+  inset: 17%;
+  border-radius: 999px;
+  background: transparent;
+  animation: shrink 1400ms ease-out infinite;
+}
+.t1 { left: 20%; top: 40%; animation-delay: 0ms; }
+.t2 { left: 40%; top: 40%; animation-delay: 140ms; }
+.t3 { left: 60%; top: 40%; animation-delay: 280ms; }
+.current .trail::before {
+  border: 2px solid rgba(18, 17, 14, .34);
+  box-shadow:
+    0 0 12px 3px rgba(168, 128, 31, .14),
+    inset 0 0 8px 1px rgba(18, 17, 14, .06);
+}
+.proposed .trail::before {
+  border: 2px solid rgba(18, 17, 14, .52);
+  box-shadow:
+    0 0 13px 3px rgba(168, 128, 31, .17),
+    inset 0 0 9px 1px rgba(18, 17, 14, .10);
+}
+.ball {
+  position: absolute;
+  left: 60%;
+  top: 40%;
+  width: 20%;
+  height: 20%;
+}
+.ball::before {
+  content: "";
+  position: absolute;
+  inset: 17%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #4a4740 0%, #1f1e1b 54%, #0b0b0a 100%);
+  box-shadow: 0 5px 10px rgba(32, 28, 20, .18);
+}
+@keyframes shrink {
+  0% { opacity: 0; transform: scale(1.06); }
+  14% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(.74); }
+}
+@media (min-width: 720px) {
+  .compare { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<h1>Light Trail Ring</h1>
+<p class="lead">ライトモードの残像リング比較。左が現在、右が墨色を濃くした修正案。</p>
+<main class="compare">
+  <section class="sample current">
+    <div class="meta"><span class="name">現状</span><span class="tag">border .34 / amber .14</span></div>
+    <div class="stage">
+      <div class="board">
+        <div class="grid">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell wall"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell wall"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell wall"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        </div>
+        <span class="trail t1"></span><span class="trail t2"></span><span class="trail t3"></span><span class="ball"></span>
+      </div>
+    </div>
+  </section>
+  <section class="sample proposed">
+    <div class="meta"><span class="name">修正案</span><span class="tag">border .52 / amber .17</span></div>
+    <div class="stage">
+      <div class="board">
+        <div class="grid">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell wall"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell wall"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell wall"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        </div>
+        <span class="trail t1"></span><span class="trail t2"></span><span class="trail t3"></span><span class="ball"></span>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
