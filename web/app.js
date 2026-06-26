@@ -30,11 +30,16 @@ function fillI18n() {
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
 }
 
-// ---- テーマ(ライト/ダーク): 手動トグル。localStorage 永続・既定はダーク ----
+// ---- テーマ(ライト/ダーク): 手動トグル。A Blue Ring刷新版の既定はライト ----
 // テーマ(UI色) / 盤スキン / ボールスキン の3軸自由組み合わせ。
 // data-theme=dark|light, data-board=dark|light, data-ball=dark|light
 const THEME_KEY = 'nikenzume.theme.v1';
-let theme = localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
+const THEME_DESIGN_KEY = 'nikenzume.themeDesign.v2';
+if (localStorage.getItem(THEME_DESIGN_KEY) !== 'blue-ring') {
+  localStorage.setItem(THEME_KEY, 'light');
+  localStorage.setItem(THEME_DESIGN_KEY, 'blue-ring');
+}
+let theme = localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light';
 let boardSkin = theme;
 let ballSkin = theme;
 function applyTheme() {
