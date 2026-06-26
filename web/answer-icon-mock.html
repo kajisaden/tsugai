@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tsugai answer icon mock</title>
+<style>
+* { box-sizing: border-box; }
+html, body { min-height: 100%; margin: 0; background: #0a0a0e; color: #d8d4ca; }
+body {
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", system-ui, sans-serif;
+  padding: 20px 14px 34px;
+}
+h1 {
+  max-width: 420px;
+  margin: 0 auto 8px;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: .12em;
+  color: #e8d9b0;
+}
+.lead {
+  max-width: 420px;
+  margin: 0 auto 16px;
+  color: #9d9a8e;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.variants {
+  display: grid;
+  gap: 14px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.variant {
+  display: grid;
+  gap: 8px;
+}
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+.name { color: #e8d9b0; font-size: 14px; letter-spacing: .08em; }
+.tag { color: #9d9a8e; font-size: 11px; letter-spacing: .04em; }
+.bar {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 8px;
+  min-height: 60px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: radial-gradient(120% 100% at 50% 0%, #101018 0%, #0a0a0e 76%);
+  border: 1px solid rgba(255,255,255,.06);
+}
+.round,
+.answer {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #d8d4ca;
+  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
+}
+.answer {
+  color: #e8d9b0;
+  border-color: rgba(232,217,176,.25);
+}
+.status {
+  min-width: 0;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+.no { color: #e8d9b0; font-size: 14px; letter-spacing: .05em; }
+.count { color: #d8d4ca; font-size: 14px; letter-spacing: .04em; }
+.settings { justify-self: end; }
+svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fill svg { fill: currentColor; stroke: none; }
+.answer.a-mark {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+.note {
+  margin: -2px 0 0;
+  color: #9d9a8e;
+  font-size: 12px;
+  line-height: 1.55;
+}
+</style>
+</head>
+<body>
+<h1>Answer Icon Mock</h1>
+<p class="lead">ヘッダー中央に置く「答え」アイコン候補。実寸に近いヘッダー内で比較。</p>
+<main class="variants">
+  <section class="variant">
+    <div class="meta"><span class="name">A 再生</span><span class="tag">現状に近い</span></div>
+    <div class="bar">
+      <div class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></div>
+      <div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer fill"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+      <div class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></div>
+    </div>
+    <p class="note">自動再生は伝わるが、答えそのものには見えにくい。</p>
+  </section>
+  <section class="variant">
+    <div class="meta"><span class="name">B 手順</span><span class="tag">推奨</span></div>
+    <div class="bar">
+      <div class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></div>
+      <div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer"><svg viewBox="0 0 24 24"><path d="M7 6h10"/><path d="M7 12h7"/><path d="M7 18h4"/><path d="m15 16 3 2-3 2"/></svg></span></div>
+      <div class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></div>
+    </div>
+    <p class="note">「解答手順を見る」に一番近い。次の手ヒントとも混同しにくい。</p>
+  </section>
+  <section class="variant">
+    <div class="meta"><span class="name">C ゴール旗</span><span class="tag">到達イメージ</span></div>
+    <div class="bar">
+      <div class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></div>
+      <div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer"><svg viewBox="0 0 24 24"><path d="M6 20V5"/><path d="M6 5h10l-1.8 3L16 11H6"/><path d="M15 17h3"/><path d="M16.5 15.5v3"/></svg></span></div>
+      <div class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></div>
+    </div>
+    <p class="note">クリア地点は伝わるが、答え再生という機能名とは少し離れる。</p>
+  </section>
+  <section class="variant">
+    <div class="meta"><span class="name">D 目 + 再生</span><span class="tag">見る + 再生</span></div>
+    <div class="bar">
+      <div class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></div>
+      <div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer"><svg viewBox="0 0 24 24"><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/><path d="m11 9 4 3-4 3Z"/></svg></span></div>
+      <div class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></div>
+    </div>
+    <p class="note">「見る」は伝わるが、小さいサイズだと少し複雑。</p>
+  </section>
+  <section class="variant">
+    <div class="meta"><span class="name">E A</span><span class="tag">Answer略</span></div>
+    <div class="bar">
+      <div class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></div>
+      <div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer a-mark">A</span></div>
+      <div class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></div>
+    </div>
+    <p class="note">意味は覚えれば強いが、日本語UIでは少し唐突。</p>
+  </section>
+</main>
+</body>
+</html>
