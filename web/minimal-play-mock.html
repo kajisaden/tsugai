@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tsugai minimal play mock</title>
+<style>
+* { box-sizing: border-box; }
+html, body { min-height: 100%; margin: 0; background: #0a0a0e; color: #d8d4ca; }
+body {
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", system-ui, sans-serif;
+  padding: 20px 14px 34px;
+}
+h1 {
+  max-width: 760px;
+  margin: 0 auto 8px;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: .14em;
+  color: #e8d9b0;
+}
+.lead {
+  max-width: 760px;
+  margin: 0 auto 18px;
+  color: #9d9a8e;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.mocks {
+  display: grid;
+  gap: 18px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.mock { display: grid; gap: 8px; }
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+.name { color: #e8d9b0; font-size: 15px; letter-spacing: .08em; }
+.tag { color: #9d9a8e; font-size: 11px; letter-spacing: .06em; }
+.screen {
+  position: relative;
+  height: 560px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: radial-gradient(120% 100% at 50% 0%, #101018 0%, #0a0a0e 64%);
+  border: 1px solid rgba(255,255,255,.06);
+}
+.topbar {
+  display: grid;
+  grid-template-columns: 42px 1fr 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 8px;
+}
+.round,
+.icon-btn,
+.hint,
+.reset {
+  display: grid;
+  place-items: center;
+  color: #d8d4ca;
+  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
+}
+.round,
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.icon-btn.answer {
+  color: #e8d9b0;
+  border-color: rgba(232,217,176,.25);
+}
+.center-info {
+  justify-self: center;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  color: #d8d4ca;
+  letter-spacing: .08em;
+}
+.puzzle { font-size: 14px; color: #e8d9b0; }
+.moves { font-size: 13px; color: #9d9a8e; }
+.play-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 18px 10px;
+}
+.play-info-row .left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.boards {
+  display: grid;
+  gap: 24px;
+  justify-items: center;
+  padding-top: 2px;
+}
+.board {
+  position: relative;
+  width: min(236px, 70vw);
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
+  border: 1px solid rgba(255,255,255,.11);
+  box-shadow: inset 0 2px 9px rgba(0,0,0,.55);
+}
+.grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+}
+.cell { border: .5px solid rgba(255,255,255,.07); }
+.wall { background: linear-gradient(160deg, #4a4a57 0%, #3a3a45 100%); }
+.goal {
+  position: absolute;
+  width: 20%;
+  height: 20%;
+  border-radius: 50%;
+  border: 2px dashed rgba(232,217,176,.68);
+  box-shadow: 0 0 12px rgba(240,220,170,.3);
+}
+.g1 { left: 60%; top: 20%; }
+.g2 { left: 20%; top: 60%; }
+.ball {
+  position: absolute;
+  width: 20%;
+  height: 20%;
+}
+.ball::before {
+  content: "";
+  position: absolute;
+  inset: 17%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #fffdf6 0%, #f3e3bd 45%, #c9b585 100%);
+  box-shadow: 0 0 12px rgba(240,220,170,.42);
+}
+.b1 { left: 20%; top: 40%; }
+.b2 { left: 60%; top: 40%; }
+.edge-glow {
+  position: absolute;
+  left: 40%;
+  top: 40%;
+  width: 20%;
+  height: 4px;
+  background: #fffaf0;
+  box-shadow: 0 0 18px 6px rgba(240,220,170,.55);
+  opacity: .9;
+}
+.controls {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+.hint {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  color: #e8d9b0;
+  border-color: rgba(232,217,176,.3);
+}
+.hint.active {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 0 18px 4px rgba(240,220,170,.18);
+}
+.reset {
+  width: 150px;
+  height: 42px;
+  border-radius: 12px;
+  background: transparent;
+  border-color: rgba(255,255,255,.28);
+}
+svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.answer svg { fill: currentColor; stroke: none; transform: translateX(1px); }
+.badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  background: #e8d9b0;
+  color: #16161d;
+}
+.note {
+  position: absolute;
+  left: 50%;
+  bottom: 124px;
+  transform: translateX(-50%);
+  color: rgba(232,217,176,.62);
+  font-size: 11px;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+@media (min-width: 760px) {
+  .mocks { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<h1>Minimal Play Mock</h1>
+<p class="lead">次の手ヒントを外し、ヒントは光だけにする構成。ロゴなしで、答えの置き場を2案比較。</p>
+<main class="mocks">
+  <section class="mock">
+    <div class="meta"><span class="name">A ヘッダー右に答え</span><span class="tag">上部で役割分離</span></div>
+    <div class="screen">
+      <div class="topbar">
+        <div class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></div>
+        <div class="center-info"><span class="puzzle">#12 4手詰</span><span class="moves">2手</span></div>
+        <div class="icon-btn answer"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+      </div>
+      <div class="boards">
+        <div class="board"><div class="grid"></div><span class="goal g1"></span><span class="ball b1"></span><span class="edge-glow"></span></div>
+        <div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div>
+      </div>
+      <div class="note">電球 = 壁が光る</div>
+      <div class="controls">
+        <div class="hint active"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></div>
+        <div class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mock">
+    <div class="meta"><span class="name">B 情報行右に答え</span><span class="tag">戻る/設定余地あり</span></div>
+    <div class="screen">
+      <div class="topbar">
+        <div class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></div>
+        <div></div>
+        <div class="round"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+      </div>
+      <div class="play-info-row">
+        <div class="left"><span class="puzzle">#12 4手詰</span><span class="moves">2手</span></div>
+        <div class="icon-btn answer"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+      </div>
+      <div class="boards">
+        <div class="board"><div class="grid"></div><span class="goal g1"></span><span class="ball b1"></span><span class="edge-glow"></span></div>
+        <div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div>
+      </div>
+      <div class="note">電球 = 壁が光る</div>
+      <div class="controls">
+        <div class="hint active"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></div>
+        <div class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+for (const grid of document.querySelectorAll('.grid')) {
+  for (let i = 0; i < 25; i += 1) {
+    const cell = document.createElement('div');
+    cell.className = 'cell' + ([6, 14, 17].includes(i) ? ' wall' : '');
+    grid.append(cell);
+  }
+}
+</script>
+</body>
+</html>
