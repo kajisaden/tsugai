@@ -179,10 +179,46 @@ h1 {
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(5, 1fr);
 }
-.cell { border: .5px solid rgba(96, 70, 52, .14); }
+.cell {
+  position: relative;
+  border: .5px solid rgba(96, 70, 52, .14);
+}
 .wall {
-  background: linear-gradient(160deg, #cbb29b, #a88e79);
-  border-color: rgba(93, 68, 52, .2);
+  z-index: 1;
+  background: linear-gradient(145deg, #d9c1aa 0%, #b5967c 55%, #8f725f 100%);
+  border: 1px solid rgba(93, 68, 52, .24);
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,.28),
+    inset -3px -4px 0 rgba(85, 57, 40, .16),
+    0 4px 8px rgba(90, 61, 43, .18);
+}
+.wall::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  right: 9px;
+  top: 6px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(255, 244, 227, .48);
+}
+.wall::after {
+  content: "";
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 38%;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(77, 51, 36, .22);
+}
+.stone-block .wall {
+  background: linear-gradient(145deg, #d3b293 0%, #aa8267 56%, #7d5b4a 100%);
+  border-color: rgba(72, 48, 36, .28);
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,.24),
+    inset -3px -4px 0 rgba(69, 43, 31, .2),
+    0 5px 9px rgba(83, 54, 39, .23);
 }
 .goal {
   position: absolute;
