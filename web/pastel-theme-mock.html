@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tsugai pastel theme mock</title>
+<style>
+* { box-sizing: border-box; }
+html, body { min-height: 100%; margin: 0; background: #f5f2ec; color: #2d2a28; }
+body {
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", system-ui, sans-serif;
+  padding: 20px 14px 34px;
+}
+h1 {
+  max-width: 760px;
+  margin: 0 auto 8px;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  color: #5f584d;
+}
+.lead {
+  max-width: 760px;
+  margin: 0 auto 18px;
+  color: #746e64;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.variants {
+  display: grid;
+  gap: 18px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.variant { display: grid; gap: 8px; }
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+.name { color: #514b43; font-size: 15px; letter-spacing: .08em; }
+.tag { color: #7c756b; font-size: 11px; letter-spacing: .06em; }
+.screen {
+  --bg0: #f6f1e7;
+  --bg1: #ede3d4;
+  --panel0: #efe7d8;
+  --panel1: #ddd0be;
+  --wall0: #c6b8a4;
+  --wall1: #a99b88;
+  --line: rgba(77, 68, 56, .16);
+  --ball0: #4d4a45;
+  --ball1: #171716;
+  --gold: #98753a;
+  --glow: rgba(198, 155, 72, .28);
+  position: relative;
+  height: 620px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: radial-gradient(120% 100% at 50% 0%, var(--bg0) 0%, var(--bg1) 76%);
+  border: 1px solid rgba(84, 76, 63, .13);
+}
+.mint {
+  --bg0: #eff8f3;
+  --bg1: #dcefe9;
+  --panel0: #e7f4ef;
+  --panel1: #cfe5df;
+  --wall0: #b5cec8;
+  --wall1: #8daaa4;
+  --line: rgba(46, 84, 78, .16);
+  --gold: #7b8f52;
+  --glow: rgba(129, 157, 96, .28);
+}
+.lavender {
+  --bg0: #f4f0fa;
+  --bg1: #e6deef;
+  --panel0: #eee8f6;
+  --panel1: #d8cfe5;
+  --wall0: #c2b6d4;
+  --wall1: #9f93b8;
+  --line: rgba(64, 52, 90, .16);
+  --gold: #8570a5;
+  --glow: rgba(142, 115, 178, .25);
+}
+.sky {
+  --bg0: #eef6fb;
+  --bg1: #d9e9f0;
+  --panel0: #e4f0f6;
+  --panel1: #cadde7;
+  --wall0: #adc6d4;
+  --wall1: #82a0b3;
+  --line: rgba(45, 76, 95, .16);
+  --gold: #667f9b;
+  --glow: rgba(104, 137, 171, .25);
+}
+.peach {
+  --bg0: #fff2ea;
+  --bg1: #efdccf;
+  --panel0: #f7e8dd;
+  --panel1: #e5cfc1;
+  --wall0: #d0b2a5;
+  --wall1: #ad8d82;
+  --line: rgba(100, 59, 45, .15);
+  --gold: #9e704a;
+  --glow: rgba(192, 127, 82, .24);
+}
+.topbar {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 14px 8px;
+}
+.round,
+.answer,
+.hint,
+.reset {
+  display: grid;
+  place-items: center;
+  color: #4d4842;
+  background: linear-gradient(160deg, var(--panel0) 0%, var(--panel1) 100%);
+  border: 1px solid rgba(64, 56, 48, .12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.58);
+}
+.round {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+.settings { justify-self: end; }
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+.no {
+  color: var(--gold);
+  font-size: 14px;
+  letter-spacing: .05em;
+  font-weight: 600;
+}
+.count {
+  color: #4d4842;
+  font-size: 14px;
+  letter-spacing: .04em;
+}
+.answer {
+  width: 48px;
+  height: 34px;
+  border-radius: 12px;
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  border-color: color-mix(in srgb, var(--gold), transparent 66%);
+}
+.boards {
+  display: grid;
+  gap: clamp(18px, 3.5dvh, 34px);
+  justify-items: center;
+  padding-top: 8px;
+}
+.board {
+  position: relative;
+  width: min(260px, 70vw);
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(145deg, var(--panel0) 0%, var(--panel1) 100%);
+  border: 1px solid rgba(64, 56, 48, .18);
+  box-shadow: inset 0 1px 4px rgba(255,255,255,.7), inset 0 -8px 18px rgba(62,55,45,.06);
+}
+.grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+}
+.cell { border: .5px solid var(--line); }
+.wall {
+  background: linear-gradient(160deg, var(--wall0), var(--wall1));
+  border-color: color-mix(in srgb, var(--wall1), transparent 62%);
+}
+.goal {
+  position: absolute;
+  width: 20%;
+  height: 20%;
+  border-radius: 50%;
+  border: 2px dashed color-mix(in srgb, var(--gold), white 26%);
+  box-shadow: 0 0 12px var(--glow);
+}
+.g1 { left: 60%; top: 20%; }
+.g2 { left: 20%; top: 60%; }
+.ball {
+  position: absolute;
+  width: 20%;
+  height: 20%;
+}
+.ball::before {
+  content: "";
+  position: absolute;
+  inset: 17%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #73716b 0%, var(--ball0) 36%, var(--ball1) 100%);
+  box-shadow: inset -2px -3px 7px rgba(0,0,0,.48), inset 3px 3px 6px rgba(255,255,255,.16), 0 5px 9px rgba(48,38,24,.24);
+}
+.b1 { left: 20%; top: 40%; }
+.b2 { left: 60%; top: 40%; }
+.edge-glow {
+  position: absolute;
+  left: 40%;
+  top: 40%;
+  width: 20%;
+  height: 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--gold), white 28%);
+  box-shadow: 0 0 13px 4px var(--glow);
+  opacity: .92;
+}
+.trail {
+  position: absolute;
+  left: 20%;
+  top: 40%;
+  width: 20%;
+  height: 20%;
+}
+.trail::before {
+  content: "";
+  position: absolute;
+  inset: 17%;
+  border-radius: 50%;
+  border: 2px solid rgba(30, 27, 24, .32);
+  box-shadow: 0 0 12px 3px var(--glow);
+  transform: scale(.78);
+}
+.control-dock {
+  position: absolute;
+  left: 50%;
+  bottom: 68px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.hint,
+.reset {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+}
+.hint {
+  position: relative;
+  color: var(--gold);
+  border-color: color-mix(in srgb, var(--gold), transparent 62%);
+}
+.badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  background: color-mix(in srgb, var(--gold), white 40%);
+  color: #342a1b;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.7), 0 1px 2px rgba(80,58,18,.18);
+}
+.ad-slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  border-top: 1px solid rgba(64,56,48,.10);
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,.42));
+}
+svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (min-width: 760px) {
+  .variants { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<h1>Pastel Theme Mock</h1>
+<p class="lead">ミニマルさを残しつつ、盤面の読みやすさを上げる低彩度パステル案。床・壁・ゴール・球の分離を優先。</p>
+<main class="variants">
+  <section class="variant">
+    <div class="meta"><span class="name">A Sage Mint</span><span class="tag">読みやすさ優先</span></div>
+    <div class="screen mint">
+      <div class="topbar"><span class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></span><div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer">答え</span></div><span class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></span></div>
+      <div class="boards"><div class="board"><div class="grid"></div><span class="goal g1"></span><span class="trail"></span><span class="ball b1"></span><span class="edge-glow"></span></div><div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div></div>
+      <div class="control-dock"><span class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></span><span class="hint"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></span></div>
+      <div class="ad-slot"></div>
+    </div>
+  </section>
+  <section class="variant">
+    <div class="meta"><span class="name">B Warm Sand</span><span class="tag">現行ライトに近い</span></div>
+    <div class="screen">
+      <div class="topbar"><span class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></span><div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer">答え</span></div><span class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></span></div>
+      <div class="boards"><div class="board"><div class="grid"></div><span class="goal g1"></span><span class="trail"></span><span class="ball b1"></span><span class="edge-glow"></span></div><div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div></div>
+      <div class="control-dock"><span class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></span><span class="hint"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></span></div>
+      <div class="ad-slot"></div>
+    </div>
+  </section>
+  <section class="variant">
+    <div class="meta"><span class="name">C Soft Sky</span><span class="tag">清潔感と分離</span></div>
+    <div class="screen sky">
+      <div class="topbar"><span class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></span><div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer">答え</span></div><span class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></span></div>
+      <div class="boards"><div class="board"><div class="grid"></div><span class="goal g1"></span><span class="trail"></span><span class="ball b1"></span><span class="edge-glow"></span></div><div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div></div>
+      <div class="control-dock"><span class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></span><span class="hint"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></span></div>
+      <div class="ad-slot"></div>
+    </div>
+  </section>
+  <section class="variant">
+    <div class="meta"><span class="name">D Dusty Lavender</span><span class="tag">少し個性的</span></div>
+    <div class="screen lavender">
+      <div class="topbar"><span class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></span><div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer">答え</span></div><span class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></span></div>
+      <div class="boards"><div class="board"><div class="grid"></div><span class="goal g1"></span><span class="trail"></span><span class="ball b1"></span><span class="edge-glow"></span></div><div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div></div>
+      <div class="control-dock"><span class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></span><span class="hint"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></span></div>
+      <div class="ad-slot"></div>
+    </div>
+  </section>
+</main>
+<script>
+for (const grid of document.querySelectorAll('.grid')) {
+  for (let i = 0; i < 25; i += 1) {
+    const cell = document.createElement('div');
+    cell.className = 'cell' + ([6, 14, 17].includes(i) ? ' wall' : '');
+    grid.append(cell);
+  }
+}
+</script>
+</body>
+</html>
