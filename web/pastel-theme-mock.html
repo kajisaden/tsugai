@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tsugai wall style mock</title>
+<title>Tsugai minimal outline wall color mock</title>
 <style>
 * { box-sizing: border-box; }
 html, body { min-height: 100%; margin: 0; background: #f5efe5; color: #2d2a28; }
@@ -44,6 +44,16 @@ h1 {
 .name { color: #51483f; font-size: 15px; letter-spacing: .08em; }
 .tag { color: #80746a; font-size: 11px; letter-spacing: .06em; }
 .screen {
+  --board0: #f2e1d1;
+  --board1: #dcc5b3;
+  --grid-line: rgba(96, 70, 52, .14);
+  --wall0: #cdb39c;
+  --wall1: #aa8c76;
+  --wall2: #8c715f;
+  --wall-line: rgba(82, 59, 45, .32);
+  --wall-hi: rgba(255,255,255,.22);
+  --wall-low: rgba(67, 45, 34, .12);
+  --wall-cast: rgba(83, 54, 39, .13);
   --piece-radius: 7px;
   --piece-inset: 12%;
   --piece-bg: linear-gradient(145deg, #f4dfc9 0%, #cf9d78 58%, #9e694f 100%);
@@ -60,49 +70,74 @@ h1 {
   background: radial-gradient(120% 100% at 50% 0%, #fff8ef 0%, #eadccf 78%);
   border: 1px solid rgba(84, 76, 63, .13);
 }
-.soft-block {
-  --piece-radius: 12px;
-  --piece-inset: 14%;
-  --piece-bg: linear-gradient(145deg, #fff4e7 0%, #f0c5ab 54%, #c98768 100%);
-  --piece-shadow: inset -2px -3px 7px rgba(126, 75, 52, .34), inset 3px 3px 6px rgba(255,255,255,.5), 0 5px 9px rgba(126, 77, 52, .23);
-  --ghost-radius: 12px;
-  --ghost-inset: 14%;
+.tone-warm {
+  --board0: #f2e1d1;
+  --board1: #dcc5b3;
+  --grid-line: rgba(96, 70, 52, .14);
+  --wall0: #cdb39c;
+  --wall1: #aa8c76;
+  --wall2: #8c715f;
+  --wall-line: rgba(82, 59, 45, .34);
 }
-.tile-block {
-  --piece-radius: 8px;
-  --piece-inset: 13%;
-  --piece-bg: linear-gradient(150deg, #fff2df 0%, #eabf9f 47%, #bd795d 100%);
-  --piece-shadow: inset -1px -1px 0 rgba(96, 57, 38, .18), inset 2px 2px 4px rgba(255,255,255,.48), 0 6px 10px rgba(126, 77, 52, .24);
-  --piece-outline: 1px solid rgba(119, 70, 48, .24);
-  --ghost-radius: 8px;
-  --ghost-inset: 13%;
+.tone-sage {
+  --board0: #e4eadf;
+  --board1: #cbd8c4;
+  --grid-line: rgba(57, 82, 56, .14);
+  --wall0: #bac7ad;
+  --wall1: #91a07f;
+  --wall2: #748267;
+  --wall-line: rgba(49, 73, 48, .34);
+  --wall-cast: rgba(54, 80, 52, .13);
 }
-.marker-block {
-  --piece-radius: 10px;
-  --piece-inset: 13%;
-  --piece-bg: linear-gradient(145deg, #ffefd8 0%, #e8bb8f 52%, #b97655 100%);
-  --piece-shadow: inset -2px -3px 6px rgba(111, 63, 41, .34), inset 3px 3px 5px rgba(255,255,255,.48), 0 6px 10px rgba(126, 77, 52, .24);
-  --piece-after: radial-gradient(circle, rgba(255,255,255,.72) 0 28%, transparent 31%);
-  --ghost-radius: 10px;
-  --ghost-inset: 13%;
+.tone-bluegray {
+  --board0: #e2e7e8;
+  --board1: #c9d2d5;
+  --grid-line: rgba(54, 69, 75, .14);
+  --wall0: #b8c3c6;
+  --wall1: #8d9da3;
+  --wall2: #718088;
+  --wall-line: rgba(48, 62, 69, .34);
+  --wall-cast: rgba(48, 62, 69, .13);
 }
-.stone-block {
-  --piece-radius: 7px;
-  --piece-inset: 12%;
-  --piece-bg: linear-gradient(145deg, #f4dfc9 0%, #cf9d78 58%, #9e694f 100%);
-  --piece-shadow: inset -2px -2px 0 rgba(82, 48, 34, .22), inset 2px 2px 0 rgba(255,255,255,.34), 0 7px 11px rgba(104, 65, 45, .27);
-  --piece-outline: 1px solid rgba(87, 52, 38, .24);
-  --ghost-radius: 7px;
-  --ghost-inset: 12%;
+.tone-lavender {
+  --board0: #eae4ec;
+  --board1: #d2cad8;
+  --grid-line: rgba(70, 58, 85, .13);
+  --wall0: #c5bbcc;
+  --wall1: #9c8fa8;
+  --wall2: #7d728a;
+  --wall-line: rgba(61, 50, 75, .33);
+  --wall-cast: rgba(61, 50, 75, .12);
 }
-.outline-block {
-  --piece-radius: 9px;
-  --piece-inset: 12%;
-  --piece-bg: linear-gradient(145deg, #fff4e8 0%, #edc5aa 50%, #c58365 100%);
-  --piece-shadow: inset -2px -3px 7px rgba(126, 75, 52, .32), inset 3px 3px 6px rgba(255,255,255,.5), 0 5px 9px rgba(126, 77, 52, .23);
-  --piece-outline: 2px solid rgba(89, 56, 40, .28);
-  --ghost-radius: 9px;
-  --ghost-inset: 12%;
+.tone-clay {
+  --board0: #f0ddcf;
+  --board1: #d9bda9;
+  --grid-line: rgba(96, 59, 44, .13);
+  --wall0: #cfa88e;
+  --wall1: #a97d65;
+  --wall2: #865f4f;
+  --wall-line: rgba(80, 47, 35, .33);
+  --wall-cast: rgba(80, 47, 35, .14);
+}
+.tone-graphite {
+  --board0: #e2ded5;
+  --board1: #c9c3b8;
+  --grid-line: rgba(60, 56, 49, .14);
+  --wall0: #b8b1a4;
+  --wall1: #8d867b;
+  --wall2: #716b62;
+  --wall-line: rgba(45, 41, 36, .34);
+  --wall-cast: rgba(45, 41, 36, .14);
+}
+.tone-ivory {
+  --board0: #f2eadb;
+  --board1: #ded0ba;
+  --grid-line: rgba(94, 74, 50, .13);
+  --wall0: #d8c8ae;
+  --wall1: #b79f7e;
+  --wall2: #92795f;
+  --wall-line: rgba(75, 57, 37, .32);
+  --wall-cast: rgba(75, 57, 37, .12);
 }
 .topbar {
   display: grid;
@@ -168,7 +203,7 @@ h1 {
   aspect-ratio: 1;
   border-radius: 12px;
   overflow: hidden;
-  background: linear-gradient(145deg, #f2e1d1 0%, #dcc5b3 100%);
+  background: linear-gradient(145deg, var(--board0) 0%, var(--board1) 100%);
   border: 1px solid rgba(64, 56, 48, .18);
   box-shadow: inset 0 1px 4px rgba(255,255,255,.72), inset 0 -8px 18px rgba(62,55,45,.06);
 }
@@ -181,16 +216,16 @@ h1 {
 }
 .cell {
   position: relative;
-  border: .5px solid rgba(96, 70, 52, .14);
+  border: .5px solid var(--grid-line);
 }
 .wall {
   z-index: 1;
-  background: linear-gradient(145deg, #d9c1aa 0%, #b5967c 55%, #8f725f 100%);
-  border: 1px solid rgba(93, 68, 52, .24);
+  background: linear-gradient(145deg, var(--wall0) 0%, var(--wall1) 58%, var(--wall2) 100%);
+  border: 2px solid var(--wall-line);
   box-shadow:
-    inset 2px 2px 0 rgba(255,255,255,.28),
-    inset -3px -4px 0 rgba(85, 57, 40, .16),
-    0 4px 8px rgba(90, 61, 43, .18);
+    inset 1px 1px 0 var(--wall-hi),
+    inset -2px -2px 0 var(--wall-low),
+    0 3px 6px var(--wall-cast);
 }
 .wall::before {
   content: "";
@@ -200,7 +235,7 @@ h1 {
   top: 6px;
   height: 2px;
   border-radius: 2px;
-  background: rgba(255, 244, 227, .48);
+  background: rgba(255, 244, 227, .3);
 }
 .wall::after {
   content: "";
@@ -210,89 +245,12 @@ h1 {
   width: 38%;
   height: 2px;
   border-radius: 2px;
-  background: rgba(77, 51, 36, .22);
+  background: rgba(77, 51, 36, .13);
 }
-.stone-block .wall {
-  background: linear-gradient(145deg, #d3b293 0%, #aa8267 56%, #7d5b4a 100%);
-  border-color: rgba(72, 48, 36, .28);
-  box-shadow:
-    inset 2px 2px 0 rgba(255,255,255,.24),
-    inset -3px -4px 0 rgba(69, 43, 31, .2),
-    0 5px 9px rgba(83, 54, 39, .23);
-}
-.wall-soft .wall {
-  background: linear-gradient(145deg, #dfc8b2 0%, #bea088 58%, #9d806c 100%);
-  border-color: rgba(93, 68, 52, .18);
-  box-shadow:
-    inset 2px 2px 0 rgba(255,255,255,.22),
-    inset -2px -3px 0 rgba(87, 58, 42, .12),
-    0 3px 6px rgba(90, 61, 43, .13);
-}
-.wall-heavy .wall {
-  background: linear-gradient(145deg, #d0ad8e 0%, #9f765d 54%, #715243 100%);
-  border-color: rgba(62, 40, 30, .34);
-  box-shadow:
-    inset 2px 2px 0 rgba(255,248,232,.22),
-    inset -5px -6px 0 rgba(55, 35, 26, .24),
-    0 7px 12px rgba(74, 47, 34, .28);
-}
-.wall-outline .wall {
-  background:
-    linear-gradient(145deg, rgba(255,246,230,.36), transparent 35%),
-    linear-gradient(145deg, #d8b999 0%, #b38a6e 60%, #87634f 100%);
-  border: 2px solid rgba(82, 54, 39, .32);
-  box-shadow:
-    inset 0 0 0 3px rgba(255,239,211,.22),
-    inset -3px -4px 0 rgba(75, 49, 36, .16),
-    0 5px 9px rgba(83, 54, 39, .2);
-}
-.wall-cut .wall {
-  background:
-    linear-gradient(135deg, rgba(255,246,230,.45) 0 16%, transparent 17%),
-    linear-gradient(315deg, rgba(74,48,34,.2) 0 18%, transparent 19%),
-    linear-gradient(145deg, #d5b393 0%, #a98267 56%, #7b5a49 100%);
-  border-color: rgba(72, 48, 36, .28);
-  box-shadow:
-    inset 2px 2px 0 rgba(255,255,255,.2),
-    inset -3px -4px 0 rgba(69, 43, 31, .18),
-    0 5px 9px rgba(83, 54, 39, .21);
-}
-.wall-cut .wall::before {
-  left: 9px;
-  right: 14px;
-  opacity: .58;
-}
-.wall-cut .wall::after {
-  right: 7px;
-  bottom: 7px;
-  width: 46%;
-  opacity: .78;
-}
-.wall-slab .wall {
-  background:
-    linear-gradient(180deg, rgba(255,246,232,.38) 0 20%, transparent 21%),
-    linear-gradient(145deg, #ccb198 0%, #a88a73 56%, #866b5a 100%);
-  border-color: rgba(74, 52, 40, .26);
-  box-shadow:
-    inset 0 4px 0 rgba(255,248,235,.2),
-    inset 0 -6px 0 rgba(67, 45, 34, .16),
-    0 4px 8px rgba(83, 54, 39, .18);
-}
-.wall-slab .wall::before,
-.wall-slab .wall::after {
-  display: none;
-}
-.wall-minimal .wall {
-  background: linear-gradient(145deg, #cdb39c 0%, #aa8c76 62%, #8c715f 100%);
-  border-color: rgba(82, 59, 45, .22);
-  box-shadow:
-    inset 1px 1px 0 rgba(255,255,255,.2),
-    inset -2px -2px 0 rgba(67, 45, 34, .12),
-    0 3px 6px rgba(83, 54, 39, .13);
-}
-.wall-minimal .wall::before,
-.wall-minimal .wall::after {
-  opacity: .38;
+.tone-bluegray .wall::before,
+.tone-lavender .wall::before,
+.tone-graphite .wall::before {
+  background: rgba(255,255,255,.22);
 }
 .goal {
   position: absolute;
@@ -441,36 +399,36 @@ svg {
 </style>
 </head>
 <body>
-<h1>Warm Sand + Wall Variants</h1>
-<p class="lead">駒は Stone Block に固定。盤面の壁だけを変えて、障害物としての読みやすさと世界観の相性を比較するモック。</p>
+<h1>Minimal Outline Wall Colors</h1>
+<p class="lead">駒は Stone Block、壁は情報量を抑えたアウトライン型に固定。盤と壁の色系統だけを変えて相性を比較するモック。</p>
 <main class="variants">
   <section class="variant">
-    <div class="meta"><span class="name">A Raised Stone</span><span class="tag">現行強化案</span></div>
-    <div class="screen"></div>
+    <div class="meta"><span class="name">A Warm Stone</span><span class="tag">基準案</span></div>
+    <div class="screen tone-warm"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">B Soft Wall</span><span class="tag">やさしく馴染む</span></div>
-    <div class="screen wall-soft"></div>
+    <div class="meta"><span class="name">B Sage Stone</span><span class="tag">自然で穏やか</span></div>
+    <div class="screen tone-sage"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">C Heavy Wall</span><span class="tag">障害物感が強い</span></div>
-    <div class="screen wall-heavy"></div>
+    <div class="meta"><span class="name">C Blue Gray</span><span class="tag">静かで読みやすい</span></div>
+    <div class="screen tone-bluegray"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">D Outline Wall</span><span class="tag">輪郭で読ませる</span></div>
-    <div class="screen wall-outline"></div>
+    <div class="meta"><span class="name">D Lavender Gray</span><span class="tag">少し個性</span></div>
+    <div class="screen tone-lavender"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">E Cut Stone</span><span class="tag">石材らしさ重視</span></div>
-    <div class="screen wall-cut"></div>
+    <div class="meta"><span class="name">E Clay Stone</span><span class="tag">温かく濃い</span></div>
+    <div class="screen tone-clay"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">F Low Slab</span><span class="tag">低めで上品</span></div>
-    <div class="screen wall-slab"></div>
+    <div class="meta"><span class="name">F Graphite Stone</span><span class="tag">締まり重視</span></div>
+    <div class="screen tone-graphite"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">G Minimal Wall</span><span class="tag">情報量を抑える</span></div>
-    <div class="screen wall-minimal"></div>
+    <div class="meta"><span class="name">G Ivory Stone</span><span class="tag">明るく上品</span></div>
+    <div class="screen tone-ivory"></div>
   </section>
 </main>
 <template id="screen-template">
