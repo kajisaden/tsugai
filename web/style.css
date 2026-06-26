@@ -468,13 +468,11 @@ button:active { transform: translateY(1px); }
 .trail-cell::before {
   content: "";
   position: absolute;
-  inset: 22%;
+  inset: 43% 19%;
   border-radius: 999px;
-  background:
-    linear-gradient(var(--trail-angle), transparent 0%, var(--b-glow) 32%, var(--b-bump-hot) 50%, var(--b-glow) 68%, transparent 100%),
-    radial-gradient(closest-side, var(--b-glow) 0%, transparent 74%);
-  box-shadow: 0 0 16px 4px var(--b-glow);
-  filter: blur(0.2px);
+  background: linear-gradient(var(--trail-angle), transparent 0%, rgba(240, 220, 170, 0.12) 22%, rgba(255, 250, 240, 0.34) 100%);
+  box-shadow: 0 0 14px 4px rgba(240, 220, 170, 0.14);
+  filter: blur(0.35px);
 }
 
 .cells {

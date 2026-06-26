@@ -810,9 +810,9 @@ function showTrail(rm, from, to, d) {
     const reach = (s / steps) * MOVE_MS; // 球がそのマスに差し掛かる頃に点灯(進行方向へ流れる)
     const a = cell.animate([
       { opacity: 0,    offset: 0 },
-      { opacity: 0.86, offset: 0.20 },
+      { opacity: 0.72, offset: 0.18 },
       { opacity: 0,    offset: 1 },
-    ], { duration: 540, delay: reach, easing: 'ease-out', fill: 'backwards' });
+    ], { duration: 460, delay: reach, easing: 'ease-out', fill: 'backwards' });
     a.onfinish = a.oncancel = () => cell.remove(); // 退色しきったら DOM を片付ける
   }
 }
