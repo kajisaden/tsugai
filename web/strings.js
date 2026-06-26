@@ -44,7 +44,7 @@ window.NIKENZUME_STRINGS = {
     ht3title: '壁がズレを生む',
     ht3body: '球が壁や外周にぶつかると、その球だけ止まります。もう片方の部屋の球は動く——このズレがパズルの核です。わざと壁にぶつけることで、2つの球の位置関係を調整できます。',
     ht4title: 'ヒントと手戻り',
-    ht4body: '詰まったら、画面下のヒントボタンを使えます。',
+    ht4body: '詰まったら、画面下の電球でぶつけるべき壁を光らせられます。',
     ht4tip1: 'ぶつけるべき壁が光る',
     ht4tip2: '今の局面から最善の一手を示す',
     ht4tip3: '正解を自動再生する',
@@ -52,7 +52,7 @@ window.NIKENZUME_STRINGS = {
     // バージョン履歴
     version: 'バージョン履歴', verCurrent: '現在',
     ver100a: '初回リリース', ver100b: '第1章〜第3章（全30問）',
-    ver100c: '光ヒント・次の手ヒント・答え再生', ver100d: 'ダーク/ライトテーマ', ver100e: '日本語・英語対応',
+    ver100c: '光ヒント・答え再生', ver100d: 'ダーク/ライトテーマ', ver100e: '日本語・英語対応',
     // プライバシーポリシー
     ppDate: '最終更新: 2026年6月',
     ppDataH: '収集するデータ', ppDataP: 'Tsugai はお名前・メールアドレス等の個人情報を収集しません。ゲームの進捗データはすべて端末内に保存されます。',
@@ -133,7 +133,7 @@ window.NIKENZUME_STRINGS = {
     ht3title: 'Walls create the gap',
     ht3body: 'When a ball hits a wall or the edge, it stays put—while the other ball keeps moving. This gap is the heart of every puzzle. Deliberately bumping into walls lets you adjust the positions of the two balls.',
     ht4title: 'Hints & restart',
-    ht4body: 'Stuck? Use the hint buttons at the bottom.',
+    ht4body: 'Stuck? Tap the light bulb at the bottom to highlight the wall to bump.',
     ht4tip1: 'Highlights the walls to bump',
     ht4tip2: 'Shows the best next move',
     ht4tip3: 'Auto-plays the solution',
@@ -141,7 +141,7 @@ window.NIKENZUME_STRINGS = {
     // Version history
     version: 'Version history', verCurrent: 'Current',
     ver100a: 'Initial release', ver100b: 'Chapters 1–3 (30 puzzles)',
-    ver100c: 'Light hint, next-move hint & answer playback', ver100d: 'Dark / light theme', ver100e: 'Japanese & English',
+    ver100c: 'Light hint & answer playback', ver100d: 'Dark / light theme', ver100e: 'Japanese & English',
     // Privacy policy
     ppDate: 'Last updated: June 2026',
     ppDataH: 'Data we collect', ppDataP: 'Tsugai does not collect personal information such as your name or email address. Game progress is stored entirely on your device.',

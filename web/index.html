@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- テーマを CSS 適用前に確定してチラつきを防ぐ(既定=ダーク、保存があれば優先) -->
 <script>try{var r=document.documentElement,t=localStorage.getItem('nikenzume.theme.v1')==='light'?'light':'dark';r.dataset.theme=t;r.dataset.board=t;r.dataset.ball=t;}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=569f02d94f">
+<link rel="stylesheet" href="style.css?v=f2517a45e7">
 </head>
 <body>
 
@@ -28,9 +28,13 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
   </div>
-  <!-- ビルド印: タイトル横の小さな番号。stamp-cache.mjs がデプロイ前に +1 する=実機での反映確認用。
-       data-i18n はロゴ文字の内側 span に置く(h1 直下だと fillI18n の textContent 上書きで印が消えるため) -->
-  <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">59</span></h1>
+  <div id="play-status" aria-live="polite">
+    <span id="puzzle-no"></span>
+    <span id="play-progress"></span>
+    <button id="btn-answer-open" class="answer-btn" data-i18n-aria="answer" aria-label="答え">
+      <span data-i18n="answer">答え</span>
+    </button>
+  </div>
   <!-- 右スロット: 設定(歯車)。戻る(左)と対の盤色丸。右端は「○手」と揃う。中身の設定画面は別途 -->
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
@@ -42,6 +46,8 @@
 <main>
   <!-- 章一覧 -->
   <section id="view-chapters">
+    <!-- ホーム用ロゴ。プレイ画面では使える面積を優先し、ロゴ/ビルド印はここへ寄せる。 -->
+    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">60</span></h1>
     <p class="tagline" data-i18n="tagline">ふたつの部屋、ひとつの操作。</p>
     <div id="chapter-list"></div>
   </section>
@@ -69,33 +75,25 @@
 
   <!-- プレイ画面 -->
   <section id="view-play" hidden>
-    <div id="play-info">
+    <div id="play-info" hidden>
       <span id="puzzle-label"></span>
       <span id="move-count"></span>
     </div>
     <div id="boards"></div>
-    <!-- 操作系: 上段=ヘルプ(リワード広告・残数バッジ) / 下段=最初から(無料・最頻・フル幅)。
-         残数(光5/次の手10/日)は角丸の金バッジ、0で▶。答えは毎回▶。待った(一手戻る)は廃止 -->
+    <!-- 操作系: 広告バナー予定領域を避け、盤面寄りにリセット/光ヒントだけを置く。 -->
     <div id="controls">
       <div id="hint-row">
+        <button id="btn-reset" class="reset-btn" data-i18n-aria="reset" aria-label="最初から">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg>
+          <span class="sr-only" data-i18n="reset">最初から</span>
+        </button>
         <button id="btn-hint-light" class="help" data-i18n-aria="light" aria-label="光ヒント">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><path d="m5.6 5.6 2.1 2.1"/><path d="m16.3 16.3 2.1 2.1"/><path d="m18.4 5.6-2.1 2.1"/><path d="m7.7 16.3-2.1 2.1"/><circle cx="12" cy="12" r="3.4"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg>
           <span class="sr-only" data-i18n="light">光ヒント</span><span class="hint-badge"></span>
         </button>
-        <button id="btn-hint-next" class="help" data-i18n-aria="nextMove" aria-label="次の手ヒント">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13"/><path d="m13 6 6 6-6 6"/></svg>
-          <span class="sr-only" data-i18n="nextMove">次の手ヒント</span><span class="hint-badge"></span>
-        </button>
-        <button id="btn-answer-open" class="help" data-i18n-aria="answer" aria-label="答え">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-          <span class="sr-only" data-i18n="answer">答え</span><span class="hint-badge ad">▶</span>
-        </button>
       </div>
-      <button id="btn-reset" class="reset-btn" data-i18n-aria="reset" aria-label="最初から">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg>
-        <span class="sr-only" data-i18n="reset">最初から</span>
-      </button>
     </div>
+    <div id="ad-slot" aria-hidden="true"></div>
     <!-- 答えビューア: 再生(自動)ボタン + ◀▶ で一手ずつ -->
     <div id="answer-bar" hidden>
       <button id="btn-ans-play" data-i18n="play">再生</button>
@@ -357,7 +355,6 @@
       <p class="ht-text" data-i18n="ht4body">詰まったら、画面下のヒントボタンを使えます。</p>
       <ul class="ht-tips">
         <li><strong data-i18n="light">光ヒント</strong> — <span data-i18n="ht4tip1">ぶつけるべき壁が光る</span></li>
-        <li><strong data-i18n="nextMove">次の手ヒント</strong> — <span data-i18n="ht4tip2">今の局面から最善の一手を示す</span></li>
         <li><strong data-i18n="answer">答え</strong> — <span data-i18n="ht4tip3">正解を自動再生する</span></li>
         <li><strong data-i18n="reset">最初から</strong> — <span data-i18n="ht4tip4">いつでも初形に戻せる</span></li>
       </ul>
@@ -387,7 +384,7 @@
       <ul class="ver-list">
         <li data-i18n="ver100a">初回リリース</li>
         <li data-i18n="ver100b">第1章〜第3章（全30問）</li>
-        <li data-i18n="ver100c">光ヒント・次の手ヒント・答え再生</li>
+        <li data-i18n="ver100c">光ヒント・答え再生</li>
         <li data-i18n="ver100d">ダーク/ライトテーマ</li>
         <li data-i18n="ver100e">日本語・英語対応</li>
       </ul>
@@ -448,7 +445,7 @@
 <script src="pool.js?v=248cb71e15"></script>
 <script src="normal-levels.js?v=7366b4f2fb"></script>
 <script src="advanced-levels.js?v=40916070ee"></script>
-<script src="strings.js?v=bac14f712b"></script>
-<script src="app.js?v=270f3a4a54"></script>
+<script src="strings.js?v=5bb4b7207e"></script>
+<script src="app.js?v=01db81ca39"></script>
 </body>
 </html>

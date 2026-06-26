@@ -106,7 +106,7 @@ function markBest(puzId) {
 }
 
 // ヒント設定(問題ごと)。違う問題に移ると必ずオフから始める(同じ問題の初形/答え再生では保持)。
-// light=ぶつかる壁を常時光らせる / next=次の一手ボタンを出す
+// light=ぶつかる壁を常時光らせる。next は旧UI互換の保存値だけ残す。
 const hintSettings = { light: false };
 let hintPuzzleId = null; // hintSettings が今ひもづく問題ID。別問題になったらオフへ戻す
 
@@ -131,15 +131,15 @@ function addHints(light, next, answer) {
 // ---- ログインボーナス(7日サイクル) ----
 const LOGIN_KEY = 'nikenzume.login.v1';
 const LOGIN_REWARDS = [
-  { light: 3, next: 3, answer: 0 },
-  { light: 3, next: 5, answer: 0 },
-  { light: 5, next: 5, answer: 0 },
-  { light: 5, next: 5, answer: 1 },
-  { light: 5, next: 5, answer: 3 },
-  { light: 5, next: 5, answer: 5 },
-  { light: 8, next: 8, answer: 5 },
+  { light: 3, next: 0, answer: 0 },
+  { light: 3, next: 0, answer: 0 },
+  { light: 5, next: 0, answer: 0 },
+  { light: 5, next: 0, answer: 1 },
+  { light: 5, next: 0, answer: 3 },
+  { light: 5, next: 0, answer: 5 },
+  { light: 8, next: 0, answer: 5 },
 ];
-const FIRST_LOGIN_BONUS = { light: 10, next: 10, answer: 10 };
+const FIRST_LOGIN_BONUS = { light: 10, next: 0, answer: 10 };
 
 function loginToday() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
 function loadLoginState() {
@@ -319,6 +319,7 @@ let curIndex = 0;
 function showView(name) {
   for (const v of ['chapters', 'levels', 'play']) {
     $('#view-' + v).hidden = v !== name;
+    document.body.classList.toggle('view-' + v, v === name);
   }
   // ③ 画面切り替えをふわっと立ち上げる(瞬間カットを和らげる)。表示中の画面に enter を付け直して毎回再生。
   // プレイ画面は②の専用登場(animatePuzzleEntrance)を使うので、ここの一律ライズは付けない。
@@ -490,6 +491,7 @@ function _initPuzzle(puz, label, entrance) {
     cleared: false,
   };
   $('#puzzle-label').textContent = label;
+  $('#puzzle-no').textContent = label;
   updateInfo();
   updateGoals();
   updateHintUI();
@@ -504,13 +506,13 @@ function startPuzzle(ch, index, entrance = true) {
   curIndex = index;
   const puz = chapterLevels(ch)[index];
   const globalNo = curChapter.from + index + 1;
-  _initPuzzle(puz, `#${globalNo}　${t('puzzlePar', { n: puz.solution.minMoves })}`, entrance);
+  _initPuzzle(puz, `#${globalNo}`, entrance);
 }
 
 function startDailyPuzzle(entrance = true) {
   dailyMode = true;
   const puz = getDailyPuzzle();
-  _initPuzzle(puz, `${t('dailyTitle')}　${t('puzzlePar', { n: puz.solution.minMoves })}`, entrance);
+  _initPuzzle(puz, t('dailyTitle'), entrance);
 }
 
 function restartCurrentPuzzle(entrance = true) {
@@ -520,6 +522,7 @@ function restartCurrentPuzzle(entrance = true) {
 
 function updateInfo() {
   $('#move-count').textContent = t('moveCount', { n: G.moves });
+  $('#play-progress').textContent = `${G.moves}/${G.puz.solution.minMoves}${locale === 'ja' ? '手詰' : ''}`;
 }
 
 function updateGoals() {
@@ -1037,8 +1040,6 @@ function updateHintUI() {
     lightBtn.classList.toggle('lit', hintSettings.light);
     setHintBadge(lightBtn, hintCredits.light);
   }
-  setHintBadge($('#btn-hint-next'), hintCredits.next);
-  setHintBadge($('#btn-answer-open'), hintCredits.answer);
 }
 // 残数バッジ: 1以上は数字 / 0は ▶(広告)
 function setHintBadge(btn, n) {
@@ -1261,7 +1262,7 @@ function goToGap() {
     if (dr) {
       let html = `<span class="daily-streak-result">${t('dailyStreak', { n: dr.streak })}</span>`;
       const rw = dr.reward;
-      html += `<span class="daily-reward-line">${t('dailyReward')}: ${t('hintLight')} ×${rw.light}　${t('hintNext')} ×${rw.next}`;
+      html += `<span class="daily-reward-line">${t('dailyReward')}: ${t('hintLight')} ×${rw.light}`;
       if (rw.answer > 0) html += `　${t('hintAnswer')} ×${rw.answer}`;
       html += `</span>`;
       if (dr.streakReward) {
@@ -1348,8 +1349,9 @@ function relocalize(newLocale) {
   if (!$('#view-chapters').hidden) showChapters();
   else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
   if (!$('#view-play').hidden && G) {
-    const globalNo = curChapter.from + curIndex + 1;
-    $('#puzzle-label').textContent = `#${globalNo}　${t('puzzlePar', { n: G.puz.solution.minMoves })}`;
+    const globalNo = dailyMode ? t('dailyTitle') : `#${curChapter.from + curIndex + 1}`;
+    $('#puzzle-label').textContent = globalNo;
+    $('#puzzle-no').textContent = globalNo;
     updateInfo();
   }
   updateSettingsUI();
@@ -1448,11 +1450,7 @@ $('#btn-hint-light').addEventListener('click', () => {
   if (hintSettings.light) return;
   spendHint('light', () => { hintSettings.light = true; refreshWallHints(); });
 });
-// 次の手ヒント = 都度1回消費して次の一手を表示
-$('#btn-hint-next').addEventListener('click', () => {
-  if (!G || G.busy || G.cleared || AV) return;
-  spendHint('next', showNextMove);
-});
+// 次の手ヒントはUIから外した。関数/クレジットは既存データ互換のため残している。
 $('#btn-ans-prev').addEventListener('click', answerBack);
 $('#btn-ans-next').addEventListener('click', () => {
   pauseAnswerIfPlaying();
@@ -1574,7 +1572,6 @@ function showLoginModal(result) {
       daysEl.appendChild(d);
     }
     rewardEl.innerHTML = `<span class="reward-line">${t('hintLight')} ×${result.reward.light}</span>`
-      + `<span class="reward-line">${t('hintNext')} ×${result.reward.next}</span>`
       + `<span class="reward-line">${t('hintAnswer')} ×${result.reward.answer}</span>`;
   } else {
     const s = loadLoginState();
@@ -1587,8 +1584,7 @@ function showLoginModal(result) {
       daysEl.appendChild(d);
     }
     const rw = result.reward;
-    let lines = `<span class="reward-line">${t('hintLight')} ×${rw.light}</span>`
-      + `<span class="reward-line">${t('hintNext')} ×${rw.next}</span>`;
+    let lines = `<span class="reward-line">${t('hintLight')} ×${rw.light}</span>`;
     if (rw.answer > 0) lines += `<span class="reward-line">${t('hintAnswer')} ×${rw.answer}</span>`;
     rewardEl.innerHTML = lines;
   }
