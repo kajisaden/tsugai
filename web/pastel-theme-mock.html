@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tsugai minimal outline wall color mock</title>
+<title>Tsugai Threes inspired mock</title>
 <style>
 * { box-sizing: border-box; }
-html, body { min-height: 100%; margin: 0; background: #f5efe5; color: #2d2a28; }
+html, body { min-height: 100%; margin: 0; background: #f4efe4; color: #2c2a27; }
 body {
   font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", system-ui, sans-serif;
   padding: 20px 14px 34px;
-  background: radial-gradient(120% 100% at 50% 0%, #fff8ef 0%, #eadccf 78%);
+  background: #f4efe4;
 }
 h1 {
   max-width: 860px;
@@ -19,12 +19,12 @@ h1 {
   font-size: 21px;
   font-weight: 500;
   letter-spacing: .12em;
-  color: #5f5146;
+  color: #46413a;
 }
 .lead {
   max-width: 860px;
   margin: 0 auto 18px;
-  color: #74685f;
+  color: #70695d;
   font-size: 13px;
   line-height: 1.7;
 }
@@ -41,103 +41,125 @@ h1 {
   gap: 10px;
   align-items: baseline;
 }
-.name { color: #51483f; font-size: 15px; letter-spacing: .08em; }
-.tag { color: #80746a; font-size: 11px; letter-spacing: .06em; }
+.name { color: #4b463f; font-size: 15px; letter-spacing: .08em; }
+.tag { color: #7a7165; font-size: 11px; letter-spacing: .06em; }
 .screen {
-  --board0: #f2e1d1;
-  --board1: #dcc5b3;
-  --grid-line: rgba(96, 70, 52, .14);
-  --wall0: #cdb39c;
-  --wall1: #aa8c76;
-  --wall2: #8c715f;
-  --wall-line: rgba(82, 59, 45, .32);
-  --wall-hi: rgba(255,255,255,.22);
-  --wall-low: rgba(67, 45, 34, .12);
-  --wall-cast: rgba(83, 54, 39, .13);
-  --piece-radius: 7px;
-  --piece-inset: 12%;
-  --piece-bg: linear-gradient(145deg, #f4dfc9 0%, #cf9d78 58%, #9e694f 100%);
-  --piece-shadow: inset -2px -2px 0 rgba(82, 48, 34, .22), inset 2px 2px 0 rgba(255,255,255,.34), 0 7px 11px rgba(104, 65, 45, .27);
-  --piece-outline: 1px solid rgba(87, 52, 38, .24);
-  --piece-after: none;
-  --ghost-radius: 7px;
-  --ghost-inset: 12%;
-  --ghost-transform: scale(.78);
+  --screen0: #fbf6ec;
+  --screen1: #e9dcc9;
+  --ui0: #fff8eb;
+  --ui1: #e8d8c4;
+  --board0: #f6ead8;
+  --board1: #d8c4ad;
+  --grid-line: rgba(95, 75, 56, .15);
+  --wall0: #f6f0e6;
+  --wall1: #dbcab4;
+  --wall-line: rgba(96, 72, 53, .34);
+  --piece0: #fff5e6;
+  --piece1: #f0be8d;
+  --piece2: #d87855;
+  --piece-line: rgba(128, 65, 44, .3);
+  --accent: #d65d50;
+  --accent2: #3f7fad;
+  --goal: #d65d50;
   position: relative;
   height: 620px;
   border-radius: 16px;
   overflow: hidden;
-  background: radial-gradient(120% 100% at 50% 0%, #fff8ef 0%, #eadccf 78%);
-  border: 1px solid rgba(84, 76, 63, .13);
+  background: radial-gradient(120% 100% at 50% 0%, var(--screen0) 0%, var(--screen1) 78%);
+  border: 1px solid rgba(72, 64, 52, .14);
 }
-.tone-warm {
-  --board0: #f2e1d1;
-  --board1: #dcc5b3;
-  --grid-line: rgba(96, 70, 52, .14);
-  --wall0: #cdb39c;
-  --wall1: #aa8c76;
-  --wall2: #8c715f;
-  --wall-line: rgba(82, 59, 45, .34);
+.classic {
+  --screen0: #fbf6ec;
+  --screen1: #e9dcc9;
+  --ui0: #fff8eb;
+  --ui1: #e8d8c4;
+  --board0: #f6ead8;
+  --board1: #d8c4ad;
+  --wall0: #f7f0e5;
+  --wall1: #dbc8b0;
+  --wall-line: rgba(91, 67, 49, .35);
+  --piece0: #fff5e6;
+  --piece1: #efba8a;
+  --piece2: #d76b51;
+  --piece-line: rgba(128, 65, 44, .32);
+  --accent: #d65d50;
+  --accent2: #3f7fad;
 }
-.tone-sage {
-  --board0: #e4eadf;
-  --board1: #cbd8c4;
-  --grid-line: rgba(57, 82, 56, .14);
-  --wall0: #bac7ad;
-  --wall1: #91a07f;
-  --wall2: #748267;
-  --wall-line: rgba(49, 73, 48, .34);
-  --wall-cast: rgba(54, 80, 52, .13);
+.cream-redblue {
+  --screen0: #fbf7ed;
+  --screen1: #e6d9c8;
+  --board0: #f2e5d2;
+  --board1: #d1bea8;
+  --wall0: #fff5e8;
+  --wall1: #d9c6ae;
+  --wall-line: rgba(63, 80, 94, .3);
+  --piece0: #f7fbff;
+  --piece1: #8fc1d9;
+  --piece2: #3f7fad;
+  --piece-line: rgba(35, 75, 104, .34);
+  --accent: #d75c51;
+  --accent2: #3f7fad;
 }
-.tone-bluegray {
-  --board0: #e2e7e8;
-  --board1: #c9d2d5;
-  --grid-line: rgba(54, 69, 75, .14);
-  --wall0: #b8c3c6;
-  --wall1: #8d9da3;
-  --wall2: #718088;
-  --wall-line: rgba(48, 62, 69, .34);
-  --wall-cast: rgba(48, 62, 69, .13);
+.paper-slate {
+  --screen0: #f8f2e6;
+  --screen1: #e1d3bd;
+  --board0: #efe0c8;
+  --board1: #cbb69d;
+  --wall0: #f6efe3;
+  --wall1: #c7b59f;
+  --wall-line: rgba(57, 55, 53, .36);
+  --piece0: #fff6e7;
+  --piece1: #d9d2c9;
+  --piece2: #8a8178;
+  --piece-line: rgba(54, 50, 46, .36);
+  --accent: #c94f48;
+  --accent2: #3e6f9b;
 }
-.tone-lavender {
-  --board0: #eae4ec;
-  --board1: #d2cad8;
-  --grid-line: rgba(70, 58, 85, .13);
-  --wall0: #c5bbcc;
-  --wall1: #9c8fa8;
-  --wall2: #7d728a;
-  --wall-line: rgba(61, 50, 75, .33);
-  --wall-cast: rgba(61, 50, 75, .12);
+.coral-focus {
+  --screen0: #fff3e8;
+  --screen1: #e8d1c2;
+  --board0: #f5ddca;
+  --board1: #d7b79e;
+  --wall0: #faeee0;
+  --wall1: #d4b99e;
+  --wall-line: rgba(98, 63, 47, .34);
+  --piece0: #fff2e8;
+  --piece1: #ec9b78;
+  --piece2: #c84f45;
+  --piece-line: rgba(119, 45, 38, .34);
+  --accent: #c84f45;
+  --accent2: #386e9d;
 }
-.tone-clay {
-  --board0: #f0ddcf;
-  --board1: #d9bda9;
-  --grid-line: rgba(96, 59, 44, .13);
-  --wall0: #cfa88e;
-  --wall1: #a97d65;
-  --wall2: #865f4f;
-  --wall-line: rgba(80, 47, 35, .33);
-  --wall-cast: rgba(80, 47, 35, .14);
+.blue-focus {
+  --screen0: #f7f4eb;
+  --screen1: #ded6c8;
+  --board0: #ece3d3;
+  --board1: #c9bda9;
+  --wall0: #f6f0e6;
+  --wall1: #cdc0ad;
+  --wall-line: rgba(61, 69, 74, .34);
+  --piece0: #eef8fb;
+  --piece1: #8ebbd0;
+  --piece2: #3e789f;
+  --piece-line: rgba(37, 74, 98, .34);
+  --accent: #cf584e;
+  --accent2: #3e789f;
 }
-.tone-graphite {
-  --board0: #e2ded5;
-  --board1: #c9c3b8;
-  --grid-line: rgba(60, 56, 49, .14);
-  --wall0: #b8b1a4;
-  --wall1: #8d867b;
-  --wall2: #716b62;
-  --wall-line: rgba(45, 41, 36, .34);
-  --wall-cast: rgba(45, 41, 36, .14);
-}
-.tone-ivory {
-  --board0: #f2eadb;
-  --board1: #ded0ba;
-  --grid-line: rgba(94, 74, 50, .13);
-  --wall0: #d8c8ae;
-  --wall1: #b79f7e;
-  --wall2: #92795f;
-  --wall-line: rgba(75, 57, 37, .32);
-  --wall-cast: rgba(75, 57, 37, .12);
+.bold-readable {
+  --screen0: #faf4e8;
+  --screen1: #e2d2bd;
+  --board0: #ecdbc3;
+  --board1: #c6ad92;
+  --grid-line: rgba(61, 49, 38, .18);
+  --wall0: #fff4e5;
+  --wall1: #c9b094;
+  --wall-line: rgba(47, 43, 39, .42);
+  --piece0: #fff0df;
+  --piece1: #e68b72;
+  --piece2: #ba4c45;
+  --piece-line: rgba(52, 45, 40, .42);
+  --accent: #ba4c45;
+  --accent2: #316c9c;
 }
 .topbar {
   display: grid;
@@ -152,15 +174,15 @@ h1 {
 .reset {
   display: grid;
   place-items: center;
-  color: #4d4842;
-  background: linear-gradient(160deg, #f5e7dc 0%, #e3d1c2 100%);
-  border: 1px solid rgba(64, 56, 48, .12);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.58);
+  color: #46413a;
+  background: linear-gradient(160deg, var(--ui0) 0%, var(--ui1) 100%);
+  border: 1px solid rgba(64, 56, 48, .13);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.68), 0 2px 4px rgba(88, 66, 45, .08);
 }
 .round {
   width: 34px;
   height: 34px;
-  border-radius: 50%;
+  border-radius: 12px;
 }
 .settings { justify-self: end; }
 .status {
@@ -171,25 +193,26 @@ h1 {
   white-space: nowrap;
 }
 .no {
-  color: #8f6c36;
+  color: var(--accent2);
   font-size: 14px;
   letter-spacing: .05em;
-  font-weight: 700;
+  font-weight: 800;
 }
 .count {
-  color: #4d4842;
+  color: #4b453d;
   font-size: 14px;
   letter-spacing: .04em;
+  font-weight: 600;
 }
 .answer {
   width: 48px;
   height: 34px;
   border-radius: 12px;
-  color: #8f6c36;
+  color: var(--accent);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: .08em;
-  border-color: rgba(151, 110, 50, .26);
+  border-color: color-mix(in srgb, var(--accent), transparent 68%);
 }
 .boards {
   display: grid;
@@ -201,11 +224,11 @@ h1 {
   position: relative;
   width: min(260px, 70vw);
   aspect-ratio: 1;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   background: linear-gradient(145deg, var(--board0) 0%, var(--board1) 100%);
-  border: 1px solid rgba(64, 56, 48, .18);
-  box-shadow: inset 0 1px 4px rgba(255,255,255,.72), inset 0 -8px 18px rgba(62,55,45,.06);
+  border: 2px solid rgba(78, 64, 49, .16);
+  box-shadow: inset 0 1px 5px rgba(255,255,255,.75), inset 0 -10px 20px rgba(62,55,45,.06);
 }
 .grid {
   position: absolute;
@@ -220,37 +243,14 @@ h1 {
 }
 .wall {
   z-index: 1;
-  background: linear-gradient(145deg, var(--wall0) 0%, var(--wall1) 58%, var(--wall2) 100%);
+  margin: 4px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, var(--wall0) 0%, var(--wall1) 100%);
   border: 2px solid var(--wall-line);
   box-shadow:
-    inset 1px 1px 0 var(--wall-hi),
-    inset -2px -2px 0 var(--wall-low),
-    0 3px 6px var(--wall-cast);
-}
-.wall::before {
-  content: "";
-  position: absolute;
-  left: 7px;
-  right: 9px;
-  top: 6px;
-  height: 2px;
-  border-radius: 2px;
-  background: rgba(255, 244, 227, .3);
-}
-.wall::after {
-  content: "";
-  position: absolute;
-  right: 5px;
-  bottom: 5px;
-  width: 38%;
-  height: 2px;
-  border-radius: 2px;
-  background: rgba(77, 51, 36, .13);
-}
-.tone-bluegray .wall::before,
-.tone-lavender .wall::before,
-.tone-graphite .wall::before {
-  background: rgba(255,255,255,.22);
+    inset 2px 2px 0 rgba(255,255,255,.34),
+    inset -2px -3px 0 rgba(74, 58, 43, .12),
+    0 3px 5px rgba(76, 54, 39, .13);
 }
 .goal {
   position: absolute;
@@ -259,8 +259,9 @@ h1 {
   width: 20%;
   height: 20%;
   border-radius: 10px;
-  border: 2px dashed rgba(143, 108, 54, .62);
-  box-shadow: 0 0 12px rgba(218, 171, 82, .28);
+  border: 3px solid color-mix(in srgb, var(--goal), white 12%);
+  box-shadow: inset 0 0 0 4px rgba(255,255,255,.42), 0 0 12px color-mix(in srgb, var(--goal), transparent 68%);
+  opacity: .8;
 }
 .board:nth-child(2) .goal { left: 20%; top: 60%; }
 .piece {
@@ -271,23 +272,29 @@ h1 {
 .piece::before {
   content: "";
   position: absolute;
-  inset: var(--piece-inset);
-  border-radius: var(--piece-radius);
-  background: var(--piece-bg);
-  border: var(--piece-outline);
-  box-shadow: var(--piece-shadow);
+  inset: 10%;
+  border-radius: 10px;
+  background: linear-gradient(145deg, var(--piece0) 0%, var(--piece1) 52%, var(--piece2) 100%);
+  border: 2px solid var(--piece-line);
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,.46),
+    inset -3px -3px 0 rgba(74, 48, 35, .14),
+    0 6px 10px rgba(92, 62, 45, .22);
 }
 .piece::after {
   content: "";
   position: absolute;
-  inset: 25%;
-  border-radius: 999px;
-  background: var(--piece-after);
+  left: 31%;
+  top: 28%;
+  width: 16%;
+  height: 16%;
+  border-radius: 50%;
+  background: rgba(255,255,255,.55);
 }
 .p1 { left: 20%; top: 40%; }
 .p2 { left: 60%; top: 40%; }
 .active .piece::before {
-  outline: 2px solid rgba(255, 223, 158, .56);
+  outline: 3px solid color-mix(in srgb, var(--accent), white 48%);
   outline-offset: 2px;
 }
 .edge-glow {
@@ -297,9 +304,9 @@ h1 {
   width: 20%;
   height: 4px;
   border-radius: 4px;
-  background: #ffd996;
-  box-shadow: 0 0 13px 4px rgba(218, 171, 82, .36);
-  opacity: .94;
+  background: color-mix(in srgb, var(--accent), white 30%);
+  box-shadow: 0 0 13px 4px color-mix(in srgb, var(--accent), transparent 72%);
+  opacity: .9;
 }
 .trail {
   position: absolute;
@@ -311,11 +318,11 @@ h1 {
 .trail::before {
   content: "";
   position: absolute;
-  inset: var(--ghost-inset);
-  border-radius: var(--ghost-radius);
-  border: 2px solid rgba(73, 55, 38, .3);
-  box-shadow: 0 0 12px 3px rgba(218, 171, 82, .21);
-  transform: var(--ghost-transform);
+  inset: 10%;
+  border-radius: 10px;
+  border: 2px solid color-mix(in srgb, var(--accent), transparent 58%);
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--accent), transparent 78%);
+  transform: scale(.76);
 }
 .move-mark {
   position: absolute;
@@ -323,9 +330,9 @@ h1 {
   top: calc(40% - 8px);
   width: 18px;
   height: 18px;
-  border-radius: 50%;
-  background: rgba(255, 231, 178, .86);
-  box-shadow: 0 0 12px rgba(218, 171, 82, .34);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent2), white 40%);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent2), transparent 68%);
 }
 .move-mark::before {
   content: "";
@@ -334,8 +341,8 @@ h1 {
   top: 4px;
   width: 5px;
   height: 8px;
-  border-right: 2px solid rgba(86, 61, 33, .58);
-  border-bottom: 2px solid rgba(86, 61, 33, .58);
+  border-right: 2px solid rgba(255,255,255,.85);
+  border-bottom: 2px solid rgba(255,255,255,.85);
   transform: rotate(45deg);
 }
 .control-dock {
@@ -356,8 +363,8 @@ h1 {
 }
 .hint {
   position: relative;
-  color: #8f6c36;
-  border-color: rgba(151, 110, 50, .26);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent), transparent 70%);
 }
 .badge {
   position: absolute;
@@ -368,12 +375,12 @@ h1 {
   padding: 0 4px;
   border-radius: 5px;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 18px;
   text-align: center;
-  background: #edd097;
-  color: #342a1b;
-  box-shadow: inset 0 1px 1px rgba(255,255,255,.7), 0 1px 2px rgba(80,58,18,.18);
+  background: color-mix(in srgb, var(--accent2), white 54%);
+  color: #fff;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.35), 0 1px 2px rgba(60,44,28,.18);
 }
 .ad-slot {
   position: absolute;
@@ -389,7 +396,7 @@ svg {
   height: 22px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.8;
+  stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -399,36 +406,32 @@ svg {
 </style>
 </head>
 <body>
-<h1>Minimal Outline Wall Colors</h1>
-<p class="lead">駒は Stone Block、壁は情報量を抑えたアウトライン型に固定。盤と壁の色系統だけを変えて相性を比較するモック。</p>
+<h1>Threes-Inspired Tsugai</h1>
+<p class="lead">Threes!の紙タイル感、クリーム地、赤青アクセントをTsugai向けに翻訳した配色モック。模倣ではなく、読みやすさと親しみやすさの要素を抽出。</p>
 <main class="variants">
   <section class="variant">
-    <div class="meta"><span class="name">A Warm Stone</span><span class="tag">基準案</span></div>
-    <div class="screen tone-warm"></div>
+    <div class="meta"><span class="name">A Classic Paper</span><span class="tag">一番Threes寄り</span></div>
+    <div class="screen classic"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">B Sage Stone</span><span class="tag">自然で穏やか</span></div>
-    <div class="screen tone-sage"></div>
+    <div class="meta"><span class="name">B Red / Blue</span><span class="tag">意味色を強める</span></div>
+    <div class="screen cream-redblue"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">C Blue Gray</span><span class="tag">静かで読みやすい</span></div>
-    <div class="screen tone-bluegray"></div>
+    <div class="meta"><span class="name">C Paper Slate</span><span class="tag">少し大人しい</span></div>
+    <div class="screen paper-slate"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">D Lavender Gray</span><span class="tag">少し個性</span></div>
-    <div class="screen tone-lavender"></div>
+    <div class="meta"><span class="name">D Coral Focus</span><span class="tag">駒を主役にする</span></div>
+    <div class="screen coral-focus"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">E Clay Stone</span><span class="tag">温かく濃い</span></div>
-    <div class="screen tone-clay"></div>
+    <div class="meta"><span class="name">E Blue Focus</span><span class="tag">クールで読みやすい</span></div>
+    <div class="screen blue-focus"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">F Graphite Stone</span><span class="tag">締まり重視</span></div>
-    <div class="screen tone-graphite"></div>
-  </section>
-  <section class="variant">
-    <div class="meta"><span class="name">G Ivory Stone</span><span class="tag">明るく上品</span></div>
-    <div class="screen tone-ivory"></div>
+    <div class="meta"><span class="name">F Bold Readable</span><span class="tag">ストア映え重視</span></div>
+    <div class="screen bold-readable"></div>
   </section>
 </main>
 <template id="screen-template">
