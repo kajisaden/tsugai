@@ -468,12 +468,14 @@ button:active { transform: translateY(1px); }
 .trail-cell::before {
   content: "";
   position: absolute;
-  inset: 43% 19%;
+  inset: 17%;
   border-radius: 999px;
-  background: linear-gradient(var(--trail-angle), transparent 0%, rgba(240, 220, 170, 0.12) 22%, rgba(255, 250, 240, 0.34) 100%);
-  box-shadow: 0 0 14px 4px rgba(240, 220, 170, 0.14);
-  filter: blur(0.35px);
+  background: linear-gradient(var(--trail-angle), transparent 0%, rgba(240, 220, 170, 0.08) 24%, rgba(255, 250, 240, 0.24) 100%);
+  box-shadow: 0 0 20px 5px rgba(240, 220, 170, 0.10);
+  filter: blur(0.7px);
 }
+.trail-cell.trail-h::before { transform: scaleX(1.18); }
+.trail-cell.trail-v::before { transform: scaleY(1.18); }
 
 .cells {
   position: absolute;

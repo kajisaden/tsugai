@@ -805,7 +805,9 @@ function showTrail(rm, from, to, d) {
     cell.style.width = 100 / G.w + '%';
     cell.style.height = 100 / G.h + '%';
     cell.style.transform = `translate(${cx * 100}%, ${cy * 100}%)`;
-    cell.style.setProperty('--trail-angle', AXIS_H(d) ? '90deg' : '0deg');
+    const isHorizontal = AXIS_H(d);
+    cell.classList.add(isHorizontal ? 'trail-h' : 'trail-v');
+    cell.style.setProperty('--trail-angle', isHorizontal ? '90deg' : '0deg');
     rm.trailLayer.append(cell);
     const reach = (s / steps) * MOVE_MS; // 球がそのマスに差し掛かる頃に点灯(進行方向へ流れる)
     const a = cell.animate([
