@@ -3,34 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tsugai pastel theme mock</title>
+<title>Tsugai board color mock</title>
 <style>
 * { box-sizing: border-box; }
-html, body { min-height: 100%; margin: 0; background: #f5f2ec; color: #2d2a28; }
+html, body { min-height: 100%; margin: 0; background: #f5efe5; color: #2d2a28; }
 body {
   font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", system-ui, sans-serif;
   padding: 20px 14px 34px;
+  background: radial-gradient(120% 100% at 50% 0%, #fff7ee 0%, #eadccf 78%);
 }
 h1 {
-  max-width: 760px;
+  max-width: 860px;
   margin: 0 auto 8px;
   font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
   font-size: 21px;
   font-weight: 500;
   letter-spacing: .12em;
-  color: #5f584d;
+  color: #5f5146;
 }
 .lead {
-  max-width: 760px;
+  max-width: 860px;
   margin: 0 auto 18px;
-  color: #746e64;
+  color: #74685f;
   font-size: 13px;
   line-height: 1.7;
 }
 .variants {
   display: grid;
   gap: 18px;
-  max-width: 760px;
+  max-width: 860px;
   margin: 0 auto;
 }
 .variant { display: grid; gap: 8px; }
@@ -40,88 +41,70 @@ h1 {
   gap: 10px;
   align-items: baseline;
 }
-.name { color: #514b43; font-size: 15px; letter-spacing: .08em; }
-.tag { color: #7c756b; font-size: 11px; letter-spacing: .06em; }
+.name { color: #51483f; font-size: 15px; letter-spacing: .08em; }
+.tag { color: #80746a; font-size: 11px; letter-spacing: .06em; }
 .screen {
-  --bg0: #f6f1e7;
-  --bg1: #ede3d4;
-  --panel0: #efe7d8;
-  --panel1: #ddd0be;
-  --wall0: #c6b8a4;
-  --wall1: #a99b88;
-  --line: rgba(77, 68, 56, .16);
-  --ball-hi: #fff7ee;
-  --ball0: #f2c9ad;
-  --ball1: #c78969;
-  --ball-shadow: rgba(126, 77, 52, .28);
-  --gold: #98753a;
-  --glow: rgba(198, 155, 72, .28);
+  --board0: #e7f4ef;
+  --board1: #cfe5df;
+  --wall0: #b5cec8;
+  --wall1: #8daaa4;
+  --line: rgba(46, 84, 78, .16);
+  --accent: #8a7443;
+  --hint: rgba(218, 171, 82, .38);
   position: relative;
   height: 620px;
   border-radius: 16px;
   overflow: hidden;
-  background: radial-gradient(120% 100% at 50% 0%, var(--bg0) 0%, var(--bg1) 76%);
+  background: radial-gradient(120% 100% at 50% 0%, #fff7ee 0%, #eadccf 78%);
   border: 1px solid rgba(84, 76, 63, .13);
 }
-.mint {
-  --bg0: #eff8f3;
-  --bg1: #dcefe9;
-  --panel0: #e7f4ef;
-  --panel1: #cfe5df;
+.sage {
+  --board0: #e7f4ef;
+  --board1: #cfe5df;
   --wall0: #b5cec8;
   --wall1: #8daaa4;
   --line: rgba(46, 84, 78, .16);
-  --ball-hi: #f8fff8;
-  --ball0: #b9ead7;
-  --ball1: #70b89f;
-  --ball-shadow: rgba(50, 111, 91, .24);
-  --gold: #7b8f52;
-  --glow: rgba(129, 157, 96, .28);
-}
-.lavender {
-  --bg0: #f4f0fa;
-  --bg1: #e6deef;
-  --panel0: #eee8f6;
-  --panel1: #d8cfe5;
-  --wall0: #c2b6d4;
-  --wall1: #9f93b8;
-  --line: rgba(64, 52, 90, .16);
-  --ball-hi: #fffaff;
-  --ball0: #dcc7ef;
-  --ball1: #a887cd;
-  --ball-shadow: rgba(90, 65, 125, .24);
-  --gold: #8570a5;
-  --glow: rgba(142, 115, 178, .25);
+  --accent: #6e8e77;
 }
 .sky {
-  --bg0: #eef6fb;
-  --bg1: #d9e9f0;
-  --panel0: #e4f0f6;
-  --panel1: #cadde7;
+  --board0: #e4f0f6;
+  --board1: #cadde7;
   --wall0: #adc6d4;
   --wall1: #82a0b3;
   --line: rgba(45, 76, 95, .16);
-  --ball-hi: #f8fdff;
-  --ball0: #bddff1;
-  --ball1: #79abc8;
-  --ball-shadow: rgba(52, 94, 120, .24);
-  --gold: #667f9b;
-  --glow: rgba(104, 137, 171, .25);
+  --accent: #667f9b;
 }
-.peach {
-  --bg0: #fff2ea;
-  --bg1: #efdccf;
-  --panel0: #f7e8dd;
-  --panel1: #e5cfc1;
-  --wall0: #d0b2a5;
-  --wall1: #ad8d82;
-  --line: rgba(100, 59, 45, .15);
-  --ball-hi: #fff9f6;
-  --ball0: #ffc8b7;
-  --ball1: #d98e77;
-  --ball-shadow: rgba(142, 76, 59, .24);
-  --gold: #9e704a;
-  --glow: rgba(192, 127, 82, .24);
+.lavender {
+  --board0: #eee8f6;
+  --board1: #d8cfe5;
+  --wall0: #c2b6d4;
+  --wall1: #9f93b8;
+  --line: rgba(64, 52, 90, .16);
+  --accent: #8570a5;
+}
+.bluegray {
+  --board0: #e8edf0;
+  --board1: #cfd9df;
+  --wall0: #b3c1c8;
+  --wall1: #8799a4;
+  --line: rgba(47, 62, 72, .17);
+  --accent: #687985;
+}
+.clay {
+  --board0: #f0e3dc;
+  --board1: #dcc8bd;
+  --wall0: #c7a99c;
+  --wall1: #a47f72;
+  --line: rgba(96, 60, 48, .16);
+  --accent: #9b6f58;
+}
+.graphite {
+  --board0: #e7e5df;
+  --board1: #cecbc2;
+  --wall0: #aaa69c;
+  --wall1: #817d74;
+  --line: rgba(47, 43, 38, .18);
+  --accent: #6d675d;
 }
 .topbar {
   display: grid;
@@ -137,7 +120,7 @@ h1 {
   display: grid;
   place-items: center;
   color: #4d4842;
-  background: linear-gradient(160deg, var(--panel0) 0%, var(--panel1) 100%);
+  background: linear-gradient(160deg, #f5e7dc 0%, #e3d1c2 100%);
   border: 1px solid rgba(64, 56, 48, .12);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.58);
 }
@@ -155,10 +138,10 @@ h1 {
   white-space: nowrap;
 }
 .no {
-  color: var(--gold);
+  color: var(--accent);
   font-size: 14px;
   letter-spacing: .05em;
-  font-weight: 600;
+  font-weight: 700;
 }
 .count {
   color: #4d4842;
@@ -169,11 +152,11 @@ h1 {
   width: 48px;
   height: 34px;
   border-radius: 12px;
-  color: var(--gold);
+  color: #8f6c36;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: .08em;
-  border-color: color-mix(in srgb, var(--gold), transparent 66%);
+  border-color: rgba(151, 110, 50, .26);
 }
 .boards {
   display: grid;
@@ -187,9 +170,9 @@ h1 {
   aspect-ratio: 1;
   border-radius: 12px;
   overflow: hidden;
-  background: linear-gradient(145deg, var(--panel0) 0%, var(--panel1) 100%);
+  background: linear-gradient(145deg, var(--board0) 0%, var(--board1) 100%);
   border: 1px solid rgba(64, 56, 48, .18);
-  box-shadow: inset 0 1px 4px rgba(255,255,255,.7), inset 0 -8px 18px rgba(62,55,45,.06);
+  box-shadow: inset 0 1px 4px rgba(255,255,255,.72), inset 0 -8px 18px rgba(62,55,45,.06);
 }
 .grid {
   position: absolute;
@@ -208,8 +191,8 @@ h1 {
   width: 20%;
   height: 20%;
   border-radius: 50%;
-  border: 2px dashed color-mix(in srgb, var(--gold), white 26%);
-  box-shadow: 0 0 12px var(--glow);
+  border: 2px dashed rgba(143, 108, 54, .62);
+  box-shadow: 0 0 12px rgba(218, 171, 82, .28);
 }
 .g1 { left: 60%; top: 20%; }
 .g2 { left: 20%; top: 60%; }
@@ -223,11 +206,11 @@ h1 {
   position: absolute;
   inset: 17%;
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, var(--ball-hi) 0%, var(--ball0) 42%, var(--ball1) 100%);
+  background: radial-gradient(circle at 34% 28%, #fff8f0 0%, #f4c8b0 44%, #c98467 100%);
   box-shadow:
-    inset -2px -3px 7px color-mix(in srgb, var(--ball1), #4a352a 20%),
-    inset 3px 3px 6px rgba(255,255,255,.46),
-    0 5px 9px var(--ball-shadow);
+    inset -2px -3px 7px rgba(126, 75, 52, .36),
+    inset 3px 3px 6px rgba(255,255,255,.52),
+    0 5px 9px rgba(126, 77, 52, .25);
 }
 .b1 { left: 20%; top: 40%; }
 .b2 { left: 60%; top: 40%; }
@@ -238,9 +221,9 @@ h1 {
   width: 20%;
   height: 4px;
   border-radius: 4px;
-  background: color-mix(in srgb, var(--gold), white 28%);
-  box-shadow: 0 0 13px 4px var(--glow);
-  opacity: .92;
+  background: #ffd996;
+  box-shadow: 0 0 13px 4px rgba(218, 171, 82, .36);
+  opacity: .94;
 }
 .trail {
   position: absolute;
@@ -254,8 +237,8 @@ h1 {
   position: absolute;
   inset: 17%;
   border-radius: 50%;
-  border: 2px solid rgba(30, 27, 24, .32);
-  box-shadow: 0 0 12px 3px var(--glow);
+  border: 2px solid rgba(73, 55, 38, .32);
+  box-shadow: 0 0 12px 3px rgba(218, 171, 82, .24);
   transform: scale(.78);
 }
 .control-dock {
@@ -276,8 +259,8 @@ h1 {
 }
 .hint {
   position: relative;
-  color: var(--gold);
-  border-color: color-mix(in srgb, var(--gold), transparent 62%);
+  color: #8f6c36;
+  border-color: rgba(151, 110, 50, .26);
 }
 .badge {
   position: absolute;
@@ -291,7 +274,7 @@ h1 {
   font-weight: 700;
   line-height: 18px;
   text-align: center;
-  background: color-mix(in srgb, var(--gold), white 40%);
+  background: #edd097;
   color: #342a1b;
   box-shadow: inset 0 1px 1px rgba(255,255,255,.7), 0 1px 2px rgba(80,58,18,.18);
 }
@@ -314,52 +297,60 @@ svg {
   stroke-linejoin: round;
 }
 @media (min-width: 760px) {
-  .variants { grid-template-columns: 1fr 1fr; }
+  .variants { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
 <body>
-<h1>Pastel Theme Mock</h1>
-<p class="lead">ミニマルさを残しつつ、盤面の読みやすさを上げる低彩度パステル案。床・壁・ゴール・球の分離を優先。</p>
+<h1>Warm Sand + Board Variants</h1>
+<p class="lead">テーマ背景は Warm Sand に固定。盤だけ別系統にして、自然さと視認性を比較するモック。</p>
 <main class="variants">
   <section class="variant">
-    <div class="meta"><span class="name">A Sage Mint</span><span class="tag">読みやすさ優先</span></div>
-    <div class="screen mint">
-      <div class="topbar"><span class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></span><div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer">答え</span></div><span class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></span></div>
-      <div class="boards"><div class="board"><div class="grid"></div><span class="goal g1"></span><span class="trail"></span><span class="ball b1"></span><span class="edge-glow"></span></div><div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div></div>
-      <div class="control-dock"><span class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></span><span class="hint"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></span></div>
-      <div class="ad-slot"></div>
-    </div>
+    <div class="meta"><span class="name">A Sage Board</span><span class="tag">自然・読みやすい</span></div>
+    <div class="screen sage"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">B Warm Sand</span><span class="tag">現行ライトに近い</span></div>
-    <div class="screen">
-      <div class="topbar"><span class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></span><div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer">答え</span></div><span class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></span></div>
-      <div class="boards"><div class="board"><div class="grid"></div><span class="goal g1"></span><span class="trail"></span><span class="ball b1"></span><span class="edge-glow"></span></div><div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div></div>
-      <div class="control-dock"><span class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></span><span class="hint"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></span></div>
-      <div class="ad-slot"></div>
-    </div>
+    <div class="meta"><span class="name">B Sky Board</span><span class="tag">分離が強い</span></div>
+    <div class="screen sky"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">C Soft Sky</span><span class="tag">清潔感と分離</span></div>
-    <div class="screen sky">
-      <div class="topbar"><span class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></span><div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer">答え</span></div><span class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></span></div>
-      <div class="boards"><div class="board"><div class="grid"></div><span class="goal g1"></span><span class="trail"></span><span class="ball b1"></span><span class="edge-glow"></span></div><div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div></div>
-      <div class="control-dock"><span class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></span><span class="hint"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></span></div>
-      <div class="ad-slot"></div>
-    </div>
+    <div class="meta"><span class="name">C Lavender Board</span><span class="tag">やわらかい個性</span></div>
+    <div class="screen lavender"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">D Dusty Lavender</span><span class="tag">少し個性的</span></div>
-    <div class="screen lavender">
-      <div class="topbar"><span class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></span><div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer">答え</span></div><span class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></span></div>
-      <div class="boards"><div class="board"><div class="grid"></div><span class="goal g1"></span><span class="trail"></span><span class="ball b1"></span><span class="edge-glow"></span></div><div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div></div>
-      <div class="control-dock"><span class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></span><span class="hint"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></span></div>
-      <div class="ad-slot"></div>
-    </div>
+    <div class="meta"><span class="name">D Blue Gray Board</span><span class="tag">落ち着き重視</span></div>
+    <div class="screen bluegray"></div>
+  </section>
+  <section class="variant">
+    <div class="meta"><span class="name">E Clay Board</span><span class="tag">温かいが近似色</span></div>
+    <div class="screen clay"></div>
+  </section>
+  <section class="variant">
+    <div class="meta"><span class="name">F Graphite Board</span><span class="tag">最も締まる</span></div>
+    <div class="screen graphite"></div>
   </section>
 </main>
+<template id="screen-template">
+  <div class="topbar">
+    <span class="round"><svg viewBox="0 0 24 24"><path d="M15 18 9 12l6-6"/></svg></span>
+    <div class="status"><span class="no">#12</span><span class="count">1/4手詰</span><span class="answer">答え</span></div>
+    <span class="round settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg></span>
+  </div>
+  <div class="boards">
+    <div class="board"><div class="grid"></div><span class="goal g1"></span><span class="trail"></span><span class="ball b1"></span><span class="edge-glow"></span></div>
+    <div class="board"><div class="grid"></div><span class="goal g2"></span><span class="ball b2"></span></div>
+  </div>
+  <div class="control-dock">
+    <span class="reset"><svg viewBox="0 0 24 24"><path d="M4 7v5h5"/><path d="M5.8 16.1A7 7 0 1 0 6 7.8"/></svg></span>
+    <span class="hint"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg><span class="badge">5</span></span>
+  </div>
+  <div class="ad-slot"></div>
+</template>
 <script>
+const template = document.querySelector('#screen-template');
+for (const screen of document.querySelectorAll('.screen')) {
+  screen.append(template.content.cloneNode(true));
+}
 for (const grid of document.querySelectorAll('.grid')) {
   for (let i = 0; i < 25; i += 1) {
     const cell = document.createElement('div');
