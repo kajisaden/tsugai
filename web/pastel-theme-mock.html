@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tsugai warm sand piece mock</title>
+<title>Tsugai wall style mock</title>
 <style>
 * { box-sizing: border-box; }
 html, body { min-height: 100%; margin: 0; background: #f5efe5; color: #2d2a28; }
@@ -44,14 +44,14 @@ h1 {
 .name { color: #51483f; font-size: 15px; letter-spacing: .08em; }
 .tag { color: #80746a; font-size: 11px; letter-spacing: .06em; }
 .screen {
-  --piece-radius: 50%;
-  --piece-inset: 17%;
-  --piece-bg: radial-gradient(circle at 34% 28%, #fff8f0 0%, #f3c9b2 44%, #c98467 100%);
-  --piece-shadow: inset -2px -3px 7px rgba(126, 75, 52, .36), inset 3px 3px 6px rgba(255,255,255,.52), 0 5px 9px rgba(126, 77, 52, .25);
-  --piece-outline: none;
+  --piece-radius: 7px;
+  --piece-inset: 12%;
+  --piece-bg: linear-gradient(145deg, #f4dfc9 0%, #cf9d78 58%, #9e694f 100%);
+  --piece-shadow: inset -2px -2px 0 rgba(82, 48, 34, .22), inset 2px 2px 0 rgba(255,255,255,.34), 0 7px 11px rgba(104, 65, 45, .27);
+  --piece-outline: 1px solid rgba(87, 52, 38, .24);
   --piece-after: none;
-  --ghost-radius: 50%;
-  --ghost-inset: 17%;
+  --ghost-radius: 7px;
+  --ghost-inset: 12%;
   --ghost-transform: scale(.78);
   position: relative;
   height: 620px;
@@ -220,6 +220,80 @@ h1 {
     inset -3px -4px 0 rgba(69, 43, 31, .2),
     0 5px 9px rgba(83, 54, 39, .23);
 }
+.wall-soft .wall {
+  background: linear-gradient(145deg, #dfc8b2 0%, #bea088 58%, #9d806c 100%);
+  border-color: rgba(93, 68, 52, .18);
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,.22),
+    inset -2px -3px 0 rgba(87, 58, 42, .12),
+    0 3px 6px rgba(90, 61, 43, .13);
+}
+.wall-heavy .wall {
+  background: linear-gradient(145deg, #d0ad8e 0%, #9f765d 54%, #715243 100%);
+  border-color: rgba(62, 40, 30, .34);
+  box-shadow:
+    inset 2px 2px 0 rgba(255,248,232,.22),
+    inset -5px -6px 0 rgba(55, 35, 26, .24),
+    0 7px 12px rgba(74, 47, 34, .28);
+}
+.wall-outline .wall {
+  background:
+    linear-gradient(145deg, rgba(255,246,230,.36), transparent 35%),
+    linear-gradient(145deg, #d8b999 0%, #b38a6e 60%, #87634f 100%);
+  border: 2px solid rgba(82, 54, 39, .32);
+  box-shadow:
+    inset 0 0 0 3px rgba(255,239,211,.22),
+    inset -3px -4px 0 rgba(75, 49, 36, .16),
+    0 5px 9px rgba(83, 54, 39, .2);
+}
+.wall-cut .wall {
+  background:
+    linear-gradient(135deg, rgba(255,246,230,.45) 0 16%, transparent 17%),
+    linear-gradient(315deg, rgba(74,48,34,.2) 0 18%, transparent 19%),
+    linear-gradient(145deg, #d5b393 0%, #a98267 56%, #7b5a49 100%);
+  border-color: rgba(72, 48, 36, .28);
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,.2),
+    inset -3px -4px 0 rgba(69, 43, 31, .18),
+    0 5px 9px rgba(83, 54, 39, .21);
+}
+.wall-cut .wall::before {
+  left: 9px;
+  right: 14px;
+  opacity: .58;
+}
+.wall-cut .wall::after {
+  right: 7px;
+  bottom: 7px;
+  width: 46%;
+  opacity: .78;
+}
+.wall-slab .wall {
+  background:
+    linear-gradient(180deg, rgba(255,246,232,.38) 0 20%, transparent 21%),
+    linear-gradient(145deg, #ccb198 0%, #a88a73 56%, #866b5a 100%);
+  border-color: rgba(74, 52, 40, .26);
+  box-shadow:
+    inset 0 4px 0 rgba(255,248,235,.2),
+    inset 0 -6px 0 rgba(67, 45, 34, .16),
+    0 4px 8px rgba(83, 54, 39, .18);
+}
+.wall-slab .wall::before,
+.wall-slab .wall::after {
+  display: none;
+}
+.wall-minimal .wall {
+  background: linear-gradient(145deg, #cdb39c 0%, #aa8c76 62%, #8c715f 100%);
+  border-color: rgba(82, 59, 45, .22);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.2),
+    inset -2px -2px 0 rgba(67, 45, 34, .12),
+    0 3px 6px rgba(83, 54, 39, .13);
+}
+.wall-minimal .wall::before,
+.wall-minimal .wall::after {
+  opacity: .38;
+}
 .goal {
   position: absolute;
   left: 60%;
@@ -367,32 +441,36 @@ svg {
 </style>
 </head>
 <body>
-<h1>Warm Sand + Piece Variants</h1>
-<p class="lead">同系統のテーマで統一し、動かす対象だけを形・影・光で立たせる比較モック。</p>
+<h1>Warm Sand + Wall Variants</h1>
+<p class="lead">駒は Stone Block に固定。盤面の壁だけを変えて、障害物としての読みやすさと世界観の相性を比較するモック。</p>
 <main class="variants">
   <section class="variant">
-    <div class="meta"><span class="name">A Soft Ball</span><span class="tag">現行に近い</span></div>
+    <div class="meta"><span class="name">A Raised Stone</span><span class="tag">現行強化案</span></div>
     <div class="screen"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">B Soft Block</span><span class="tag">球から自然に移行</span></div>
-    <div class="screen soft-block"></div>
+    <div class="meta"><span class="name">B Soft Wall</span><span class="tag">やさしく馴染む</span></div>
+    <div class="screen wall-soft"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">C Tile Block</span><span class="tag">盤面ゲーム感が強い</span></div>
-    <div class="screen tile-block"></div>
+    <div class="meta"><span class="name">C Heavy Wall</span><span class="tag">障害物感が強い</span></div>
+    <div class="screen wall-heavy"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">D Marked Block</span><span class="tag">動かす対象が明確</span></div>
-    <div class="screen marker-block"></div>
+    <div class="meta"><span class="name">D Outline Wall</span><span class="tag">輪郭で読ませる</span></div>
+    <div class="screen wall-outline"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">E Stone Block</span><span class="tag">和風・質感寄り</span></div>
-    <div class="screen stone-block"></div>
+    <div class="meta"><span class="name">E Cut Stone</span><span class="tag">石材らしさ重視</span></div>
+    <div class="screen wall-cut"></div>
   </section>
   <section class="variant">
-    <div class="meta"><span class="name">F Outline Block</span><span class="tag">視認性優先</span></div>
-    <div class="screen outline-block"></div>
+    <div class="meta"><span class="name">F Low Slab</span><span class="tag">低めで上品</span></div>
+    <div class="screen wall-slab"></div>
+  </section>
+  <section class="variant">
+    <div class="meta"><span class="name">G Minimal Wall</span><span class="tag">情報量を抑える</span></div>
+    <div class="screen wall-minimal"></div>
   </section>
 </main>
 <template id="screen-template">
