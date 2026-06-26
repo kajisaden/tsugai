@@ -458,7 +458,6 @@ button:active { transform: translateY(1px); }
   pointer-events: none;
 }
 .trail-cell {
-  --trail-angle: 90deg;
   position: absolute;
   left: 0;
   top: 0;
@@ -470,12 +469,17 @@ button:active { transform: translateY(1px); }
   position: absolute;
   inset: 17%;
   border-radius: 999px;
-  background: linear-gradient(var(--trail-angle), transparent 0%, rgba(240, 220, 170, 0.08) 24%, rgba(255, 250, 240, 0.24) 100%);
-  box-shadow: 0 0 20px 5px rgba(240, 220, 170, 0.10);
-  filter: blur(0.7px);
+  border: 2px solid rgba(255, 250, 240, 0.42);
+  background: transparent;
+  box-shadow:
+    0 0 14px 3px rgba(240, 220, 170, 0.18),
+    inset 0 0 10px 1px rgba(255, 250, 240, 0.08);
+  animation: trail-ring-shrink 460ms ease-out forwards;
 }
-.trail-cell.trail-h::before { transform: scaleX(1.18); }
-.trail-cell.trail-v::before { transform: scaleY(1.18); }
+@keyframes trail-ring-shrink {
+  0% { transform: scale(1.06); }
+  100% { transform: scale(0.74); }
+}
 
 .cells {
   position: absolute;
