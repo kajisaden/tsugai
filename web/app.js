@@ -805,13 +805,14 @@ function showTrail(rm, from, to, d) {
     cell.style.width = 100 / G.w + '%';
     cell.style.height = 100 / G.h + '%';
     cell.style.transform = `translate(${cx * 100}%, ${cy * 100}%)`;
+    cell.style.setProperty('--trail-angle', AXIS_H(d) ? '90deg' : '0deg');
     rm.trailLayer.append(cell);
     const reach = (s / steps) * MOVE_MS; // 球がそのマスに差し掛かる頃に点灯(進行方向へ流れる)
     const a = cell.animate([
       { opacity: 0,    offset: 0 },
-      { opacity: 0.65, offset: 0.18 },
+      { opacity: 0.86, offset: 0.20 },
       { opacity: 0,    offset: 1 },
-    ], { duration: 420, delay: reach, easing: 'ease-out', fill: 'backwards' });
+    ], { duration: 540, delay: reach, easing: 'ease-out', fill: 'backwards' });
     a.onfinish = a.oncancel = () => cell.remove(); // 退色しきったら DOM を片付ける
   }
 }
