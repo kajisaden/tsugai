@@ -18,8 +18,9 @@
   --bump-ms: 200ms;  /* 壁当て */
   /* 盤の縦並びサイズ計算: 一辺 = (画面高 - 上下UI - 盤間余白) / 2(盤数)。
      盤数が変わる3部屋ビューアは、ここの除数と --play-chrome を別管理する */
-  --play-chrome: 292px; /* ヘッダ + 下部操作 + 将来の広告枠の合計概算 */
-  --board-gap: 44px;    /* 上下2盤の間隔 */
+  --ad-slot-h: clamp(36px, 6dvh, 50px); /* 将来のバナー広告枠。背の低い端末では薄くする */
+  --play-chrome: clamp(238px, 31dvh, 278px); /* ヘッダ + 下部操作 + 広告枠の概算 */
+  --board-gap: clamp(18px, 3.5dvh, 34px);    /* 上下2盤の間隔。小さいスマホでは詰める */
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -692,17 +693,17 @@ button:active { transform: translateY(1px); }
 
 /* ---- 操作系: 上段=ヘルプ(リワード) / 下段=最初から(無料・フル幅) ---- */
 #controls {
-  margin: 18px auto 0;
+  margin: clamp(10px, 2dvh, 16px) auto 0;
   width: fit-content;
 }
-#hint-row { display: flex; gap: 18px; align-items: center; justify-content: center; }
+#hint-row { display: flex; gap: 14px; align-items: center; justify-content: center; }
 /* ヘルプ = 盤床色のカード(一覧タイル/結果カードと同家系)。背後の一枚板は置かない */
 .help {
   position: relative;
   display: grid;
   place-items: center;
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
   font: inherit; font-size: 13px; letter-spacing: 0.04em;
   color: var(--text);
   border-radius: 16px;
@@ -736,8 +737,8 @@ button:active { transform: translateY(1px); }
 .hint-badge.ad { font-weight: 400; font-size: 9px; }
 /* 最初から = 下段フル幅・枠強(中立。リワードの金とは別カテゴリ) */
 .reset-btn {
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
   display: grid;
   place-items: center;
   font: inherit; font-size: 15px; letter-spacing: 0.08em;
@@ -1088,8 +1089,8 @@ button:active { transform: translateY(1px); }
   box-shadow: 0 0 8px 2px rgba(216, 192, 110, 0.56), 0 0 15px 4px rgba(216, 192, 110, 0.24);
 }
 #ad-slot {
-  height: 58px;
-  margin-top: 14px;
+  height: var(--ad-slot-h);
+  margin-top: clamp(8px, 1.6dvh, 12px);
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   background:
     linear-gradient(180deg, rgba(10, 10, 14, 0), rgba(10, 10, 14, 0.58) 35%),
