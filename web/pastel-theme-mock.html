@@ -50,8 +50,10 @@ h1 {
   --wall0: #c6b8a4;
   --wall1: #a99b88;
   --line: rgba(77, 68, 56, .16);
-  --ball0: #4d4a45;
-  --ball1: #171716;
+  --ball-hi: #fff7ee;
+  --ball0: #f2c9ad;
+  --ball1: #c78969;
+  --ball-shadow: rgba(126, 77, 52, .28);
   --gold: #98753a;
   --glow: rgba(198, 155, 72, .28);
   position: relative;
@@ -69,6 +71,10 @@ h1 {
   --wall0: #b5cec8;
   --wall1: #8daaa4;
   --line: rgba(46, 84, 78, .16);
+  --ball-hi: #f8fff8;
+  --ball0: #b9ead7;
+  --ball1: #70b89f;
+  --ball-shadow: rgba(50, 111, 91, .24);
   --gold: #7b8f52;
   --glow: rgba(129, 157, 96, .28);
 }
@@ -80,6 +86,10 @@ h1 {
   --wall0: #c2b6d4;
   --wall1: #9f93b8;
   --line: rgba(64, 52, 90, .16);
+  --ball-hi: #fffaff;
+  --ball0: #dcc7ef;
+  --ball1: #a887cd;
+  --ball-shadow: rgba(90, 65, 125, .24);
   --gold: #8570a5;
   --glow: rgba(142, 115, 178, .25);
 }
@@ -91,6 +101,10 @@ h1 {
   --wall0: #adc6d4;
   --wall1: #82a0b3;
   --line: rgba(45, 76, 95, .16);
+  --ball-hi: #f8fdff;
+  --ball0: #bddff1;
+  --ball1: #79abc8;
+  --ball-shadow: rgba(52, 94, 120, .24);
   --gold: #667f9b;
   --glow: rgba(104, 137, 171, .25);
 }
@@ -102,6 +116,10 @@ h1 {
   --wall0: #d0b2a5;
   --wall1: #ad8d82;
   --line: rgba(100, 59, 45, .15);
+  --ball-hi: #fff9f6;
+  --ball0: #ffc8b7;
+  --ball1: #d98e77;
+  --ball-shadow: rgba(142, 76, 59, .24);
   --gold: #9e704a;
   --glow: rgba(192, 127, 82, .24);
 }
@@ -205,8 +223,11 @@ h1 {
   position: absolute;
   inset: 17%;
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, #73716b 0%, var(--ball0) 36%, var(--ball1) 100%);
-  box-shadow: inset -2px -3px 7px rgba(0,0,0,.48), inset 3px 3px 6px rgba(255,255,255,.16), 0 5px 9px rgba(48,38,24,.24);
+  background: radial-gradient(circle at 34% 28%, var(--ball-hi) 0%, var(--ball0) 42%, var(--ball1) 100%);
+  box-shadow:
+    inset -2px -3px 7px color-mix(in srgb, var(--ball1), #4a352a 20%),
+    inset 3px 3px 6px rgba(255,255,255,.46),
+    0 5px 9px var(--ball-shadow);
 }
 .b1 { left: 20%; top: 40%; }
 .b2 { left: 60%; top: 40%; }
