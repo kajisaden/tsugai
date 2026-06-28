@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tsugai Home Hub Buttons - Light</title>
+<title>Tsugai Home Hub Mock</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -18,8 +18,8 @@
     --gold-2: #d9bd70;
     --red: #b64f45;
     --blue: #3f7fad;
-    --shadow: rgba(76, 58, 34, 0.16);
   }
+  html { background: var(--bg); }
   body {
     min-height: 100dvh;
     display: grid;
@@ -30,6 +30,8 @@
     color: var(--ink);
     font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
   button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
   .phone {
@@ -68,28 +70,26 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 5px rgba(88, 66, 45, 0.08);
     color: var(--dim);
   }
-  .icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  svg { stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-btn svg { width: 18px; height: 18px; stroke-width: 1.7; }
   .hub {
     width: 100%;
     align-self: center;
     display: grid;
-    gap: 12px;
   }
   .continue-btn {
     width: 100%;
     min-height: 178px;
     padding: 14px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(104px, 128px);
+    grid-template-columns: minmax(0, 1fr) minmax(94px, 112px);
     gap: 14px;
     align-items: center;
     border-radius: 8px;
-    background:
-      linear-gradient(160deg, rgba(255, 248, 235, 0.92) 0%, rgba(232, 216, 196, 0.86) 100%);
+    background: linear-gradient(160deg, rgba(255, 248, 235, 0.92) 0%, rgba(232, 216, 196, 0.86) 100%);
     border: 1px solid rgba(168, 128, 31, 0.3);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.72),
-      0 12px 26px rgba(76, 58, 34, 0.13);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 12px 26px rgba(76, 58, 34, 0.13);
+    overflow: hidden;
   }
   .continue-copy {
     display: grid;
@@ -158,7 +158,7 @@
     display: grid;
     gap: 8px;
     justify-self: end;
-    width: min(128px, 100%);
+    width: min(112px, 100%);
   }
   .mini-board {
     position: relative;
@@ -172,10 +172,7 @@
     border: 1px solid var(--line);
     box-shadow: inset 0 1px 4px rgba(43, 38, 32, 0.12);
   }
-  .mini-board i {
-    display: block;
-    border: 0.5px solid rgba(43, 38, 32, 0.08);
-  }
+  .mini-board i { display: block; border: 0.5px solid rgba(43, 38, 32, 0.08); }
   .mini-board i.w {
     background: linear-gradient(160deg, var(--tile) 0%, var(--tile-2) 100%);
     border-color: rgba(43, 38, 32, 0.14);
@@ -204,7 +201,6 @@
     gap: 4px;
     min-height: 72px;
     padding: 8px 6px 6px;
-    border-radius: 0;
     background: rgba(232, 226, 214, 0.72);
     border-top: 1px solid rgba(43, 38, 32, 0.08);
     box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.58);
@@ -232,7 +228,7 @@
     display: grid;
     place-items: center;
   }
-  .nav-icon svg { width: 25px; height: 25px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-icon svg { width: 25px; height: 25px; stroke-width: 1.8; }
   .nav-label {
     max-width: 100%;
     font-size: 10.5px;
@@ -314,37 +310,36 @@
           </div>
         </div>
       </button>
-
     </section>
 
     <footer class="footer-nav" aria-label="ホームフッター">
-        <button class="nav-btn primary" aria-label="デイリー">
-          <span class="nav-icon">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-            <span class="daily-dot"></span>
-          </span>
-          <span class="nav-label">今日</span>
-        </button>
-        <button class="nav-btn" aria-label="問題一覧">
-          <span class="nav-icon small-grid" aria-hidden="true">
-            <span class="done"></span><span class="done"></span><span></span>
-            <span class="done"></span><span></span><span></span>
-            <span></span><span></span><span></span>
-          </span>
-          <span class="nav-label">一覧</span>
-        </button>
-        <button class="nav-btn" aria-label="目標">
-          <span class="nav-icon">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-          </span>
-          <span class="nav-label">目標</span>
-        </button>
-        <button class="nav-btn" aria-label="ストア">
-          <span class="nav-icon">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10h14l-1 10H6L5 10Z"/><path d="M8 10V8a4 4 0 0 1 8 0v2"/><path d="M9 14h6"/></svg>
-          </span>
-          <span class="nav-label">ストア</span>
-        </button>
+      <button class="nav-btn primary" aria-label="デイリー">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <span class="daily-dot"></span>
+        </span>
+        <span class="nav-label">今日</span>
+      </button>
+      <button class="nav-btn" aria-label="問題一覧">
+        <span class="nav-icon small-grid" aria-hidden="true">
+          <span class="done"></span><span class="done"></span><span></span>
+          <span class="done"></span><span></span><span></span>
+          <span></span><span></span><span></span>
+        </span>
+        <span class="nav-label">一覧</span>
+      </button>
+      <button class="nav-btn" aria-label="目標">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        </span>
+        <span class="nav-label">目標</span>
+      </button>
+      <button class="nav-btn" aria-label="ストア">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10h14l-1 10H6L5 10Z"/><path d="M8 10V8a4 4 0 0 1 8 0v2"/><path d="M9 14h6"/></svg>
+        </span>
+        <span class="nav-label">ストア</span>
+      </button>
     </footer>
   </main>
 </body>
