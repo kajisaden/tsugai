@@ -76,6 +76,69 @@
     width: 100%;
     align-self: center;
     display: grid;
+    justify-items: center;
+  }
+  .hero {
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    width: 100%;
+  }
+  .hero-emblem {
+    position: relative;
+    width: 108px;
+    height: 72px;
+  }
+  .hero-emblem::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    right: 7px;
+    bottom: 4px;
+    height: 34px;
+    border-radius: 12px;
+    background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 42%, #bd9c52 76%, #8f7032 100%);
+    box-shadow: inset 0 2px 4px rgba(255, 248, 224, 0.72), inset 0 -6px 10px rgba(115, 89, 36, 0.22), 0 8px 18px rgba(95, 76, 35, 0.12);
+  }
+  .hero-stone {
+    position: absolute;
+    width: 45px;
+    height: 45px;
+    border-radius: 13px;
+    background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
+    box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.46), inset -3px -3px 0 rgba(74, 48, 35, 0.14), 0 4px 7px rgba(76, 54, 39, 0.14);
+  }
+  .hero-stone.a { left: 24px; top: 24px; z-index: 2; }
+  .hero-stone.b { left: 56px; top: 10px; z-index: 1; }
+  .hero-level {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    line-height: 1.2;
+  }
+  .hero-level .level {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 0.04em;
+  }
+  .hero-level .mode {
+    font-size: 15px;
+    font-weight: 700;
+    color: #54a6dc;
+    letter-spacing: 0.08em;
+  }
+  .play-btn {
+    width: min(360px, 88vw);
+    height: 72px;
+    margin-top: clamp(88px, 18dvh, 154px);
+    border-radius: 999px;
+    color: #fff;
+    background: linear-gradient(180deg, #6f8bff 0%, #5772f5 100%);
+    box-shadow: 0 12px 26px rgba(87, 114, 245, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
   }
   .continue-btn {
     width: 100%;
@@ -281,35 +344,17 @@
     </header>
 
     <section class="hub" aria-label="ホーム">
-      <button class="continue-btn" aria-label="続きから">
-        <div class="continue-copy">
-          <div class="primary-mark" aria-hidden="true">
-            <span class="stone a"></span>
-            <span class="stone b"></span>
-          </div>
-          <div class="continue-label">
-            <span class="main">続き</span>
-            <span class="sub">18</span>
-          </div>
-          <div class="progress-strip" aria-hidden="true"><span></span></div>
+      <div class="hero">
+        <div class="hero-emblem" aria-hidden="true">
+          <span class="hero-stone a"></span>
+          <span class="hero-stone b"></span>
         </div>
-        <div class="mini-stack" aria-hidden="true">
-          <div class="mini-board">
-            <i></i><i></i><i></i><i></i>
-            <i></i><i class="w"></i><i></i><i></i>
-            <i></i><i></i><i></i><i class="w"></i>
-            <i></i><i></i><i></i><i></i>
-            <span class="goal g1"></span><span class="token p1"></span>
-          </div>
-          <div class="mini-board">
-            <i></i><i></i><i></i><i></i>
-            <i class="w"></i><i></i><i></i><i></i>
-            <i></i><i></i><i class="w"></i><i></i>
-            <i></i><i></i><i></i><i></i>
-            <span class="goal g2"></span><span class="token p2"></span>
-          </div>
+        <div class="hero-level">
+          <div class="level">レベル 18</div>
+          <div class="mode">通常</div>
         </div>
-      </button>
+        <button class="play-btn" aria-label="プレイ">プレイ</button>
+      </div>
     </section>
 
     <footer class="footer-nav" aria-label="ホームフッター">
