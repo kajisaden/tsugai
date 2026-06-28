@@ -420,6 +420,7 @@ function buildBoard(room, w, h) {
   const board = el('board');
   const cells = el('cells');
   cells.style.gridTemplateColumns = `repeat(${w}, 1fr)`;
+  cells.style.gridTemplateRows = `repeat(${h}, 1fr)`;
   const wallSet = new Set(room.walls.split(',').filter(Boolean).map(Number));
   for (let i = 0; i < w * h; i++) {
     cells.append(el('cell' + (wallSet.has(i) ? ' wall' : '')));
@@ -481,8 +482,9 @@ function _initPuzzle(puz, label, entrance) {
   const boardsEl = $('#boards');
   boardsEl.replaceChildren();
   boardsEl.classList.remove('clear-best', 'clear-win', 'bouncing');
-  const rooms = puz.rooms.map((r) => {
+  const rooms = puz.rooms.map((r, i) => {
     const b = buildBoard(r, w, h);
+    b.board.classList.toggle('active', i === 0);
     boardsEl.append(b.board);
     boardsEl.append(b.ripple);
     return b;
