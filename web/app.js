@@ -385,7 +385,7 @@ function showLevels(ch) {
     const isBest = bestCleared.has(p.id);
     btn.className = 'level-tile' + (isCleared ? ' cleared' : '') + (isBest ? ' best' : '') + (isBoss ? ' boss' : '');
     const emblem = (state) =>
-      `<span class="lv-emblem ${state}"><span class="le-inner">` +
+      `<span class="lv-emblem ${state}${isBoss ? ' boss' : ''}"><span class="le-inner">` +
       `<span class="le-halo"></span><span class="le-disc"></span>` +
       `<span class="le-ball eb1"></span><span class="le-ball eb2"></span></span></span>`;
     const mark = isBest
@@ -467,7 +467,7 @@ function animatePuzzleEntrance() {
   });
 }
 
-function _initPuzzle(puz, label, entrance) {
+function _initPuzzle(puz, label, entrance, isBoss = false) {
   hintGlows = [];
   AV = null;
   $('#answer-bar').hidden = true;
@@ -497,6 +497,7 @@ function _initPuzzle(puz, label, entrance) {
     busy: false,
     cleared: false,
   };
+  document.documentElement.dataset.boss = isBoss ? 'boss' : 'normal';
   $('#puzzle-label').textContent = label;
   $('#puzzle-no').textContent = label;
   updateInfo();
@@ -513,13 +514,13 @@ function startPuzzle(ch, index, entrance = true) {
   curIndex = index;
   const puz = chapterLevels(ch)[index];
   const globalNo = curChapter.from + index + 1;
-  _initPuzzle(puz, `#${globalNo}`, entrance);
+  _initPuzzle(puz, `#${globalNo}`, entrance, !!modeData().boss[curChapter.from + index]);
 }
 
 function startDailyPuzzle(entrance = true) {
   dailyMode = true;
   const puz = getDailyPuzzle();
-  _initPuzzle(puz, t('dailyTitle'), entrance);
+  _initPuzzle(puz, t('dailyTitle'), entrance, false);
 }
 
 function restartCurrentPuzzle(entrance = true) {

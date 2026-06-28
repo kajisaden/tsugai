@@ -286,7 +286,12 @@ button:active { transform: translateY(1px); }
 #level-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: inset 0 2px 9px rgba(0, 0, 0, 0.55);
 }
 .level-tile {
   aspect-ratio: 1;
@@ -296,34 +301,40 @@ button:active { transform: translateY(1px); }
   justify-content: center;
   gap: 4px;
   padding: 0;
-  /* 壁カード化: 盤の壁・A画面カードと同色の「壁から彫り出したカード」に。
-     既定=ダーク(持ち上げた壁色 #4a4a57→#3a3a45)。ライトは下で washi に上書き。
-     クリア済みの金縁(.level-tile.cleared)は specificity で維持される */
-  /* 一覧タイルは盤の床(.board)と同色＝盤面そのものの暗さ(壁より暗い)。
-     地色に沈めつつカードの立体(縁＋上辺ハイライト)は残す。盤床と同じ radial */
-  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
+  background: transparent;
+  border: 0;
+  border-right: 0.5px solid var(--line);
+  border-bottom: 0.5px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
 }
-.level-tile .lv-no { font-size: 18px; }
-.level-tile .lv-moves { font-size: 10px; color: var(--text-dim); }
+.level-tile .lv-no {
+  font-size: 18px;
+}
+.level-tile .lv-moves {
+  display: grid;
+  place-items: center;
+  min-height: 40px;
+  font-size: 10px;
+  color: var(--text-dim);
+}
 .level-tile.cleared {
-  border-color: rgba(232, 217, 176, 0.35);
+  background: rgba(232, 217, 176, 0.05);
 }
-.level-tile.cleared .lv-no { color: var(--gold); }
-.level-tile.boss { border-color: rgba(232, 176, 80, 0.5); }
+.level-tile.cleared .lv-no { color: #3f7fad; }
+.level-tile.boss .lv-no { color: #b14a42; }
+.level-tile.boss { background: transparent; }
 .level-tile.boss .lv-no { font-weight: 700; }
 /* クリア印 = A画面のつがいエンブレム(縮小)。最短=金 / クリア=白(銀)。
    220x176座標の本物の意匠を transform: scale で縮小し、発光/影も比率を保つ。
    既定=ダーク(発光2球)。ライトは下で碁石+皿+後光に上書き */
-.lv-emblem { position: relative; display: inline-block; width: 38px; height: 30px; }
+.lv-emblem { position: relative; display: inline-block; width: 52px; height: 42px; }
 .lv-emblem .le-inner {
   position: absolute; top: 50%; left: 50%; width: 220px; height: 176px;
-  margin: -88px 0 0 -110px; transform: scale(0.16); transform-origin: center;
+  margin: -88px 0 0 -110px; transform: scale(0.22); transform-origin: center;
 }
 .le-halo { position: absolute; inset: -12% -6% -20% -6%; border-radius: 50%; display: none; }
-.le-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 50%; display: none; }
+.le-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 20px; display: none; }
 .le-ball { position: absolute; width: 86px; height: 86px; border-radius: 50%; }
 .le-ball.eb1 { left: 40px; top: 62px; z-index: 2; } /* 左下・手前 */
 .le-ball.eb2 { left: 94px; top: 31px; z-index: 1; } /* 右上・奥 */
@@ -968,7 +979,7 @@ button:active { transform: translateY(1px); }
 .emblem { position: relative; width: 220px; height: 176px; }
 /* 後光(halo): エンブレム背後の温かなオーラ。既定(ダーク)は発光球が奥行きを担うので非表示。ライトのみ表示(下) */
 .emblem-halo { display: none; position: absolute; inset: -12% -6% -20% -6%; border-radius: 50%; pointer-events: none; }
-.emblem-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 50%; display: none; }
+.emblem-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 20px; display: none; }
 .emblem-balls { position: absolute; inset: 0; }
 .emblem-ball {
   position: absolute; width: 86px; height: 86px; border-radius: 50%;
@@ -1075,6 +1086,16 @@ button:active { transform: translateY(1px); }
   --b-glow: rgba(63, 127, 173, 0.32);
   --b-bump-hot: #6fa7c7;
 }
+:root[data-theme="light"][data-boss="boss"] {
+  --gold: #b14a42;
+  --glow: rgba(177, 74, 66, 0.26);
+  --bump-hot: #e7aaa1;
+}
+:root[data-board="light"][data-boss="boss"] {
+  --b-gold: #c65b52;
+  --b-glow: rgba(198, 91, 82, 0.34);
+  --b-bump-hot: #e28f86;
+}
 :root[data-theme="light"] body {
   background: radial-gradient(120% 100% at 50% 0%, #fbf7ed 0%, var(--bg) 60%);
 }
@@ -1127,19 +1148,34 @@ button:active { transform: translateY(1px); }
     rgba(255, 255, 255, 0.025);
 }
 :root[data-board="light"] .bump-glow.show { animation-name: bump-glow-light; }
+:root[data-board="light"][data-boss="boss"] .bump-glow.show { animation-name: bump-glow-light-boss; }
 @keyframes bump-glow-light {
   0%   { opacity: 0;    background: #cde4f0; box-shadow: 0 0 5px 1px rgba(63, 127, 173, 0.30); }
   9%   { opacity: 1;    background: #dceef6; box-shadow: 0 0 13px 4px rgba(63, 127, 173, 0.52), calc(var(--bloom-x, 0px) * 0.76) calc(var(--bloom-y, 0px) * 0.76) 28px 8px rgba(63, 127, 173, 0.22); }
   30%  { opacity: 0.92; background: #6fa7c7; box-shadow: 0 0 9px 3px rgba(63, 127, 173, 0.42), calc(var(--bloom-x, 0px) * 0.46) calc(var(--bloom-y, 0px) * 0.46) 18px 5px rgba(63, 127, 173, 0.18); }
   100% { opacity: 0;    background: #6fa7c7; box-shadow: 0 0 8px 2px rgba(63, 127, 173, 0.46), 0 0 15px 4px rgba(63, 127, 173, 0.20); }
 }
+@keyframes bump-glow-light-boss {
+  0%   { opacity: 0;    background: #f0d3d0; box-shadow: 0 0 5px 1px rgba(198, 91, 82, 0.28); }
+  9%   { opacity: 1;    background: #f6dfdc; box-shadow: 0 0 13px 4px rgba(198, 91, 82, 0.46), calc(var(--bloom-x, 0px) * 0.76) calc(var(--bloom-y, 0px) * 0.76) 28px 8px rgba(198, 91, 82, 0.20); }
+  30%  { opacity: 0.92; background: #d97a72; box-shadow: 0 0 9px 3px rgba(198, 91, 82, 0.38), calc(var(--bloom-x, 0px) * 0.46) calc(var(--bloom-y, 0px) * 0.46) 18px 5px rgba(198, 91, 82, 0.16); }
+  100% { opacity: 0;    background: #d97a72; box-shadow: 0 0 8px 2px rgba(198, 91, 82, 0.42), 0 0 15px 4px rgba(198, 91, 82, 0.18); }
+}
 :root[data-board="light"] .hint-glow {
   animation: hint-glow-leaf 2.6s ease-in-out infinite;
+}
+:root[data-board="light"][data-boss="boss"] .hint-glow {
+  background: #d97a72;
+  box-shadow: 0 0 8px 2px rgba(198, 91, 82, 0.42), 0 0 15px 4px rgba(198, 91, 82, 0.18);
 }
 @keyframes hint-glow-leaf { 0%, 100% { opacity: 0.82; } 50% { opacity: 1; } }
 :root[data-board="light"] .bump-ripple {
   border: 2px solid rgba(63, 127, 173, 0.50);
   box-shadow: 0 0 5px 1px rgba(63, 127, 173, 0.20);
+}
+:root[data-board="light"][data-boss="boss"] .bump-ripple {
+  border: 2px solid rgba(198, 91, 82, 0.50);
+  box-shadow: 0 0 5px 1px rgba(198, 91, 82, 0.20);
 }
 
 /* ボール: B案の青い紙タイル。アウトライン/呼吸光は出さず、実体の面と影だけで読ませる */
@@ -1153,6 +1189,9 @@ button:active { transform: translateY(1px); }
     inset -3px -3px 0 rgba(74, 48, 35, 0.14),
     0 3px 5px rgba(76, 54, 39, 0.13);
 }
+:root[data-ball="light"][data-boss="boss"] .ball {
+  background: linear-gradient(145deg, #fff8f7 0%, #e79e98 52%, #c65b52 100%);
+}
 :root[data-ball="light"] .ball::before {
   content: "";
   position: absolute;
@@ -1161,6 +1200,9 @@ button:active { transform: translateY(1px); }
   border: 2px solid rgba(36, 107, 143, 0.5);
   pointer-events: none;
   z-index: 2;
+}
+:root[data-ball="light"][data-boss="boss"] .ball::before {
+  border-color: rgba(157, 52, 44, 0.52);
 }
 :root[data-ball="light"] .ball::after {
   display: block;
@@ -1183,6 +1225,22 @@ button:active { transform: translateY(1px); }
   background: radial-gradient(circle at 50% 45%, rgba(220, 238, 246, 0.92) 0%, rgba(111, 167, 199, 0.45) 55%, transparent 78%);
   box-shadow: 0 0 14px 3px rgba(63, 127, 173, 0.28);
 }
+:root[data-ball="light"][data-boss="boss"] .ball-flash {
+  background: radial-gradient(circle at 50% 45%, rgba(248, 222, 219, 0.92) 0%, rgba(198, 91, 82, 0.42) 55%, transparent 78%);
+  box-shadow: 0 0 14px 3px rgba(198, 91, 82, 0.24);
+}
+:root[data-ball="light"][data-boss="boss"] #gap-emblem .emblem-ball {
+  background: linear-gradient(145deg, #fff8f7 0%, #e79e98 52%, #c65b52 100%);
+}
+:root[data-ball="light"][data-boss="boss"] #gap-emblem .emblem-ball::before {
+  border-color: rgba(157, 52, 44, 0.52);
+}
+:root[data-ball="light"][data-boss="boss"] #gap-emblem.best .emblem-halo,
+:root[data-ball="light"][data-boss="boss"] #gap-emblem.win .emblem-halo {
+  display: block;
+  background: radial-gradient(closest-side, rgba(198, 91, 82, 0.18), rgba(198, 91, 82, 0.06) 52%, transparent 78%);
+  filter: blur(4px);
+}
 
 :root[data-board="light"] .goal::before {
   inset: 0;
@@ -1194,11 +1252,23 @@ button:active { transform: translateY(1px); }
     0 0 12px rgba(63, 127, 173, 0.32);
   opacity: 0.88;
 }
+:root[data-board="light"][data-boss="boss"] .goal::before {
+  border-color: #c65b52;
+  box-shadow:
+    inset 0 0 0 4px rgba(255, 255, 255, 0.50),
+    0 0 12px rgba(198, 91, 82, 0.28);
+}
 :root[data-board="light"] .goal.on::before {
   border-color: #4f8fbb;
   box-shadow:
     inset 0 0 0 4px rgba(255, 255, 255, 0.54),
     0 0 14px rgba(63, 127, 173, 0.36);
+}
+:root[data-board="light"][data-boss="boss"] .goal.on::before {
+  border-color: #c65b52;
+  box-shadow:
+    inset 0 0 0 4px rgba(255, 255, 255, 0.54),
+    0 0 14px rgba(198, 91, 82, 0.32);
 }
 :root[data-board="light"] .goal::after { display: none; }
 :root[data-board="light"] .goal.filled::before {
@@ -1207,6 +1277,12 @@ button:active { transform: translateY(1px); }
   box-shadow:
     inset 0 0 0 4px rgba(255, 255, 255, 0.50),
     0 0 12px rgba(63, 127, 173, 0.32);
+}
+:root[data-board="light"][data-boss="boss"] .goal.filled::before {
+  border-color: #c65b52;
+  box-shadow:
+    inset 0 0 0 4px rgba(255, 255, 255, 0.50),
+    0 0 12px rgba(198, 91, 82, 0.28);
 }
 
 /* クリア演出: 青い駒/ゴールの意味色を保ち、ゴールリングだけを少し満たす */
@@ -1218,64 +1294,137 @@ button:active { transform: translateY(1px); }
     inset -3px -3px 0 rgba(74, 48, 35, 0.14),
     0 6px 10px rgba(92, 62, 45, 0.22);
 }
+:root[data-ball="light"][data-boss="boss"] #boards.clear-best .ball,
+:root[data-ball="light"][data-boss="boss"] #boards.clear-win .ball {
+  background: linear-gradient(145deg, #fff8f7 0%, #e79e98 52%, #c65b52 100%);
+}
 :root[data-board="light"] #boards.clear-best .goal.filled::before,
 :root[data-board="light"] #boards.clear-win .goal.filled::before {
   inset: 0;
   border: 3px solid #4f8fbb;
   border-radius: 12px;
 }
+:root[data-board="light"][data-boss="boss"] #boards.clear-best .goal.filled::before,
+:root[data-board="light"][data-boss="boss"] #boards.clear-win .goal.filled::before {
+  border-color: #c65b52;
+}
 :root[data-board="light"] #boards.clear-best .goal.filled::before {
-  background: linear-gradient(145deg, rgba(244, 234, 217, 0.92) 0%, rgba(232, 220, 205, 0.92) 100%);
-  box-shadow:
-    inset 0 0 0 4px rgba(255, 255, 255, 0.52),
-    0 0 12px rgba(63, 127, 173, 0.32);
+  background: linear-gradient(145deg, rgba(247, 236, 200, 0.94) 0%, rgba(224, 197, 133, 0.92) 52%, rgba(189, 156, 82, 0.90) 100%);
+  box-shadow: none;
+}
+:root[data-board="light"][data-boss="boss"] #boards.clear-best .goal.filled::before {
+  box-shadow: none;
 }
 :root[data-board="light"] #boards.clear-win .goal.filled::before {
-  background: linear-gradient(145deg, rgba(241, 227, 207, 0.94) 0%, rgba(225, 210, 193, 0.94) 100%);
-  box-shadow:
-    inset 0 0 0 4px rgba(255, 255, 255, 0.48),
-    0 0 12px rgba(63, 127, 173, 0.32);
+  background: linear-gradient(145deg, rgba(247, 250, 253, 0.94) 0%, rgba(212, 218, 227, 0.92) 52%, rgba(174, 182, 195, 0.90) 100%);
+  box-shadow: none;
+}
+:root[data-board="light"][data-boss="boss"] #boards.clear-win .goal.filled::before {
+  box-shadow: none;
 }
 
 /* A画面エンブレム ライト(案C): 磨いた碁石2球＋漆金精緻化(最短)/精緻化銀(クリア)の楕円皿＋温かな後光halo。発光ではなく実体＋素材感 */
 :root[data-ball="light"] #gap-emblem .emblem-ball {
-  background: radial-gradient(circle at 35% 26%, #6c6c77 0%, #37373f 30%, #1b1b21 68%, #0d0d11 100%);
-  box-shadow: inset -2px -3px 7px rgba(0, 0, 0, 0.6), inset 3px 3px 6px rgba(255, 255, 255, 0.16), 0 5px 9px rgba(40, 32, 16, 0.42);
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.46), inset -3px -3px 0 rgba(74, 48, 35, 0.14), 0 8px 14px rgba(92, 62, 45, 0.2);
+}
+:root[data-ball="light"] #gap-emblem .emblem-ball::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid rgba(36, 107, 143, 0.5);
+}
+:root[data-ball="light"] #gap-emblem .emblem-ball::after {
+  display: block;
+  content: "";
+  position: absolute;
+  left: 27%;
+  top: 24%;
+  width: 18%;
+  height: 18%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: none;
+  animation: none;
+  opacity: 1;
 }
 :root[data-ball="light"] .emblem-disc { display: block; }
 /* 漆金精緻化(ツヤ): 上面に磨きハイライト＋細い金縁。チープな均一黄でなく金箔の照り */
 :root[data-ball="light"] #gap-emblem.best .emblem-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
-  box-shadow: 0 6px 13px rgba(70, 52, 18, 0.22), inset 0 2px 4px rgba(255, 248, 224, 0.7), inset 0 -6px 9px rgba(105, 78, 30, 0.42), inset 0 0 0 1px rgba(255, 242, 205, 0.18);
+  box-shadow: 0 10px 16px rgba(95, 76, 35, 0.14), inset 0 2px 4px rgba(255, 248, 224, 0.72), inset 0 -6px 10px rgba(115, 89, 36, 0.24);
 }
 /* 銀も金と同じ精緻化ツヤで揃える */
 :root[data-ball="light"] #gap-emblem.win .emblem-disc {
-  background: radial-gradient(120% 150% at 40% 24%, #f7fafd 0%, #d4dae3 40%, #aeb6c3 72%, #79808d 100%);
-  box-shadow: 0 6px 13px rgba(40, 48, 60, 0.22), inset 0 2px 4px rgba(248, 251, 255, 0.7), inset 0 -6px 9px rgba(70, 78, 92, 0.42), inset 0 0 0 1px rgba(238, 244, 250, 0.2);
+  background: radial-gradient(120% 150% at 40% 24%, #f8fbfe 0%, #d8e3ee 40%, #b6c6d7 72%, #8e9daf 100%);
+  box-shadow: 0 10px 16px rgba(84, 92, 104, 0.14), inset 0 2px 4px rgba(255, 255, 255, 0.72), inset 0 -6px 10px rgba(110, 124, 140, 0.22);
 }
 /* 後光(halo) ライト: 状態で色を出し分け(最短=金 / クリア=銀)。背後に敷いて温かさを足す */
 :root[data-ball="light"] #gap-emblem.best .emblem-halo {
   display: block;
-  background: radial-gradient(closest-side, rgba(216, 183, 95, 0.42), rgba(216, 183, 95, 0.15) 46%, transparent 72%);
-  filter: blur(3px);
+  background: radial-gradient(closest-side, rgba(216, 183, 95, 0.2), rgba(216, 183, 95, 0.07) 48%, transparent 76%);
+  filter: blur(4px);
 }
 :root[data-ball="light"] #gap-emblem.win .emblem-halo {
   display: block;
-  background: radial-gradient(closest-side, rgba(185, 192, 204, 0.4), rgba(185, 192, 204, 0.14) 46%, transparent 72%);
-  filter: blur(3px);
+  background: radial-gradient(closest-side, rgba(63, 127, 173, 0.14), rgba(63, 127, 173, 0.05) 62%, transparent 100%);
+  filter: blur(4px);
 }
 
 /* A画面カード ライト: 壁(washi)の配色そのまま(.cell.wall light と同じ)＋角丸 */
 :root[data-theme="light"] .gap-card {
-  background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
-  border-color: rgba(43, 38, 32, 0.10);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  gap: 24px;
+  min-height: min(70vh, 596px);
+  padding: 40px 24px 24px;
+  border-radius: 30px;
+  background: linear-gradient(180deg, rgba(247, 241, 229, 0.98) 0%, rgba(234, 225, 209, 0.98) 100%);
+  border-color: rgba(138, 120, 92, 0.16);
+  box-shadow: 0 18px 42px rgba(98, 78, 48, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+:root[data-theme="light"] .gap-result {
+  gap: 18px;
+}
+:root[data-theme="light"] .gap-moves {
+  text-align: center;
+  line-height: 1.8;
+}
+:root[data-theme="light"] .gap-moves #gap-moves-1 {
+  font-size: 18px;
+}
+:root[data-theme="light"] .gap-moves #gap-moves-2 {
+  margin-left: 10px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+:root[data-theme="light"] .gap-progress {
+  margin-top: 4px;
+  font-size: 16px;
+  letter-spacing: 0.18em;
 }
 /* A画面ボタンの彫り出し面(ライト) */
 :root[data-theme="light"] #btn-next,
 :root[data-theme="light"] #btn-retry {
-  background: #e6decd;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 5px rgba(80, 64, 36, 0.16);
+  height: 58px;
+  border-radius: 18px;
+  box-shadow: none;
+}
+:root[data-theme="light"] #btn-next {
+  color: #3f7fad;
+  border: 1px solid rgba(63, 127, 173, 0.22);
+  background: linear-gradient(180deg, rgba(252, 253, 255, 0.92) 0%, rgba(239, 246, 251, 0.92) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 7px 16px rgba(63, 127, 173, 0.08);
+}
+:root[data-theme="light"] #btn-retry {
+  color: var(--text);
+  border: 1px solid rgba(95, 75, 56, 0.12);
+  background: rgba(251, 248, 241, 0.72);
+}
+:root[data-theme="light"] .gap-buttons {
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(95, 75, 56, 0.12);
 }
 
 /* 章カード ライト: ダークで足した盤床色を打ち消し、従来の紙色(var(--panel))を維持 */
@@ -1283,34 +1432,97 @@ button:active { transform: translateY(1px); }
 
 /* 一覧タイルの壁カード ライト: washi壁(.cell.wall light と同色)＋彫り出しハイライト */
 :root[data-theme="light"] .level-tile {
-  background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
-  border-color: rgba(43, 38, 32, 0.10);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border-right-color: rgba(95, 75, 56, 0.15);
+  border-bottom-color: rgba(95, 75, 56, 0.15);
+}
+:root[data-board="light"] #level-grid {
+  background: #e7d8c3;
+  border: 2px solid rgba(78, 64, 49, 0.16);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.75), inset 0 -10px 20px rgba(62, 55, 45, 0.06);
+}
+:root[data-theme="light"] .level-tile {
+  background: transparent;
+  border-right-color: var(--line);
+  border-bottom-color: var(--line);
+}
+:root[data-ball="light"] .lv-corner.clear .lv-corner-block.front,
+:root[data-ball="light"] .lv-corner.best .lv-corner-block {
+  background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.38), inset -1px -1px 0 rgba(74, 48, 35, 0.10), 0 2px 4px rgba(76, 54, 39, 0.12);
+}
+:root[data-ball="light"] .lv-corner.clear .lv-corner-block.front::before,
+:root[data-ball="light"] .lv-corner.best .lv-corner-block::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid rgba(36, 107, 143, 0.42);
+}
+:root[data-theme="light"] .level-tile.cleared {
+  background: rgba(168, 128, 31, 0.05);
+}
+:root[data-theme="light"] .level-tile.boss.cleared,
+:root[data-theme="light"] .level-tile.boss.best {
+  background: rgba(168, 128, 31, 0.05);
+}
+:root[data-theme="light"] .level-tile.boss {
+  background: transparent;
+  border-right-color: rgba(177, 74, 66, 0.28);
+  border-bottom-color: rgba(177, 74, 66, 0.28);
 }
 
 /* レベル一覧のクリア印 ライト: 碁石2球＋金(最短)/銀(クリア)の楕円皿＋後光(A画面と同意匠) */
 :root[data-ball="light"] .lv-emblem .le-ball {
-  background: radial-gradient(circle at 35% 26%, #6c6c77 0%, #37373f 30%, #1b1b21 68%, #0d0d11 100%);
-  box-shadow: inset -2px -3px 7px rgba(0, 0, 0, 0.6), inset 3px 3px 6px rgba(255, 255, 255, 0.16), 0 5px 9px rgba(40, 32, 16, 0.42);
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.46), inset -3px -3px 0 rgba(74, 48, 35, 0.14), 0 8px 14px rgba(92, 62, 45, 0.2);
+}
+:root[data-ball="light"] .lv-emblem.boss .le-ball {
+  background: linear-gradient(145deg, #fff8f7 0%, #e79e98 52%, #c65b52 100%);
+}
+:root[data-ball="light"] .lv-emblem .le-ball::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid rgba(36, 107, 143, 0.5);
+}
+:root[data-ball="light"] .lv-emblem.boss .le-ball::before {
+  border-color: rgba(157, 52, 44, 0.52);
+}
+:root[data-ball="light"] .lv-emblem .le-ball::after {
+  content: "";
+  position: absolute;
+  left: 27%;
+  top: 24%;
+  width: 18%;
+  height: 18%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
 }
 :root[data-ball="light"] .lv-emblem .le-disc { display: block; }
 :root[data-ball="light"] .lv-emblem.best .le-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
-  box-shadow: 0 6px 13px rgba(70, 52, 18, 0.22), inset 0 2px 4px rgba(255, 248, 224, 0.7), inset 0 -6px 9px rgba(105, 78, 30, 0.42), inset 0 0 0 1px rgba(255, 242, 205, 0.18);
+  box-shadow: 0 10px 16px rgba(95, 76, 35, 0.14), inset 0 2px 4px rgba(255, 248, 224, 0.72), inset 0 -6px 10px rgba(115, 89, 36, 0.24);
 }
 :root[data-ball="light"] .lv-emblem.win .le-disc {
-  background: radial-gradient(120% 150% at 40% 24%, #f7fafd 0%, #d4dae3 40%, #aeb6c3 72%, #79808d 100%);
-  box-shadow: 0 6px 13px rgba(40, 48, 60, 0.22), inset 0 2px 4px rgba(248, 251, 255, 0.7), inset 0 -6px 9px rgba(70, 78, 92, 0.42), inset 0 0 0 1px rgba(238, 244, 250, 0.2);
+  background: radial-gradient(120% 150% at 40% 24%, #f8fbfe 0%, #d8e3ee 40%, #b6c6d7 72%, #8e9daf 100%);
+  box-shadow: 0 10px 16px rgba(84, 92, 104, 0.14), inset 0 2px 4px rgba(255, 255, 255, 0.72), inset 0 -6px 10px rgba(110, 124, 140, 0.22);
 }
 :root[data-ball="light"] .lv-emblem.best .le-halo {
   display: block;
-  background: radial-gradient(closest-side, rgba(216, 183, 95, 0.42), rgba(216, 183, 95, 0.15) 46%, transparent 72%);
-  filter: blur(3px);
+  background: radial-gradient(closest-side, rgba(216, 183, 95, 0.2), rgba(216, 183, 95, 0.07) 48%, transparent 76%);
+  filter: blur(4px);
 }
 :root[data-ball="light"] .lv-emblem.win .le-halo {
   display: block;
-  background: radial-gradient(closest-side, rgba(185, 192, 204, 0.4), rgba(185, 192, 204, 0.14) 46%, transparent 72%);
-  filter: blur(3px);
+  background: radial-gradient(closest-side, rgba(63, 127, 173, 0.14), rgba(63, 127, 173, 0.05) 62%, transparent 100%);
+  filter: blur(4px);
+}
+:root[data-ball="light"] .lv-emblem.boss.best .le-halo,
+:root[data-ball="light"] .lv-emblem.boss.win .le-halo {
+  background: radial-gradient(closest-side, rgba(198, 91, 82, 0.18), rgba(198, 91, 82, 0.06) 52%, transparent 78%);
 }
 :root[data-theme="light"] .level-tile.cleared { border-color: rgba(168, 128, 31, 0.4); }
 
@@ -1346,7 +1558,7 @@ button:active { transform: translateY(1px); }
 /* オーバーレイの暗幕 → 明るい紙の幕 */
 :root[data-theme="light"] #overlay-gap,
 :root[data-theme="light"] #overlay-miss {
-  background: rgba(243, 239, 230, 0.6);
+  background: rgba(243, 239, 230, 0.56);
 }
 :root[data-theme="light"] #overlay-login {
   background: rgba(243, 239, 230, 0.92);
