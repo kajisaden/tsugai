@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tsugai Home Hub Buttons - Light</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f3efe6;
+    --paper: #fbf8f1;
+    --tile: #ddd5c4;
+    --tile-2: #cfc6b2;
+    --ink: #2b2620;
+    --dim: #8a8276;
+    --line: rgba(43, 38, 32, 0.13);
+    --gold: #a8801f;
+    --gold-2: #d9bd70;
+    --red: #b64f45;
+    --blue: #3f7fad;
+    --shadow: rgba(76, 58, 34, 0.16);
+  }
+  body {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(120% 90% at 50% -8%, #fffaf1 0%, var(--bg) 62%),
+      var(--bg);
+    color: var(--ink);
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+  .phone {
+    width: min(100vw, 430px);
+    min-height: 100dvh;
+    padding: calc(18px + env(safe-area-inset-top, 0px)) 18px calc(22px + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 18px;
+  }
+  .top {
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+  }
+  .brand {
+    justify-self: center;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    font-size: 23px;
+    font-weight: 400;
+    letter-spacing: 0.5em;
+    text-indent: 0.5em;
+    color: var(--gold);
+  }
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    justify-self: end;
+    border-radius: 50%;
+    background: linear-gradient(160deg, #fff8eb 0%, #e8d8c4 100%);
+    border: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 5px rgba(88, 66, 45, 0.08);
+    color: var(--dim);
+  }
+  .icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .hub {
+    align-self: center;
+    display: grid;
+    gap: 12px;
+  }
+  .continue-btn {
+    width: 100%;
+    min-height: 178px;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 14px;
+    align-items: center;
+    border-radius: 8px;
+    background:
+      linear-gradient(160deg, rgba(255, 248, 235, 0.92) 0%, rgba(232, 216, 196, 0.86) 100%);
+    border: 1px solid rgba(168, 128, 31, 0.3);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      0 12px 26px rgba(76, 58, 34, 0.13);
+  }
+  .continue-copy {
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+    min-width: 0;
+  }
+  .primary-mark {
+    position: relative;
+    width: 76px;
+    height: 46px;
+  }
+  .primary-mark::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 5px;
+    bottom: 0;
+    height: 24px;
+    border-radius: 8px;
+    background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 42%, #bd9c52 76%, #8f7032 100%);
+    box-shadow: inset 0 2px 4px rgba(255, 248, 224, 0.72), inset 0 -6px 10px rgba(115, 89, 36, 0.22);
+  }
+  .stone {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
+    box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.46), inset -3px -3px 0 rgba(74, 48, 35, 0.14), 0 3px 5px rgba(76, 54, 39, 0.13);
+  }
+  .stone.a { left: 14px; top: 12px; z-index: 2; }
+  .stone.b { left: 39px; top: 3px; z-index: 1; }
+  .continue-label {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    white-space: nowrap;
+  }
+  .continue-label .main {
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    font-size: 25px;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+  }
+  .continue-label .sub {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--dim);
+  }
+  .progress-strip {
+    width: min(148px, 100%);
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(43, 38, 32, 0.09);
+    overflow: hidden;
+  }
+  .progress-strip span {
+    display: block;
+    width: 63%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--gold), var(--gold-2));
+  }
+  .mini-stack {
+    display: grid;
+    gap: 8px;
+    justify-self: end;
+    width: min(128px, 100%);
+  }
+  .mini-board {
+    position: relative;
+    aspect-ratio: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    box-shadow: inset 0 1px 4px rgba(43, 38, 32, 0.12);
+  }
+  .mini-board i {
+    display: block;
+    border: 0.5px solid rgba(43, 38, 32, 0.08);
+  }
+  .mini-board i.w {
+    background: linear-gradient(160deg, var(--tile) 0%, var(--tile-2) 100%);
+    border-color: rgba(43, 38, 32, 0.14);
+  }
+  .goal {
+    position: absolute;
+    width: 25%;
+    height: 25%;
+    border-radius: 50%;
+    border: 2px solid rgba(168, 128, 31, 0.62);
+    box-shadow: 0 0 8px rgba(168, 128, 31, 0.2);
+  }
+  .token {
+    position: absolute;
+    width: 25%;
+    height: 25%;
+    border-radius: 8px;
+    background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
+    box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.46), inset -2px -2px 0 rgba(74, 48, 35, 0.14), 0 1px 3px rgba(43, 38, 32, 0.16);
+  }
+  .g1 { left: 50%; top: 50%; } .p1 { left: 0; top: 50%; }
+  .g2 { left: 75%; top: 0; } .p2 { left: 25%; top: 25%; }
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .quick-btn {
+    min-height: 86px;
+    padding: 10px 6px 9px;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 7px;
+    border-radius: 8px;
+    background: linear-gradient(160deg, #fff8eb 0%, #e8d8c4 100%);
+    border: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), 0 2px 6px rgba(88, 66, 45, 0.08);
+  }
+  .quick-icon {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    color: var(--gold);
+  }
+  .quick-icon svg { width: 30px; height: 30px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .quick-label {
+    max-width: 100%;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+  .daily-dot {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--red);
+    border: 2px solid #fff8eb;
+  }
+  .small-grid {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+  }
+  .small-grid span {
+    border-radius: 3px;
+    background: var(--tile);
+    border: 1px solid rgba(43, 38, 32, 0.1);
+  }
+  .small-grid span.done {
+    background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 48%, #bd9c52 100%);
+  }
+  .mode-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .mode-btn {
+    min-height: 74px;
+    padding: 11px 12px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+  }
+  .mode-btn .mini-disc {
+    width: 34px;
+    height: 24px;
+    border-radius: 8px;
+    background: radial-gradient(120% 150% at 40% 24%, #f8fbfe 0%, #d8e3ee 40%, #b6c6d7 72%, #8e9daf 100%);
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.72), inset 0 -6px 10px rgba(110, 124, 140, 0.22);
+  }
+  .mode-btn.best .mini-disc {
+    background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
+  }
+  .mode-text {
+    display: grid;
+    gap: 4px;
+    text-align: left;
+    min-width: 0;
+  }
+  .mode-text b {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+  }
+  .mode-text span {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(43, 38, 32, 0.08);
+    overflow: hidden;
+  }
+  .mode-text span::before {
+    content: "";
+    display: block;
+    height: 100%;
+    width: var(--w, 45%);
+    border-radius: inherit;
+    background: var(--blue);
+    opacity: 0.65;
+  }
+  .best .mode-text span::before { background: var(--gold); opacity: 1; }
+  .caption {
+    align-self: end;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    color: var(--dim);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+  .home-pill {
+    width: 92px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(43, 38, 32, 0.18);
+  }
+  @media (max-width: 360px) {
+    .phone { padding-left: 14px; padding-right: 14px; }
+    .continue-btn { grid-template-columns: 1fr; }
+    .mini-stack { width: 100%; grid-template-columns: 1fr 1fr; }
+    .continue-label .main { font-size: 22px; }
+    .quick-grid { gap: 8px; }
+    .quick-label { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+  <main class="phone">
+    <header class="top">
+      <div></div>
+      <h1 class="brand">つがい</h1>
+      <button class="icon-btn" aria-label="設定">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </header>
+
+    <section class="hub" aria-label="ホーム">
+      <button class="continue-btn" aria-label="続きから">
+        <div class="continue-copy">
+          <div class="primary-mark" aria-hidden="true">
+            <span class="stone a"></span>
+            <span class="stone b"></span>
+          </div>
+          <div class="continue-label">
+            <span class="main">続き</span>
+            <span class="sub">18</span>
+          </div>
+          <div class="progress-strip" aria-hidden="true"><span></span></div>
+        </div>
+        <div class="mini-stack" aria-hidden="true">
+          <div class="mini-board">
+            <i></i><i></i><i></i><i></i>
+            <i></i><i class="w"></i><i></i><i></i>
+            <i></i><i></i><i></i><i class="w"></i>
+            <i></i><i></i><i></i><i></i>
+            <span class="goal g1"></span><span class="token p1"></span>
+          </div>
+          <div class="mini-board">
+            <i></i><i></i><i></i><i></i>
+            <i class="w"></i><i></i><i></i><i></i>
+            <i></i><i></i><i class="w"></i><i></i>
+            <i></i><i></i><i></i><i></i>
+            <span class="goal g2"></span><span class="token p2"></span>
+          </div>
+        </div>
+      </button>
+
+      <div class="quick-grid">
+        <button class="quick-btn" aria-label="デイリー">
+          <span class="quick-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            <span class="daily-dot"></span>
+          </span>
+          <span class="quick-label">今日</span>
+        </button>
+        <button class="quick-btn" aria-label="問題一覧">
+          <span class="quick-icon small-grid" aria-hidden="true">
+            <span class="done"></span><span class="done"></span><span></span>
+            <span class="done"></span><span></span><span></span>
+            <span></span><span></span><span></span>
+          </span>
+          <span class="quick-label">一覧</span>
+        </button>
+        <button class="quick-btn" aria-label="実績">
+          <span class="quick-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M5 6H3v2a4 4 0 0 0 4 4"/><path d="M19 6h2v2a4 4 0 0 1-4 4"/></svg>
+          </span>
+          <span class="quick-label">印</span>
+        </button>
+        <button class="quick-btn" aria-label="遊び方">
+          <span class="quick-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg>
+          </span>
+          <span class="quick-label">灯</span>
+        </button>
+      </div>
+
+      <div class="mode-row">
+        <button class="mode-btn best" aria-label="通常モード">
+          <span class="mini-disc" aria-hidden="true"></span>
+          <span class="mode-text"><b>通常</b><span style="--w:68%"></span></span>
+        </button>
+        <button class="mode-btn" aria-label="上級モード">
+          <span class="mini-disc" aria-hidden="true"></span>
+          <span class="mode-text"><b>上級</b><span style="--w:28%"></span></span>
+        </button>
+      </div>
+    </section>
+
+    <footer class="caption" aria-hidden="true">
+      <span>LIGHT HUB BUTTON MOCK</span>
+      <span class="home-pill"></span>
+    </footer>
+  </main>
+</body>
+</html>

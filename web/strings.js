@@ -8,7 +8,7 @@ window.NIKENZUME_STRINGS = {
     chapter: ({ n }) => `第${n}章`,
     modeNormal: '通常', modeAdvanced: '上級',
     // ボタン
-    back: '戻る', reset: '最初から', answer: '答え', theme: '表示テーマ', settings: '設定',
+    back: '戻る', reset: '最初から', answer: '答え', settings: '設定',
     light: '光ヒント', nextMove: '次の手ヒント',
     hintLight: '光ヒント', hintNext: '次の手', hintAnswer: '答え',
     loginTitle: 'ログインボーナス', loginClaim: '受け取る',
@@ -52,12 +52,12 @@ window.NIKENZUME_STRINGS = {
     // バージョン履歴
     version: 'バージョン履歴', verCurrent: '現在',
     ver100a: '初回リリース', ver100b: '第1章〜第3章（全30問）',
-    ver100c: '光ヒント・答え再生', ver100d: 'ダーク/ライトテーマ', ver100e: '日本語・英語対応',
+    ver100c: '光ヒント・答え再生', ver100d: 'ライトモード専用デザイン', ver100e: '日本語・英語対応',
     // プライバシーポリシー
     ppDate: '最終更新: 2026年6月',
     ppDataH: '収集するデータ', ppDataP: 'Tsugai はお名前・メールアドレス等の個人情報を収集しません。ゲームの進捗データはすべて端末内に保存されます。',
     ppLocalH: '端末内のデータ', ppLocalP: '以下のデータを端末内（localStorage）に保存します。',
-    ppLocal1: 'クリア状況・最短手数の記録', ppLocal2: '表示テーマ（ダーク/ライト）の設定',
+    ppLocal1: 'クリア状況・最短手数の記録', ppLocal2: '表示設定',
     ppLocal3: '効果音・触覚のON/OFF設定', ppLocal4: '言語設定',
     ppLocalNote: 'これらはサーバーには送信されません。設定画面の「進捗をリセット」で全消去できます。',
     ppAdH: '広告', ppAdP: '本アプリでは Google AdMob を利用して広告を表示します。AdMob は広告配信のために広告ID・デバイス情報を収集することがあります。詳細は Google のプライバシーポリシーをご確認ください。',
@@ -99,7 +99,7 @@ window.NIKENZUME_STRINGS = {
     tagline: 'Two rooms, one move.',
     chapter: ({ n }) => `Chapter ${n}`,
     modeNormal: 'Normal', modeAdvanced: 'Advanced',
-    back: 'Back', reset: 'Restart', answer: 'Answer', theme: 'Theme', settings: 'Settings',
+    back: 'Back', reset: 'Restart', answer: 'Answer', settings: 'Settings',
     light: 'Light hint', nextMove: 'Next move',
     hintLight: 'Light', hintNext: 'Next move', hintAnswer: 'Answer',
     loginTitle: 'Login Bonus', loginClaim: 'Claim',
@@ -141,12 +141,12 @@ window.NIKENZUME_STRINGS = {
     // Version history
     version: 'Version history', verCurrent: 'Current',
     ver100a: 'Initial release', ver100b: 'Chapters 1–3 (30 puzzles)',
-    ver100c: 'Light hint & answer playback', ver100d: 'Dark / light theme', ver100e: 'Japanese & English',
+    ver100c: 'Light hint & answer playback', ver100d: 'Light-only visual design', ver100e: 'Japanese & English',
     // Privacy policy
     ppDate: 'Last updated: June 2026',
     ppDataH: 'Data we collect', ppDataP: 'Tsugai does not collect personal information such as your name or email address. Game progress is stored entirely on your device.',
     ppLocalH: 'On-device data', ppLocalP: 'The following data is saved locally (localStorage):',
-    ppLocal1: 'Clear status & best move counts', ppLocal2: 'Theme preference (dark / light)',
+    ppLocal1: 'Clear status & best move counts', ppLocal2: 'Display preference',
     ppLocal3: 'Sound & haptics on/off', ppLocal4: 'Language setting',
     ppLocalNote: 'None of this is sent to a server. Use "Reset progress" in Settings to erase it all.',
     ppAdH: 'Advertising', ppAdP: 'This app displays ads via Google AdMob. AdMob may collect your advertising ID and device information to serve ads. See Google\'s Privacy Policy for details.',
