@@ -85,8 +85,6 @@ const MODES = {
 let curMode = 'normal';
 function modeData() { return MODES[curMode]; }
 const CHAPTERS = [{ id: 'ch1', from: 0, to: MODES.normal.levels.length }];
-const LEVEL_GROUP_SIZE = 10;
-const LEVEL_GROUP_COLS = 5;
 function switchMode(mode) {
   curMode = mode;
   CHAPTERS[0].to = modeData().levels.length;
@@ -94,33 +92,6 @@ function switchMode(mode) {
 }
 function chapterLevels(ch) {
   return modeData().levels.slice(ch.from, ch.to);
-}
-function isGroupUnlocked(levels, groupStart) {
-  if (groupStart <= 0) return true;
-  for (let i = 0; i < groupStart; i++) {
-    if (!cleared.has(levels[i].id)) return false;
-  }
-  return true;
-}
-
-function makeLockedStrip(groupStart) {
-  const strip = document.createElement('div');
-  strip.className = 'level-lock-strip';
-  for (let i = 0; i < LEVEL_GROUP_COLS; i++) {
-    const cell = document.createElement('div');
-    cell.className = 'level-lock-cell' + (i === 0 ? ' lead' : '');
-    if (i === 0) {
-      const no = document.createElement('span');
-      no.className = 'level-lock-no';
-      no.textContent = String(groupStart + 1);
-      const msg = document.createElement('span');
-      msg.className = 'level-lock-msg';
-      msg.textContent = t('levelUnlockAfter', { n: groupStart });
-      cell.append(no, msg);
-    }
-    strip.append(cell);
-  }
-  return strip;
 }
 
 // ---- クリア記録 ----
@@ -406,50 +377,27 @@ function showLevels(ch) {
   $('#levels-title').textContent = `${done} / ${chapterLevels(ch).length}`;
   const grid = $('#level-grid');
   grid.replaceChildren();
-  const levels = chapterLevels(ch);
-  for (let groupStart = 0; groupStart < levels.length; groupStart += LEVEL_GROUP_SIZE) {
-    const group = levels.slice(groupStart, groupStart + LEVEL_GROUP_SIZE);
-    const section = document.createElement('section');
-    section.className = 'level-group';
-    const head = document.createElement('div');
-    head.className = 'level-group-head';
-    const groupCleared = group.filter((p) => cleared.has(p.id)).length;
-    const startNo = ch.from + groupStart + 1;
-    const endNo = ch.from + groupStart + group.length;
-    head.innerHTML = `<span class="level-group-range">${t('levelRange', { from: startNo, to: endNo })}</span>` +
-      `<span class="level-group-state">${groupCleared} / ${group.length}</span>`;
-    section.append(head);
-
-    if (isGroupUnlocked(levels, groupStart)) {
-      const block = document.createElement('div');
-      block.className = 'level-group-grid';
-      group.forEach((p, i) => {
-        const globalIdx = ch.from + groupStart + i;
-        const isBoss = modeData().boss[globalIdx];
-        const btn = document.createElement('button');
-        const isCleared = cleared.has(p.id);
-        const isBest = bestCleared.has(p.id);
-        btn.className = 'level-tile' + (isCleared ? ' cleared' : '') + (isBest ? ' best' : '') + (isBoss ? ' boss' : '');
-        const emblem = (state) =>
-          `<span class="lv-emblem ${state}${isBoss ? ' boss' : ''}"><span class="le-inner">` +
-          `<span class="le-halo"></span><span class="le-disc"></span>` +
-          `<span class="le-ball eb1"></span><span class="le-ball eb2"></span></span></span>`;
-        const mark = isBest
-          ? emblem('best')
-          : isCleared
-            ? emblem('win')
-            : t('levelMoves', { n: p.solution.minMoves });
-        btn.innerHTML = `<span class="lv-no">${globalIdx + 1}</span>` +
-          `<span class="lv-moves">${mark}</span>`;
-        btn.addEventListener('click', () => startPuzzle(ch, groupStart + i));
-        block.append(btn);
-      });
-      section.append(block);
-    } else {
-      section.append(makeLockedStrip(groupStart));
-    }
-    grid.append(section);
-  }
+  chapterLevels(ch).forEach((p, i) => {
+    const globalIdx = ch.from + i;
+    const isBoss = modeData().boss[globalIdx];
+    const btn = document.createElement('button');
+    const isCleared = cleared.has(p.id);
+    const isBest = bestCleared.has(p.id);
+    btn.className = 'level-tile' + (isCleared ? ' cleared' : '') + (isBest ? ' best' : '') + (isBoss ? ' boss' : '');
+    const emblem = (state) =>
+      `<span class="lv-emblem ${state}${isBoss ? ' boss' : ''}"><span class="le-inner">` +
+      `<span class="le-halo"></span><span class="le-disc"></span>` +
+      `<span class="le-ball eb1"></span><span class="le-ball eb2"></span></span></span>`;
+    const mark = isBest
+      ? emblem('best')
+      : isCleared
+        ? emblem('win')
+        : t('levelMoves', { n: p.solution.minMoves });
+    btn.innerHTML = `<span class="lv-no">${globalIdx + 1}</span>` +
+      `<span class="lv-moves">${mark}</span>`;
+    btn.addEventListener('click', () => startPuzzle(ch, i));
+    grid.append(btn);
+  });
 }
 
 // ---- プレイ ----
