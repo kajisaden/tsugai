@@ -1,19 +1,19 @@
-/* 二間詰 ビューア — ラグジュアリー(黒基調・発光ボール) SPEC.md 5章
+/* 二間詰 ビューア — ライト専用デザイン
    原則: アニメは「演出」でなく「情報」。動くのは移動と壁当てbumpだけ。 */
 
 :root {
-  --bg: #0a0a0e;
-  --panel: #121218;
-  --line: rgba(255, 255, 255, 0.06);
-  --text: #d8d4ca;
-  --text-dim: #9d9a8e;
-  --gold: #e8d9b0;
-  --glow: rgba(240, 220, 170, 0.55);
-  --bump-hot: #fffaf0;
-  /* 盤用トークン(デフォルト=ダーク盤)。盤・ゴール・ヒントグロー・壁当てが使う */
-  --b-gold: #e8d9b0;
-  --b-glow: rgba(240, 220, 170, 0.55);
-  --b-bump-hot: #fffaf0;
+  --bg: #f3efe6;
+  --panel: #fbf8f1;
+  --line: rgba(95, 75, 56, 0.15);
+  --text: #2b2620;
+  --text-dim: #8a8276;
+  --gold: #a8801f;
+  --glow: rgba(168, 128, 31, 0.40);
+  --bump-hot: #e7c25a;
+  /* 盤用トークン。盤・ゴール・ヒントグロー・壁当てが使う */
+  --b-gold: #3f7fad;
+  --b-glow: rgba(63, 127, 173, 0.32);
+  --b-bump-hot: #6fa7c7;
   --move-ms: 240ms;  /* キャラ移動(スライド)。半分の速さに(旧120ms)。app.js の MOVE_MS と一致 */
   --bump-ms: 200ms;  /* 壁当て */
   /* 盤の縦並びサイズ計算: 一辺 = (画面高 - 上下UI - 盤間余白) / 2(盤数)。
@@ -31,7 +31,7 @@ html, body { height: 100%; }
 html { background-color: var(--bg); }
 
 body {
-  background: radial-gradient(120% 100% at 50% 0%, #101018 0%, var(--bg) 60%);
+  background: radial-gradient(120% 100% at 50% 0%, #fbf7ed 0%, var(--bg) 60%);
   color: var(--text);
   font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -55,12 +55,13 @@ main {
   flex-direction: column;
   justify-content: safe center;
 }
-/* 章一覧・問題一覧は内容を上寄せ＋上マージンにして、ロゴ/ヘッダとの余白を詰める
+/* ホーム・問題一覧は内容を上寄せ＋上マージンにして、ロゴ/ヘッダとの余白を詰める
    (縦中央寄せだと上が大きく空く)。:has 非対応の旧環境は従来の中央寄せにフォールバック。
    プレイ画面(view-play)は対象外＝従来どおり */
 main:has(#view-chapters:not([hidden])),
 main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
-#view-chapters, #view-levels { margin-top: 60px; }
+#view-chapters { margin-top: 36px; }
+#view-levels { margin-top: 60px; }
 
 /* ---- ヘッダ ---- */
 #app-header {
@@ -70,13 +71,21 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
   /* standalone(black-translucent)では時計/電池の下までコンテンツが広がるので上に safe-area 分の余白 */
   padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 8px;
   max-width: 560px;
-  width: 100%;          /* フル幅: 戻る=左マージン / トグル=右マージンに固定(縮んで中央寄りにならない) */
+  width: 100%;
   margin: 0 auto;
+}
+#hdr-center {
+  grid-column: 2;
+  justify-self: center;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 0;
 }
 #app-title {
   position: relative; /* ビルド印(.build-mark)の絶対配置の基準。印は流れから外し中央寄せのロゴを崩さない */
   width: fit-content;
-  margin: 0 auto;
+  margin: 0;
   font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
   font-weight: 400;
   font-size: 22px;
@@ -101,13 +110,9 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
   opacity: 0.7;
   pointer-events: none;
 }
-/* 戻る = 案2 盤色の丸ボタン(シェブロン)。左端は「○手詰」と揃う左マージン、行はトグルと同じ高さ */
-/* ヘッダ左グループ(戻る+トグル) / 右スロット(後で設定) */
-/* 左: 戻るのみ(トグルは設定ドロワーへ) */
-.hdr-left { grid-column: 1; justify-self: start; display: flex; align-items: center; }
 .hdr-right { grid-column: 3; justify-self: end; }
 #play-status {
-  grid-column: 2;
+  grid-column: 1;
   justify-self: center;
   display: none;
   align-items: center;
@@ -143,65 +148,27 @@ body.view-play #play-status { display: flex; }
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 /* 戻る(左)と設定(右)は同じ盤色の丸ボタンで対。直径=トグルの高さ(32px) */
-#btn-back, #btn-settings {
+#btn-settings {
   width: 32px; height: 32px; padding: 0;
   display: grid; place-items: center; border-radius: 50%;
   background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-#btn-back svg, #btn-settings svg { color: var(--text-dim); display: block; }
-#btn-back svg { width: 20px; height: 20px; }
+#btn-settings svg { color: var(--text-dim); display: block; }
 #btn-settings svg { width: 18px; height: 18px; }  /* 歯車は密なので少し小さく */
-:root[data-theme="light"] #btn-back,
-:root[data-theme="light"] #btn-settings,
-:root[data-theme="light"] .answer-btn {
+#btn-settings,
+.answer-btn {
   background: linear-gradient(160deg, #fff8eb 0%, #e8d8c4 100%);
   border-color: rgba(64, 56, 48, 0.13);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), 0 2px 4px rgba(88, 66, 45, 0.08);
 }
-:root[data-theme="light"] .answer-btn {
+.answer-btn {
   color: #d75c51;
   border-color: color-mix(in srgb, #d75c51, transparent 68%);
   letter-spacing: 0.08em;
 }
 .btn-icon { padding: 8px; line-height: 0; border-radius: 50%; }
-/* テーマトグル(案C): 太陽(ライト)/月(ダーク)を埋め込んだスライド式。アクティブ側を金で点灯。
-   実切替は data-theme(CSS)駆動。クリックは app.js が data-theme を反転する */
-#btn-theme {
-  position: relative; width: 68px; height: 32px; padding: 0 6px; border-radius: 16px;
-  display: flex; align-items: center; justify-content: space-between;
-  /* トラック = 盤の床色(ダーク) */
-  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-#btn-theme .ic-wrap {
-  width: 26px; height: 26px; display: grid; place-items: center;
-  border-radius: 50%; color: var(--text-dim); /* 非アクティブ=薄字 */
-}
-#btn-theme .ic-wrap svg { width: 17px; height: 17px; display: block; }
-/* アクティブ側の背後に金のほの灯り＋金アイコン。ダーク既定=月(右)が点灯。
-   三日月は質量が左下に寄るので右上へ微ナッジして丸の中心へ(調整B) */
-#btn-theme .moon-wrap {
-  color: var(--gold);
-  /* オン側の円 = 盤の壁色(ダーク) */
-  background: linear-gradient(160deg, #4a4a57 0%, #3a3a45 100%);
-}
-#btn-theme .moon-wrap svg { transform: translate(0.7px, -0.6px); }
-/* ライト: トラック=washi、アクティブ=太陽(左)が琥珀で点灯。月側は素に戻す */
-:root[data-theme="light"] #btn-theme {
-  background: var(--panel); border-color: rgba(43, 38, 32, 0.12); /* トラック = 盤の床色(ライト=紙) */
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
-}
-:root[data-theme="light"] #btn-theme .moon-wrap { color: var(--text-dim); background: none; }
-:root[data-theme="light"] #btn-theme .moon-wrap svg { transform: none; }
-:root[data-theme="light"] #btn-theme .sun-wrap {
-  color: #a8801f;
-  /* オン側の円 = 盤の壁色(ライト=washi) */
-  background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
-}
-
 .tagline {
   text-align: center;
   color: var(--text-dim);
@@ -249,7 +216,7 @@ button:active { transform: translateY(1px); }
   width: 100%;
   text-align: left;
   padding: 18px 20px;
-  /* 一覧タイル/A画面カードと同じ盤床色に統一(ダーク)。ライトは下で従来の紙色に戻す */
+  /* 一覧タイル/A画面カードと同じ紙色に統一 */
   background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
 }
 .chapter-card .ch-name { font-size: 15px; letter-spacing: 0.15em; }
@@ -320,8 +287,7 @@ button:active { transform: translateY(1px); }
 .level-tile.boss .lv-no { color: #b14a42; }
 .level-tile.boss .lv-no { font-weight: 700; }
 /* クリア印 = A画面のつがいエンブレム(縮小)。最短=金 / クリア=白(銀)。
-   220x176座標の本物の意匠を transform: scale で縮小し、発光/影も比率を保つ。
-   既定=ダーク(発光2球)。ライトは下で碁石+皿+後光に上書き */
+   220x176座標の本物の意匠を transform: scale で縮小し、影も比率を保つ。 */
 .lv-emblem { position: relative; display: inline-block; width: 52px; height: 42px; }
 .lv-emblem .le-inner {
   position: absolute; top: 50%; left: 50%; width: 220px; height: 176px;
@@ -396,15 +362,15 @@ button:active { transform: translateY(1px); }
   cursor: pointer;
 }
 /* ライト */
-:root[data-theme="light"] #daily-card {
+#daily-card {
   border-color: rgba(168, 128, 31, 0.3);
   background: linear-gradient(135deg, rgba(168, 128, 31, 0.08) 0%, rgba(168, 128, 31, 0.03) 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
-:root[data-theme="light"] .daily-streak { color: #a8801f; }
-:root[data-theme="light"] .daily-status.new { background: rgba(168, 128, 31, 0.15); color: #a8801f; }
-:root[data-theme="light"] .daily-reward-line { color: #a8801f; }
-:root[data-theme="light"] #btn-share { border-color: rgba(168, 128, 31, 0.3); }
+.daily-streak { color: #a8801f; }
+.daily-status.new { background: rgba(168, 128, 31, 0.15); color: #a8801f; }
+.daily-reward-line { color: #a8801f; }
+#btn-share { border-color: rgba(168, 128, 31, 0.3); }
 
 /* ---- プレイ画面 ---- */
 #play-info {
@@ -438,11 +404,9 @@ button:active { transform: translateY(1px); }
      横幅(100%)を超えない。dvh 非対応ブラウザ向けに 100vh のフォールバックを先に置く */
   width: min(100%, calc((100vh  - var(--play-chrome) - var(--board-gap)) / 2));
   width: min(100%, calc((100dvh - var(--play-chrome) - var(--board-gap) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) / 2));
-  /* ダークの床(盤の地)は中央を少し灯したグラデで視認性を上げる。
-     ライトは下のテーマ上書きで Threes 風の紙タイルに寄せる。 */
+  /* 盤の地は後段で Threes 風の紙タイルに寄せる。 */
   background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
-  /* 案A 額装インセット: 盤を少しへこんだ盆として枠取りし「部屋としてのまとまり」を出す。
-     ここは既定(ダーク)値。ライトは下のテーマ上書きで暖色の弱い影に差し替える。--line(格子線)は不変 */
+  /* 案A 額装インセット: 盤を少しへこんだ盆として枠取りし「部屋としてのまとまり」を出す。 */
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 12px;
   box-shadow: inset 0 2px 9px rgba(0, 0, 0, 0.55);
@@ -474,7 +438,7 @@ button:active { transform: translateY(1px); }
   pointer-events: none;
 }
 /* レバー6: 衝撃リップル。細いリングが接触点から広がって消える。サイズ/位置/拡大は JS(WAAPI)が制御。
-   色は --glow でテーマ自動追従(ダーク=金/ライト=琥珀)。実不透明度は WAAPI 側で更に抑える */
+   色は --glow で統一。実不透明度は WAAPI 側で更に抑える */
 .bump-ripple {
   position: absolute;
   border-radius: 12px;
@@ -510,7 +474,7 @@ button:active { transform: translateY(1px); }
 
 /* 通り道の尾引き: きれいに滑ったとき、通過したマスを順に一瞬照らして後ろへ消す。
    .trail-layer は球(.piece)の下に敷く透明レイヤ。マスの点灯/退色は JS(WAAPI)が制御。
-   色は --glow でテーマ自動追従(ダーク=金/ライト=琥珀のにじみ) */
+   色は --glow で統一 */
 .trail-layer {
   position: absolute;
   inset: 0;
@@ -539,7 +503,7 @@ button:active { transform: translateY(1px); }
   0% { transform: scale(1.06); }
   100% { transform: scale(0.74); }
 }
-:root[data-ball="light"] .trail-cell::before {
+.trail-cell::before {
   inset: 10%;
   border-radius: 12px;
   border: 2px solid rgba(36, 107, 143, 0.26);
@@ -567,7 +531,7 @@ button:active { transform: translateY(1px); }
   content: "";
   position: absolute;
   inset: 0;
-  /* ダーク壁: 灯り床の上で沈まないよう一段持ち上げる。 */
+  /* 壁マスは床の上で沈まないよう一段持ち上げる。 */
   background: linear-gradient(160deg, #4a4a57 0%, #3a3a45 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   /* 上辺ハイライトは廃止: 壁マス毎に出ると隣接壁の継ぎ目で境界線と二重になり線が浮く。
@@ -605,51 +569,6 @@ button:active { transform: translateY(1px); }
   78%  { transform: scale(1.14); border-color: var(--b-bump-hot); box-shadow: 0 0 16px 5px var(--b-glow); }
   100% { transform: scale(1);    border-color: var(--b-gold);     box-shadow: 0 0 8px 1px var(--b-glow); }
 }
-/* ゴール吸着の黒皿(ダーク): クリアの一手で、発光する球が収まる先に黒漆の皿がすっと現れて座になる。
-   goal は piece より前に append=皿(::after)は球の下に敷かれる。皿が輪(::before)を覆うので、
-   皿自身に細い金縁を持たせて連続性を保つ。ライトは金/銀の円盤演出があるので出さない(下で display:none)。 */
-.goal::after {
-  content: "";
-  position: absolute;
-  inset: 10%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 38%, #30303b 0%, #18181f 54%, #0a0a0e 100%);
-  border: 1px solid rgba(232, 217, 176, 0.30);
-  box-shadow:
-    inset 0 2px 5px rgba(0, 0, 0, 0.65),        /* 皿の凹み */
-    inset 0 -1px 1px rgba(255, 255, 255, 0.05),
-    0 3px 9px rgba(0, 0, 0, 0.5);               /* 盤への接地影 */
-  opacity: 0;
-  transform: scale(1.22);
-  transition: opacity 240ms ease-out, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
-  pointer-events: none;
-}
-/* 黒皿のバウンド一発: フェードイン→着座で金縁が発光しつつ皿が一瞬拡大(バウンド)→
-   そのまま scale 0 まで縮んで消える。座としては残さず、消えた跡で球が発光する。
-   キーフレームで opacity/transform/border-color/box-shadow を一括制御(forwards で終端=不可視を保持) */
-.goal.sucking::after { animation: plate-pop 560ms ease-out forwards; }
-@keyframes plate-pop {
-  0%   { opacity: 0; transform: scale(1.25); border-color: rgba(232, 217, 176, 0.30);
-         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
-  22%  { opacity: 1; transform: scale(1.12); border-color: rgba(232, 217, 176, 0.30);
-         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
-  43%  { opacity: 1; transform: scale(1);    border-color: rgba(232, 217, 176, 0.30); /* 着座(球到達 ~240ms) */
-         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
-  66%  { opacity: 1; transform: scale(1.3);  border-color: var(--b-bump-hot);
-         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5), 0 0 7px 1px var(--b-bump-hot), 0 0 16px 4px var(--b-glow); }
-  100% { opacity: 0; transform: scale(0);    border-color: rgba(232, 217, 176, 0.30); /* 0まで縮小して消える */
-         box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.65), inset 0 -1px 1px rgba(255, 255, 255, 0.05), 0 3px 9px rgba(0, 0, 0, 0.5); }
-}
-/* ダークは黒皿が座になるので、輪の金グロー(にじみ)は出さず皿に集中させる(scale/縁は皿の下で不可視)。
-   ライト(下の data-theme="light")は従来の goal-suck(金のにじみ)のまま=変更しない */
-:root:not([data-board="light"]) .goal.sucking::before { animation-name: goal-suck-dark; }
-@keyframes goal-suck-dark {
-  0%   { transform: scale(1);    border-color: var(--b-gold); }
-  58%  { transform: scale(0.82); border-color: var(--b-gold); }
-  78%  { transform: scale(1.14); border-color: var(--b-gold); }
-  100% { transform: scale(1);    border-color: var(--b-gold); }
-}
-
 /* キャラ: .piece はセルサイズのラッパー。移動は transform を 100〜140ms / ease-out */
 .piece {
   position: absolute;
@@ -673,13 +592,12 @@ button:active { transform: translateY(1px); }
   box-shadow: 0 0 10px rgba(240, 220, 170, 0.35);
   will-change: transform; /* 移動/壁当ての squash&stretch(WAAPIでscale)を滑らかに */
 }
-/* 壁当ての一瞬の発光。ボールに重なる白いディスク(既定は透明)。WAAPIで opacity を瞬間的に上げる。
-   主にライトの黒石用: brightness では光らないため、白く発光させてダーク相当の手応えを出す */
+/* 壁当ての一瞬の発光。ボールに重なる白いディスク(既定は透明)。WAAPIで opacity を瞬間的に上げる。 */
 .ball-flash {
   position: absolute;
   inset: -7%;
   border-radius: 50%;
-  /* 壁当ての光と同じ色で発光(--bump-hot=壁のピーク色 / --glow=にじみ)。テーマ自動追従(ライト=琥珀/ダーク=暖白) */
+  /* 壁当ての光と同じ色で発光(--bump-hot=壁のピーク色 / --glow=にじみ)。 */
   background: radial-gradient(circle at 50% 45%, var(--bump-hot) 0%, var(--glow) 55%, transparent 78%);
   box-shadow: 0 0 14px 3px var(--glow);
   opacity: 0;
@@ -698,16 +616,6 @@ button:active { transform: translateY(1px); }
   0%, 100% { opacity: 0.35; }
   50% { opacity: 1; }
 }
-/* つがいの連動感: 「綻び」(放送入力で片方だけ壁に阻まれ対が引き裂かれる一手=章名の核)の一拍、
-   二球の息(.ball::after)が同時にひるんで張る。#boards 共有クラスなので両球が完全同期=対であると直感させる。
-   点火/解除は JS(綻びの手のみ・ダークのみ)。ライトは黒石を発光させない方針なので出さない。 */
-#boards.strain .ball::after { animation: strain-flinch 460ms ease-out; }
-@keyframes strain-flinch {
-  0%   { opacity: 0.5;  box-shadow: 0 0 14px 2px rgba(240, 220, 170, 0.25); }
-  16%  { opacity: 1;    box-shadow: 0 0 18px 5px var(--glow); } /* 綻びの一拍を二球同時に張る */
-  100% { opacity: 0.35; box-shadow: 0 0 14px 2px rgba(240, 220, 170, 0.25); }
-}
-
 /* ---- 操作系: 上段=ヘルプ(リワード) / 下段=最初から(無料・フル幅) ---- */
 #controls {
   margin: clamp(10px, 2dvh, 16px) auto 0;
@@ -903,7 +811,7 @@ button:active { transform: translateY(1px); }
 
 /* ---- クリア演出: 盤上のボールが金(最短)/白(クリア)に発光する。言葉に依らない climax(SPEC.md 5章) ---- */
 /* 弾みはユーザがタップして次へ進むまで、止まらず滑らかに往復し続ける(両モード共通=clear-bounce: 拡大主体＋わずかな跳ね)。
-   .bouncing は checkClear で付け dismissTsumi で外す。ライトは接地影を別要素(.ball-glow)で足す/ダークは発光が奥行きを担う */
+   .bouncing は checkClear で付け dismissTsumi で外す。接地影は別要素(.ball-glow)で足す */
 #boards.bouncing .ball { animation: clear-bounce 1100ms ease-in-out infinite; }
 #boards.clear-best .ball { box-shadow: 0 0 30px 9px rgba(240, 220, 170, 0.9); }
 #boards.clear-best .ball-glow {
@@ -938,10 +846,9 @@ button:active { transform: translateY(1px); }
 }
 #btn-next { color: var(--gold); }
 #btn-retry { color: var(--text); }
-/* A画面の「一覧へ」= ホームアイコン(左上・セーフエリア下)。flex フローから外して絶対配置。
-   ダークは近黒背景に沈むので明るめ(#e6e3dc)、ライトは紙地で白飛びするので従来のディムのまま */
+/* A画面の「一覧へ」= ホームアイコン(左上・セーフエリア下)。flex フローから外して絶対配置。 */
 #btn-list { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); left: 14px; color: #e6e3dc; }
-:root[data-theme="light"] #btn-list { color: var(--text-dim); }
+#btn-list { color: var(--text-dim); }
 
 /* ---- A画面(クリア結果): 手数/最短 ・ つがいエンブレム ・ 進捗 ---- */
 /* カード = ゲーム盤の壁デザインをそのまま大きくして角だけ角丸にしたもの(テーマ追従。.cell.wall と同配色) */
@@ -969,9 +876,9 @@ button:active { transform: translateY(1px); }
 .gap-progress { font-size: 14px; letter-spacing: 0.16em; color: var(--text); }
 .gap-progress b { color: var(--gold); font-weight: 600; }
 
-/* つがいエンブレム(2球が45°で寄り添う)。既定(ダーク)=発光球・皿なし。最短=金 / クリア=銀 */
+/* つがいエンブレム(2球が45°で寄り添う)。最短=金 / クリア=銀 */
 .emblem { position: relative; width: 220px; height: 176px; }
-/* 後光(halo): エンブレム背後の温かなオーラ。既定(ダーク)は発光球が奥行きを担うので非表示。ライトのみ表示(下) */
+/* 後光(halo): エンブレム背後の温かなオーラ。状態別に後段で表示する */
 .emblem-halo { display: none; position: absolute; inset: -12% -6% -20% -6%; border-radius: 50%; pointer-events: none; }
 .emblem-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 20px; display: none; }
 .emblem-balls { position: absolute; inset: 0; }
@@ -1060,42 +967,27 @@ button:active { transform: translateY(1px); }
 }
 
 /* ============================================================
-   ライトモード(Threes風): <html data-theme="light"> で全体を切替
+   ライト盤(Threes風)
    - 盤 = クリーム紙
    - ボール/ゴール/壁当て = 青の意味色
    - 赤/琥珀系はUIアクセントとして残す
    ============================================================ */
-:root[data-theme="light"] {
-  --bg: #f3efe6;
-  --panel: #fbf8f1;
-  --text: #2b2620;
-  --text-dim: #8a8276;
-  --gold: #a8801f;
-  --glow: rgba(168, 128, 31, 0.40);
-  --bump-hot: #e7c25a;
-}
-:root[data-board="light"] {
-  --line: rgba(95, 75, 56, 0.15);
-  --b-gold: #3f7fad;
-  --b-glow: rgba(63, 127, 173, 0.32);
-  --b-bump-hot: #6fa7c7;
-}
-:root[data-theme="light"][data-boss="boss"] {
+:root[data-boss="boss"] {
   --gold: #b14a42;
   --glow: rgba(177, 74, 66, 0.26);
   --bump-hot: #e7aaa1;
 }
-:root[data-board="light"][data-boss="boss"] {
+:root[data-boss="boss"] {
   --b-gold: #c65b52;
   --b-glow: rgba(198, 91, 82, 0.34);
   --b-bump-hot: #e28f86;
 }
-:root[data-theme="light"] body {
+body {
   background: radial-gradient(120% 100% at 50% 0%, #fbf7ed 0%, var(--bg) 60%);
 }
 
 /* ライト盤: Threes風のクリーム紙タイル。盤は静かに、青い駒/ゴールだけを読みやすくする */
-:root[data-board="light"] .board {
+.board {
   width: min(260px, 70vw);
   background: #e7d8c3;
   border: 2px solid rgba(78, 64, 49, 0.16);
@@ -1104,12 +996,12 @@ button:active { transform: translateY(1px); }
 }
 
 /* 盤の壁: 紙タイル風の淡い壁。青系の輪郭で駒/ゴールとの家系を揃える */
-:root[data-board="light"] .cell.wall {
+.cell.wall {
   background: transparent;
   border: 0.5px solid var(--line);
   box-shadow: none;
 }
-:root[data-board="light"] .cell.wall::before {
+.cell.wall::before {
   inset: 10%;
   border-radius: 12px;
   background: linear-gradient(145deg, #fffaf0 0%, #ddc9af 100%);
@@ -1118,7 +1010,7 @@ button:active { transform: translateY(1px); }
     inset -2px -3px 0 rgba(74, 58, 43, 0.12),
     0 3px 5px rgba(76, 54, 39, 0.13);
 }
-:root[data-board="light"] .cell.wall::after {
+.cell.wall::after {
   content: "";
   position: absolute;
   inset: 10%;
@@ -1128,8 +1020,8 @@ button:active { transform: translateY(1px); }
 }
 
 /* 壁の印(ヒント/壁当て)ライト: ボール/ゴールと同じ青。紙の上に薄くにじむ接触サインとして出す */
-:root[data-board="light"] .hint-glow,
-:root[data-board="light"] .bump-glow {
+.hint-glow,
+.bump-glow {
   background: #6fa7c7;
   box-shadow: 0 0 8px 2px rgba(63, 127, 173, 0.46), 0 0 15px 4px rgba(63, 127, 173, 0.20);
 }
@@ -1141,8 +1033,8 @@ button:active { transform: translateY(1px); }
     linear-gradient(180deg, rgba(10, 10, 14, 0), rgba(10, 10, 14, 0.58) 35%),
     rgba(255, 255, 255, 0.025);
 }
-:root[data-board="light"] .bump-glow.show { animation-name: bump-glow-light; }
-:root[data-board="light"][data-boss="boss"] .bump-glow.show { animation-name: bump-glow-light-boss; }
+.bump-glow.show { animation-name: bump-glow-light; }
+:root[data-boss="boss"] .bump-glow.show { animation-name: bump-glow-light-boss; }
 @keyframes bump-glow-light {
   0%   { opacity: 0;    background: #cde4f0; box-shadow: 0 0 5px 1px rgba(63, 127, 173, 0.30); }
   9%   { opacity: 1;    background: #dceef6; box-shadow: 0 0 13px 4px rgba(63, 127, 173, 0.52), calc(var(--bloom-x, 0px) * 0.76) calc(var(--bloom-y, 0px) * 0.76) 28px 8px rgba(63, 127, 173, 0.22); }
@@ -1155,25 +1047,25 @@ button:active { transform: translateY(1px); }
   30%  { opacity: 0.92; background: #d97a72; box-shadow: 0 0 9px 3px rgba(198, 91, 82, 0.38), calc(var(--bloom-x, 0px) * 0.46) calc(var(--bloom-y, 0px) * 0.46) 18px 5px rgba(198, 91, 82, 0.16); }
   100% { opacity: 0;    background: #d97a72; box-shadow: 0 0 8px 2px rgba(198, 91, 82, 0.42), 0 0 15px 4px rgba(198, 91, 82, 0.18); }
 }
-:root[data-board="light"] .hint-glow {
+.hint-glow {
   animation: hint-glow-leaf 2.6s ease-in-out infinite;
 }
-:root[data-board="light"][data-boss="boss"] .hint-glow {
+:root[data-boss="boss"] .hint-glow {
   background: #d97a72;
   box-shadow: 0 0 8px 2px rgba(198, 91, 82, 0.42), 0 0 15px 4px rgba(198, 91, 82, 0.18);
 }
 @keyframes hint-glow-leaf { 0%, 100% { opacity: 0.82; } 50% { opacity: 1; } }
-:root[data-board="light"] .bump-ripple {
+.bump-ripple {
   border: 2px solid rgba(63, 127, 173, 0.50);
   box-shadow: 0 0 5px 1px rgba(63, 127, 173, 0.20);
 }
-:root[data-board="light"][data-boss="boss"] .bump-ripple {
+:root[data-boss="boss"] .bump-ripple {
   border: 2px solid rgba(198, 91, 82, 0.50);
   box-shadow: 0 0 5px 1px rgba(198, 91, 82, 0.20);
 }
 
 /* ボール: B案の青い紙タイル。アウトライン/呼吸光は出さず、実体の面と影だけで読ませる */
-:root[data-ball="light"] .ball {
+.ball {
   inset: 10%;
   border-radius: 12px;
   overflow: hidden;
@@ -1183,10 +1075,10 @@ button:active { transform: translateY(1px); }
     inset -3px -3px 0 rgba(74, 48, 35, 0.14),
     0 3px 5px rgba(76, 54, 39, 0.13);
 }
-:root[data-ball="light"][data-boss="boss"] .ball {
+:root[data-boss="boss"] .ball {
   background: linear-gradient(145deg, #fff8f7 0%, #e79e98 52%, #c65b52 100%);
 }
-:root[data-ball="light"] .ball::before {
+.ball::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -1195,10 +1087,10 @@ button:active { transform: translateY(1px); }
   pointer-events: none;
   z-index: 2;
 }
-:root[data-ball="light"][data-boss="boss"] .ball::before {
+:root[data-boss="boss"] .ball::before {
   border-color: rgba(157, 52, 44, 0.52);
 }
-:root[data-ball="light"] .ball::after {
+.ball::after {
   display: block;
   content: "";
   position: absolute;
@@ -1213,30 +1105,30 @@ button:active { transform: translateY(1px); }
   opacity: 1;
   z-index: 1;
 }
-:root[data-ball="light"] .ball-glow { inset: -22%; display: none; }
-:root[data-ball="light"] .ball-flash {
+.ball-glow { inset: -22%; display: none; }
+.ball-flash {
   border-radius: 12px;
   background: radial-gradient(circle at 50% 45%, rgba(220, 238, 246, 0.92) 0%, rgba(111, 167, 199, 0.45) 55%, transparent 78%);
   box-shadow: 0 0 14px 3px rgba(63, 127, 173, 0.28);
 }
-:root[data-ball="light"][data-boss="boss"] .ball-flash {
+:root[data-boss="boss"] .ball-flash {
   background: radial-gradient(circle at 50% 45%, rgba(248, 222, 219, 0.92) 0%, rgba(198, 91, 82, 0.42) 55%, transparent 78%);
   box-shadow: 0 0 14px 3px rgba(198, 91, 82, 0.24);
 }
-:root[data-ball="light"][data-boss="boss"] #gap-emblem .emblem-ball {
+:root[data-boss="boss"] #gap-emblem .emblem-ball {
   background: linear-gradient(145deg, #fff8f7 0%, #e79e98 52%, #c65b52 100%);
 }
-:root[data-ball="light"][data-boss="boss"] #gap-emblem .emblem-ball::before {
+:root[data-boss="boss"] #gap-emblem .emblem-ball::before {
   border-color: rgba(157, 52, 44, 0.52);
 }
-:root[data-ball="light"][data-boss="boss"] #gap-emblem.best .emblem-halo,
-:root[data-ball="light"][data-boss="boss"] #gap-emblem.win .emblem-halo {
+:root[data-boss="boss"] #gap-emblem.best .emblem-halo,
+:root[data-boss="boss"] #gap-emblem.win .emblem-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(198, 91, 82, 0.18), rgba(198, 91, 82, 0.06) 52%, transparent 78%);
   filter: blur(4px);
 }
 
-:root[data-board="light"] .goal::before {
+.goal::before {
   inset: 0;
   border: 3px solid #4f8fbb;
   border-radius: 12px;
@@ -1246,33 +1138,33 @@ button:active { transform: translateY(1px); }
     0 0 12px rgba(63, 127, 173, 0.32);
   opacity: 0.88;
 }
-:root[data-board="light"][data-boss="boss"] .goal::before {
+:root[data-boss="boss"] .goal::before {
   border-color: #c65b52;
   box-shadow:
     inset 0 0 0 4px rgba(255, 255, 255, 0.50),
     0 0 12px rgba(198, 91, 82, 0.28);
 }
-:root[data-board="light"] .goal.on::before {
+.goal.on::before {
   border-color: #4f8fbb;
   box-shadow:
     inset 0 0 0 4px rgba(255, 255, 255, 0.54),
     0 0 14px rgba(63, 127, 173, 0.36);
 }
-:root[data-board="light"][data-boss="boss"] .goal.on::before {
+:root[data-boss="boss"] .goal.on::before {
   border-color: #c65b52;
   box-shadow:
     inset 0 0 0 4px rgba(255, 255, 255, 0.54),
     0 0 14px rgba(198, 91, 82, 0.32);
 }
-:root[data-board="light"] .goal::after { display: none; }
-:root[data-board="light"] .goal.filled::before {
+.goal::after { display: none; }
+.goal.filled::before {
   background: linear-gradient(145deg, rgba(244, 234, 217, 0.92) 0%, rgba(234, 219, 199, 0.92) 100%);
   border-color: #4f8fbb;
   box-shadow:
     inset 0 0 0 4px rgba(255, 255, 255, 0.50),
     0 0 12px rgba(63, 127, 173, 0.32);
 }
-:root[data-board="light"][data-boss="boss"] .goal.filled::before {
+:root[data-boss="boss"] .goal.filled::before {
   border-color: #c65b52;
   box-shadow:
     inset 0 0 0 4px rgba(255, 255, 255, 0.50),
@@ -1280,57 +1172,57 @@ button:active { transform: translateY(1px); }
 }
 
 /* クリア演出: 青い駒/ゴールの意味色を保ち、ゴールリングだけを少し満たす */
-:root[data-ball="light"] #boards.clear-best .ball,
-:root[data-ball="light"] #boards.clear-win .ball {
+#boards.clear-best .ball,
+#boards.clear-win .ball {
   background: linear-gradient(145deg, #f7fbff 0%, #8fc1d9 52%, #3f7fad 100%);
   box-shadow:
     inset 2px 2px 0 rgba(255, 255, 255, 0.46),
     inset -3px -3px 0 rgba(74, 48, 35, 0.14),
     0 6px 10px rgba(92, 62, 45, 0.22);
 }
-:root[data-ball="light"][data-boss="boss"] #boards.clear-best .ball,
-:root[data-ball="light"][data-boss="boss"] #boards.clear-win .ball {
+:root[data-boss="boss"] #boards.clear-best .ball,
+:root[data-boss="boss"] #boards.clear-win .ball {
   background: linear-gradient(145deg, #fff8f7 0%, #e79e98 52%, #c65b52 100%);
 }
-:root[data-board="light"] #boards.clear-best .goal.filled::before,
-:root[data-board="light"] #boards.clear-win .goal.filled::before {
+#boards.clear-best .goal.filled::before,
+#boards.clear-win .goal.filled::before {
   inset: 0;
   border: 3px solid #4f8fbb;
   border-radius: 12px;
 }
-:root[data-board="light"][data-boss="boss"] #boards.clear-best .goal.filled::before,
-:root[data-board="light"][data-boss="boss"] #boards.clear-win .goal.filled::before {
+:root[data-boss="boss"] #boards.clear-best .goal.filled::before,
+:root[data-boss="boss"] #boards.clear-win .goal.filled::before {
   border-color: #c65b52;
 }
-:root[data-board="light"] #boards.clear-best .goal.filled::before {
+#boards.clear-best .goal.filled::before {
   background: linear-gradient(145deg, rgba(247, 236, 200, 0.94) 0%, rgba(224, 197, 133, 0.92) 52%, rgba(189, 156, 82, 0.90) 100%);
   box-shadow: none;
 }
-:root[data-board="light"][data-boss="boss"] #boards.clear-best .goal.filled::before {
+:root[data-boss="boss"] #boards.clear-best .goal.filled::before {
   box-shadow: none;
 }
-:root[data-board="light"] #boards.clear-win .goal.filled::before {
+#boards.clear-win .goal.filled::before {
   background: linear-gradient(145deg, rgba(247, 250, 253, 0.94) 0%, rgba(212, 218, 227, 0.92) 52%, rgba(174, 182, 195, 0.90) 100%);
   box-shadow: none;
 }
-:root[data-board="light"][data-boss="boss"] #boards.clear-win .goal.filled::before {
+:root[data-boss="boss"] #boards.clear-win .goal.filled::before {
   box-shadow: none;
 }
 
 /* A画面エンブレム ライト(案C): 磨いた碁石2球＋漆金精緻化(最短)/精緻化銀(クリア)の楕円皿＋温かな後光halo。発光ではなく実体＋素材感 */
-:root[data-ball="light"] #gap-emblem .emblem-ball {
+#gap-emblem .emblem-ball {
   border-radius: 12px;
   background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
   box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.46), inset -3px -3px 0 rgba(74, 48, 35, 0.14), 0 8px 14px rgba(92, 62, 45, 0.2);
 }
-:root[data-ball="light"] #gap-emblem .emblem-ball::before {
+#gap-emblem .emblem-ball::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   border: 2px solid rgba(36, 107, 143, 0.5);
 }
-:root[data-ball="light"] #gap-emblem .emblem-ball::after {
+#gap-emblem .emblem-ball::after {
   display: block;
   content: "";
   position: absolute;
@@ -1344,31 +1236,31 @@ button:active { transform: translateY(1px); }
   animation: none;
   opacity: 1;
 }
-:root[data-ball="light"] .emblem-disc { display: block; }
+.emblem-disc { display: block; }
 /* 漆金精緻化(ツヤ): 上面に磨きハイライト＋細い金縁。チープな均一黄でなく金箔の照り */
-:root[data-ball="light"] #gap-emblem.best .emblem-disc {
+#gap-emblem.best .emblem-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
   box-shadow: 0 10px 16px rgba(95, 76, 35, 0.14), inset 0 2px 4px rgba(255, 248, 224, 0.72), inset 0 -6px 10px rgba(115, 89, 36, 0.24);
 }
 /* 銀も金と同じ精緻化ツヤで揃える */
-:root[data-ball="light"] #gap-emblem.win .emblem-disc {
+#gap-emblem.win .emblem-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f8fbfe 0%, #d8e3ee 40%, #b6c6d7 72%, #8e9daf 100%);
   box-shadow: 0 10px 16px rgba(84, 92, 104, 0.14), inset 0 2px 4px rgba(255, 255, 255, 0.72), inset 0 -6px 10px rgba(110, 124, 140, 0.22);
 }
 /* 後光(halo) ライト: 状態で色を出し分け(最短=金 / クリア=銀)。背後に敷いて温かさを足す */
-:root[data-ball="light"] #gap-emblem.best .emblem-halo {
+#gap-emblem.best .emblem-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(216, 183, 95, 0.2), rgba(216, 183, 95, 0.07) 48%, transparent 76%);
   filter: blur(4px);
 }
-:root[data-ball="light"] #gap-emblem.win .emblem-halo {
+#gap-emblem.win .emblem-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(63, 127, 173, 0.14), rgba(63, 127, 173, 0.05) 62%, transparent 100%);
   filter: blur(4px);
 }
 
 /* A画面カード ライト: 壁(washi)の配色そのまま(.cell.wall light と同じ)＋角丸 */
-:root[data-theme="light"] .gap-card {
+.gap-card {
   gap: 24px;
   min-height: min(70vh, 596px);
   padding: 40px 24px 24px;
@@ -1377,103 +1269,102 @@ button:active { transform: translateY(1px); }
   border-color: rgba(138, 120, 92, 0.16);
   box-shadow: 0 18px 42px rgba(98, 78, 48, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
-:root[data-theme="light"] .gap-result {
+.gap-result {
   gap: 18px;
 }
-:root[data-theme="light"] .gap-moves {
+.gap-moves {
   text-align: center;
   line-height: 1.8;
 }
-:root[data-theme="light"] .gap-moves #gap-moves-1 {
+.gap-moves #gap-moves-1 {
   font-size: 18px;
 }
-:root[data-theme="light"] .gap-moves #gap-moves-2 {
+.gap-moves #gap-moves-2 {
   margin-left: 10px;
   font-size: 13px;
   letter-spacing: 0.08em;
 }
-:root[data-theme="light"] .gap-progress {
+.gap-progress {
   margin-top: 4px;
   font-size: 16px;
   letter-spacing: 0.18em;
 }
 /* A画面ボタンの彫り出し面(ライト) */
-:root[data-theme="light"] #btn-next,
-:root[data-theme="light"] #btn-retry {
+#btn-next,
+#btn-retry {
   height: 58px;
   border-radius: 18px;
   box-shadow: none;
 }
-:root[data-theme="light"] #btn-next {
+#btn-next {
   color: #3f7fad;
   border: 1px solid rgba(63, 127, 173, 0.22);
   background: linear-gradient(180deg, rgba(252, 253, 255, 0.92) 0%, rgba(239, 246, 251, 0.92) 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 7px 16px rgba(63, 127, 173, 0.08);
 }
-:root[data-theme="light"] #btn-retry {
+#btn-retry {
   color: var(--text);
   border: 1px solid rgba(95, 75, 56, 0.12);
   background: rgba(251, 248, 241, 0.72);
 }
-:root[data-theme="light"] .gap-buttons {
+.gap-buttons {
   gap: 12px;
   padding-top: 18px;
   border-top: 1px solid rgba(95, 75, 56, 0.12);
 }
 
-/* 章カード ライト: ダークで足した盤床色を打ち消し、従来の紙色(var(--panel))を維持 */
-:root[data-theme="light"] .chapter-card { background: var(--panel); }
-
+/* 章カード: 紙色(var(--panel))を維持 */
+.chapter-card { background: var(--panel); }
 /* 一覧タイルの壁カード ライト: washi壁(.cell.wall light と同色)＋彫り出しハイライト */
-:root[data-theme="light"] .level-tile {
+.level-tile {
   background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
   border-color: rgba(43, 38, 32, 0.10);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
-:root[data-ball="light"] .lv-corner.clear .lv-corner-block.front,
-:root[data-ball="light"] .lv-corner.best .lv-corner-block {
+.lv-corner.clear .lv-corner-block.front,
+.lv-corner.best .lv-corner-block {
   background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
   box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.38), inset -1px -1px 0 rgba(74, 48, 35, 0.10), 0 2px 4px rgba(76, 54, 39, 0.12);
 }
-:root[data-ball="light"] .lv-corner.clear .lv-corner-block.front::before,
-:root[data-ball="light"] .lv-corner.best .lv-corner-block::before {
+.lv-corner.clear .lv-corner-block.front::before,
+.lv-corner.best .lv-corner-block::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   border: 1.5px solid rgba(36, 107, 143, 0.42);
 }
-:root[data-theme="light"] .level-tile.cleared {
+.level-tile.cleared {
   background: rgba(168, 128, 31, 0.05);
 }
-:root[data-theme="light"] .level-tile.boss.cleared,
-:root[data-theme="light"] .level-tile.boss.best {
+.level-tile.boss.cleared,
+.level-tile.boss.best {
   background: rgba(168, 128, 31, 0.05);
 }
-:root[data-theme="light"] .level-tile.boss {
+.level-tile.boss {
   border-color: rgba(177, 74, 66, 0.28);
 }
 
 /* レベル一覧のクリア印 ライト: 碁石2球＋金(最短)/銀(クリア)の楕円皿＋後光(A画面と同意匠) */
-:root[data-ball="light"] .lv-emblem .le-ball {
+.lv-emblem .le-ball {
   border-radius: 12px;
   background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
   box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.46), inset -3px -3px 0 rgba(74, 48, 35, 0.14), 0 8px 14px rgba(92, 62, 45, 0.2);
 }
-:root[data-ball="light"] .lv-emblem.boss .le-ball {
+.lv-emblem.boss .le-ball {
   background: linear-gradient(145deg, #fff8f7 0%, #e79e98 52%, #c65b52 100%);
 }
-:root[data-ball="light"] .lv-emblem .le-ball::before {
+.lv-emblem .le-ball::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   border: 2px solid rgba(36, 107, 143, 0.5);
 }
-:root[data-ball="light"] .lv-emblem.boss .le-ball::before {
+.lv-emblem.boss .le-ball::before {
   border-color: rgba(157, 52, 44, 0.52);
 }
-:root[data-ball="light"] .lv-emblem .le-ball::after {
+.lv-emblem .le-ball::after {
   content: "";
   position: absolute;
   left: 27%;
@@ -1483,54 +1374,54 @@ button:active { transform: translateY(1px); }
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.55);
 }
-:root[data-ball="light"] .lv-emblem .le-disc { display: block; }
-:root[data-ball="light"] .lv-emblem.best .le-disc {
+.lv-emblem .le-disc { display: block; }
+.lv-emblem.best .le-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
   box-shadow: 0 10px 16px rgba(95, 76, 35, 0.14), inset 0 2px 4px rgba(255, 248, 224, 0.72), inset 0 -6px 10px rgba(115, 89, 36, 0.24);
 }
-:root[data-ball="light"] .lv-emblem.win .le-disc {
+.lv-emblem.win .le-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f8fbfe 0%, #d8e3ee 40%, #b6c6d7 72%, #8e9daf 100%);
   box-shadow: 0 10px 16px rgba(84, 92, 104, 0.14), inset 0 2px 4px rgba(255, 255, 255, 0.72), inset 0 -6px 10px rgba(110, 124, 140, 0.22);
 }
-:root[data-ball="light"] .lv-emblem.best .le-halo {
+.lv-emblem.best .le-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(216, 183, 95, 0.2), rgba(216, 183, 95, 0.07) 48%, transparent 76%);
   filter: blur(4px);
 }
-:root[data-ball="light"] .lv-emblem.win .le-halo {
+.lv-emblem.win .le-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(63, 127, 173, 0.14), rgba(63, 127, 173, 0.05) 62%, transparent 100%);
   filter: blur(4px);
 }
-:root[data-ball="light"] .lv-emblem.boss.best .le-halo,
-:root[data-ball="light"] .lv-emblem.boss.win .le-halo {
+.lv-emblem.boss.best .le-halo,
+.lv-emblem.boss.win .le-halo {
   background: radial-gradient(closest-side, rgba(198, 91, 82, 0.18), rgba(198, 91, 82, 0.06) 52%, transparent 78%);
 }
-:root[data-theme="light"] .level-tile.cleared { border-color: rgba(168, 128, 31, 0.4); }
+.level-tile.cleared { border-color: rgba(168, 128, 31, 0.4); }
 
 /* 金アクセントのボタン: 薄い金縁だと紙で消えるので濃い琥珀の縁にする */
-:root[data-theme="light"] #btn-next,
-:root[data-theme="light"] #btn-miss-restart,
-:root[data-theme="light"] #btn-ans-play { border-color: rgba(168, 128, 31, 0.45); }
+#btn-next,
+#btn-miss-restart,
+#btn-ans-play { border-color: rgba(168, 128, 31, 0.45); }
 
 /* 操作系 ライト: ヘルプ=washiカード / 残数バッジ=案Bコイン金 / 最初から=濃い枠 */
-:root[data-theme="light"] .help {
+.help {
   background: linear-gradient(160deg, #fff8eb 0%, #e8d8c4 100%);
   border-color: rgba(64, 56, 48, 0.13);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), 0 2px 4px rgba(88, 66, 45, 0.08);
 }
-:root[data-theme="light"] .help.lit { color: #a8801f; border-color: rgba(168, 128, 31, 0.45); }
-:root[data-theme="light"] .hint-badge {
+.help.lit { color: #a8801f; border-color: rgba(168, 128, 31, 0.45); }
+.hint-badge {
   background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 45%, #bd9c52 100%);
   color: #4a3a12;
   box-shadow: inset 0 1px 1px rgba(255, 248, 224, 0.7), 0 1px 2px rgba(80, 58, 18, 0.25);
 }
-:root[data-theme="light"] .reset-btn {
+.reset-btn {
   background: linear-gradient(160deg, #fff8eb 0%, #e8d8c4 100%);
   border-color: rgba(64, 56, 48, 0.13);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), 0 2px 4px rgba(88, 66, 45, 0.08);
 }
-:root[data-theme="light"] #ad-slot {
+#ad-slot {
   border-top-color: rgba(43, 38, 32, 0.10);
   background:
     linear-gradient(180deg, rgba(243, 239, 230, 0), rgba(243, 239, 230, 0.74) 35%),
@@ -1538,29 +1429,29 @@ button:active { transform: translateY(1px); }
 }
 
 /* オーバーレイの暗幕 → 明るい紙の幕 */
-:root[data-theme="light"] #overlay-gap,
-:root[data-theme="light"] #overlay-miss {
+#overlay-gap,
+#overlay-miss {
   background: rgba(243, 239, 230, 0.56);
 }
-:root[data-theme="light"] #overlay-login {
+#overlay-login {
   background: rgba(243, 239, 230, 0.92);
 }
-:root[data-theme="light"] .login-card {
+.login-card {
   background: #fff;
   border-color: #d6d0c4;
 }
-:root[data-theme="light"] .login-day { border-color: #d6d0c4; color: #887856; }
-:root[data-theme="light"] #btn-login-close { color: #fff; background: #b88630; }
+.login-day { border-color: #d6d0c4; color: #887856; }
+#btn-login-close { color: #fff; background: #b88630; }
 
 /* クリアの弾み(ライト): スケールでなく translateY で跳ねる。接地影は別要素(.ball-glow)で床に残し、
    球が上がると影は縮んで薄く・落ちると大きく濃く=視差で「跳ねている」ように見せる。
    接地影は球から外して別要素に持たせるので、弾み中の .ball からはドロップシャドウを抜く。
    (.bouncing は checkClear で付き dismissTsumi で外れる=クリア中だけ) */
-:root[data-ball="light"] #boards.bouncing .ball {
+#boards.bouncing .ball {
   animation: clear-bounce 1100ms ease-in-out infinite;
   box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.10);
 }
-:root[data-ball="light"] #boards.bouncing .ball-glow {
+#boards.bouncing .ball-glow {
   display: block;
   inset: auto;
   left: 22%; right: 22%; bottom: 8%; height: 11%;
@@ -1580,9 +1471,9 @@ button:active { transform: translateY(1px); }
 }
 /* アニメ無効時はライトの弾み・接地影も止める(上の @media より後に置き specificity 同等で勝たせる) */
 @media (prefers-reduced-motion: reduce) {
-  :root[data-ball="light"] #boards.bouncing .ball,
-  :root[data-ball="light"] #boards.bouncing .ball-glow { animation: none; }
-  :root[data-board="light"] .hint-glow { animation: none; opacity: 0.9; }
+  #boards.bouncing .ball,
+  #boards.bouncing .ball-glow { animation: none; }
+  .hint-glow { animation: none; opacity: 0.9; }
   /* 黒皿はフェードのみ(スケールのモーションは出さない)。REDUCED では filled で即座に座る */
   .goal::after { transition: opacity 200ms ease; transform: none; }
   .goal.sucking::after, .goal.filled::after { transform: none; }
@@ -1595,21 +1486,21 @@ button:active { transform: translateY(1px); }
   position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5);
   opacity: 0; transition: opacity 0.22s ease;
 }
-:root[data-theme="light"] .drawer-scrim { background: rgba(40, 32, 16, 0.35); }
+.drawer-scrim { background: rgba(40, 32, 16, 0.35); }
 #settings-drawer.open .drawer-scrim { opacity: 1; }
 .drawer-panel {
   position: absolute; top: 0; right: 0; bottom: 0;
   width: min(82vw, 320px);
   padding: calc(26px + env(safe-area-inset-top, 0px)) 20px calc(20px + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column; gap: 4px;
-  /* ダーク背景 = A画面カードと同色(盤床 radial) */
+  /* ドロワー背景 */
   background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
   --sw-off: rgba(255, 255, 255, 0.16); --sw-knob: #e8e6e0;
   border-left: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: -10px 0 28px rgba(0, 0, 0, 0.45);
   transform: translateX(100%); transition: transform 0.24s ease;
 }
-:root[data-theme="light"] .drawer-panel {
+.drawer-panel {
   background: #fbf8f1;
   --sw-off: rgba(43, 38, 32, 0.2); --sw-knob: #ffffff;
   border-left-color: rgba(43, 38, 32, 0.10);
@@ -1628,7 +1519,7 @@ button:active { transform: translateY(1px); }
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: 13px 2px; border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
-:root[data-theme="light"] .set-row { border-top-color: rgba(43, 38, 32, 0.10); }
+.set-row { border-top-color: rgba(43, 38, 32, 0.10); }
 /* 行全体がボタンのもの(言語/リセット/情報/購入) */
 button.set-row { width: 100%; background: transparent; border-left: 0; border-right: 0; border-bottom: 0; border-radius: 0; font: inherit; text-align: left; cursor: pointer; color: inherit; }
 button.set-row:active { transform: none; }
@@ -1648,7 +1539,7 @@ button.set-row:active { transform: none; }
   padding: 9px 18px; border-radius: 20px; font-size: 13px; letter-spacing: 0.06em;
   opacity: 0; transition: opacity 0.2s; pointer-events: none;
 }
-:root[data-theme="light"] #toast { background: rgba(43, 38, 32, 0.9); color: #fbf8f1; }
+#toast { background: rgba(43, 38, 32, 0.9); color: #fbf8f1; }
 #toast.show { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   .drawer-scrim, .drawer-panel, .sw, .sw .k { transition: none; }
@@ -1662,7 +1553,7 @@ button.set-row:active { transform: none; }
   overflow: hidden;
 }
 #howto-overlay[hidden] { display: none; }
-:root[data-theme="light"] #howto-overlay { background: #f3efe6; }
+#howto-overlay { background: #f3efe6; }
 .howto-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 12px;
@@ -1794,35 +1685,35 @@ button.set-row:active { transform: none; }
 @keyframes ht-bump-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
 /* ---- 遊び方: ライトテーマ上書き ---- */
-:root[data-theme="light"] .ht-mb {
+.ht-mb {
   background: var(--panel);
   border-color: var(--line);
   box-shadow: inset 0 1px 4px rgba(43,38,32,0.12);
 }
-:root[data-theme="light"] .ht-mb .c { border-color: var(--line); }
-:root[data-theme="light"] .ht-mb .w {
+.ht-mb .c { border-color: var(--line); }
+.ht-mb .w {
   background: linear-gradient(160deg, #d6d0c4 0%, #c4bdb0 100%);
   border-color: rgba(43,38,32,0.15);
 }
-:root[data-theme="light"] .ht-ball {
+.ht-ball {
   background: radial-gradient(circle at 40% 32%, #5a5248 0%, #3e3830 60%, #2b2620 100%);
   box-shadow: 0 1px 3px rgba(43,38,32,0.3);
 }
-:root[data-theme="light"] .ht-goal {
+.ht-goal {
   border-color: rgba(168,128,31,0.5);
   background: radial-gradient(circle, rgba(168,128,31,0.08) 0%, transparent 70%);
 }
-:root[data-theme="light"] .ht-goal-lit {
+.ht-goal-lit {
   border-color: rgba(168,128,31,0.85);
   box-shadow: 0 0 8px 2px rgba(168,128,31,0.25);
 }
-:root[data-theme="light"] .ht-dir { color: rgba(168,128,31,0.6); }
-:root[data-theme="light"] .ht-ng { color: #b04a42; }
-:root[data-theme="light"] .ht-foul {
+.ht-dir { color: rgba(168,128,31,0.6); }
+.ht-ng { color: #b04a42; }
+.ht-foul {
   box-shadow: inset 0 1px 4px rgba(43,38,32,0.12), inset 0 0 16px rgba(176,74,66,0.15);
 }
-:root[data-theme="light"] .ht-step-arrow { color: rgba(168,128,31,0.4); }
-:root[data-theme="light"] .ht-bump {
+.ht-step-arrow { color: rgba(168,128,31,0.4); }
+.ht-bump {
   background: var(--bump-hot);
   box-shadow: 0 0 6px 2px rgba(168,128,31,0.4);
 }
@@ -1835,7 +1726,7 @@ button.set-row:active { transform: none; }
   overflow: hidden;
 }
 .info-overlay[hidden] { display: none; }
-:root[data-theme="light"] .info-overlay { background: #f3efe6; }
+.info-overlay { background: #f3efe6; }
 .info-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 12px;
@@ -1866,7 +1757,7 @@ button.set-row:active { transform: none; }
   border: 1px solid rgba(232,217,176,0.3); border-radius: 4px;
   padding: 1px 6px; letter-spacing: 0.05em;
 }
-:root[data-theme="light"] .ver-tag { border-color: rgba(168,128,31,0.35); }
+.ver-tag { border-color: rgba(168,128,31,0.35); }
 .ver-list { list-style: none; }
 .ver-list li {
   padding: 4px 0 4px 16px; position: relative;
@@ -1877,7 +1768,7 @@ button.set-row:active { transform: none; }
   width: 4px; height: 4px; border-radius: 50%;
   background: rgba(232,217,176,0.4);
 }
-:root[data-theme="light"] .ver-list li::before { background: rgba(168,128,31,0.4); }
+.ver-list li::before { background: rgba(168,128,31,0.4); }
 
 /* 統計・実績 */
 .stat-grid {
@@ -1924,7 +1815,7 @@ button.set-row:active { transform: none; }
 .ach-icon { font-size: 18px; width: 26px; text-align: center; }
 .ach-row:not(.done) .ach-icon { opacity: 0.4; filter: grayscale(1); }
 .ach-row.done .ach-name { color: var(--gold); }
-:root[data-theme="light"] .stat-box { background: rgba(0, 0, 0, 0.03); }
+.stat-box { background: rgba(0, 0, 0, 0.03); }
 
 /* プライバシーポリシー */
 .pp-date { font-size: 11px; color: var(--text-dim); margin-bottom: 24px; }

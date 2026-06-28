@@ -30,29 +30,6 @@ function fillI18n() {
   document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
 }
 
-// ---- テーマ(ライト/ダーク): 手動トグル。A Blue Ring刷新版の既定はライト ----
-// テーマ(UI色) / 盤スキン / ボールスキン の3軸自由組み合わせ。
-// data-theme=dark|light, data-board=dark|light, data-ball=dark|light
-const THEME_KEY = 'nikenzume.theme.v1';
-const THEME_DESIGN_KEY = 'nikenzume.themeDesign.v2';
-if (localStorage.getItem(THEME_DESIGN_KEY) !== 'blue-ring') {
-  localStorage.setItem(THEME_KEY, 'light');
-  localStorage.setItem(THEME_DESIGN_KEY, 'blue-ring');
-}
-let theme = localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light';
-let boardSkin = theme;
-let ballSkin = theme;
-function applyTheme() {
-  const root = document.documentElement;
-  boardSkin = theme;
-  ballSkin = theme;
-  root.dataset.theme = theme;
-  root.dataset.board = theme;
-  root.dataset.ball = theme;
-  const btn = document.querySelector('#btn-theme');
-  if (btn) btn.setAttribute('aria-pressed', String(theme === 'light'));
-}
-
 const DIRS = [[0, -1], [0, 1], [-1, 0], [1, 0]]; // 0=上 1=下 2=左 3=右
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MOVE_MS = REDUCED ? 0 : 240; // 移動(スライド)。120→240=体感ほぼ半分の速さ。CSS --move-ms と必ず一致させる
@@ -60,8 +37,8 @@ const BUMP_MS = REDUCED ? 0 : 200;
 const ANSWER_AUTO_GAP = REDUCED ? 260 : 520; // 答え自動再生の手間
 const MISS_HOLD_MS = REDUCED ? 0 : 600; // 反則の局面＋赤みを見せる一拍(戻り開始まで)
 const RETURN_MS = REDUCED ? 0 : 340;    // 反則から初形へ「直線で」戻るスライド時間(手数に依らず一定)
-// クリア時、ゴール吸着(白い輪の伸縮 ~320ms)の余韻を見せてから球を点火するまでの待ち。ダークのみ使用。
-// checkClear は着地(MOVE_MS=240)で走るので、ここを足すと点火が吸着の収まり(~320)直後に来る
+// クリア時、ゴール吸着の余韻を見せてから球を点火するための旧待ち値。
+// ライト専用化後は即時点火なので通常は使わない。
 const GOAL_SUCK_HOLD_MS = REDUCED ? 0 : 200;
 
 // ---- 章編成: 2段階構造 (章=気づき / 章内=サイズ→手数) ----
@@ -330,14 +307,9 @@ function showView(name) {
   // プレイ画面は②の専用登場(animatePuzzleEntrance)を使うので、ここの一律ライズは付けない。
   const cur = $('#view-' + name);
   if (!REDUCED && cur && name !== 'play') { cur.classList.remove('view-enter'); void cur.offsetWidth; cur.classList.add('view-enter'); }
-  $('#btn-back').hidden = name === 'chapters';
+  $('#app-title').hidden = name === 'play';
+  $('#play-status').hidden = name !== 'play';
 }
-$('#btn-back').addEventListener('click', () => {
-  if (!$('#view-play').hidden) {
-    dailyMode = false;
-    showLevels(curChapter || CHAPTERS[0]);
-  }
-});
 
 function showChapters() {
   showLevels(CHAPTERS[0]);
@@ -430,7 +402,7 @@ function buildBoard(room, w, h) {
   const piece = el('piece');
   setCellPos(piece, room.start, w, h);
   const ball = el('ball');
-  const ballFlash = el('ball-flash'); // 壁当ての一瞬の発光。ボールの子=crushに追従。主にライトの黒石用
+  const ballFlash = el('ball-flash'); // 壁当ての一瞬の発光。ボールの子=crushに追従。
   ball.append(ballFlash);
   piece.append(el('ball-glow'), ball);
   const bumpGlow = el('bump-glow'); // 壁当ての面ハイライト用(答え再生時)
@@ -713,20 +685,17 @@ function bumpPiece(rm, d) {
       { transform: rebound,      offset: 0.72 }, // 反発のわずかな伸び
       { transform: 'scale(1,1)', offset: 1 },
     ], { duration: BUMP_MS || 1, easing: 'ease-out' });
-    // レバー5: 当たった瞬間ボール自身も一瞬発光(輝度を上げて戻す)。filter なのでテーマに自然追従し、
-    // 暗背景の金球では強く、ライトのマット黒石では控えめに出る(黒石の意匠を壊さない)。
+    // レバー5: 当たった瞬間ボール自身も一瞬発光(輝度を上げて戻す)。
     rm.ball.animate([
       { filter: 'brightness(1)',    offset: 0 },
       { filter: 'brightness(1.55)', offset: 0.32 },
       { filter: 'brightness(1)',    offset: 1 },
     ], { duration: (BUMP_MS || 1) * 2, easing: 'ease-out' });
-    // 球面側にも接触光を一瞬だけ重ねる。ライトの黒石は強め、ダークの金球は薄くして
-    // 既存の質感を保ったまま、壁当てがゲームの主役だと分かる手応えを出す。
+    // 球面側にも接触光を一瞬だけ重ね、壁当てがゲームの主役だと分かる手応えを出す。
     if (rm.ballFlash && rm.ballFlash.animate) {
-      const peak = ballSkin === 'light' ? 0.8 : 0.32;
       rm.ballFlash.animate([
         { opacity: 0,   offset: 0 },
-        { opacity: peak, offset: 0.28 },
+        { opacity: 0.8, offset: 0.28 },
         { opacity: 0,   offset: 1 },
       ], { duration: (BUMP_MS || 1) * 2, easing: 'ease-out' });
     }
@@ -792,12 +761,11 @@ function showRipple(rm, p, d) {
   r.style.height = `${dia}px`;
   r.style.left = `${cx}px`;
   r.style.top = `${cy}px`;
-  const isLight = theme === 'light';
   r.animate([
-    { transform: 'translate(-50%, -50%) scale(0.3)', opacity: isLight ? 0.65 : 0.55, offset: 0 },
-    { transform: 'translate(-50%, -50%) scale(1.5)', opacity: isLight ? 0.45 : 0.4,  offset: 0.35 },
-    { transform: 'translate(-50%, -50%) scale(3.0)', opacity: 0,                      offset: 1 },
-  ], { duration: isLight ? 720 : 560, easing: 'ease-out' });
+    { transform: 'translate(-50%, -50%) scale(0.3)', opacity: 0.65, offset: 0 },
+    { transform: 'translate(-50%, -50%) scale(1.5)', opacity: 0.45, offset: 0.35 },
+    { transform: 'translate(-50%, -50%) scale(3.0)', opacity: 0,    offset: 1 },
+  ], { duration: 720, easing: 'ease-out' });
 }
 
 // 通り道の尾引き: きれいに滑ったとき、通過したマスを順に一瞬照らして後ろへ消す。
@@ -861,19 +829,11 @@ async function doMove(d) {
 
   const allGoal = next.every((np, i) => np === G.rooms[i].goalIndex);
   const anyGoal = next.some((np, i) => np === G.rooms[i].goalIndex);
-  // つがいの連動感: 片方が壁で止まり片方が進む=対が引き裂かれた「綻び」(章名の核)。二球の息を同時に
-  // 一拍ひるませ、対であることを直感させる。クリア/反則(ゴール絡み)は専用演出があるので !anyGoal に限る。
-  // ダークのみ(ライトは黒石を発光させない)。#boards 共有クラス=両球が完全同期。
-  if (anyMoved && anyBumped && !anyGoal && !REDUCED && ballSkin !== 'light') {
-    const be = $('#boards');
-    be.classList.remove('strain'); void be.offsetWidth; be.classList.add('strain');
-    clearTimeout(be._strainT); be._strainT = setTimeout(() => be.classList.remove('strain'), 460);
-  }
   // ゴール吸着: クリアの一手(=両球が同時にゴールへ収まる)では、滑り込む間に輪がきゅっと締まって弾ける。
   // 反則(anyGoal && !allGoal)は祝福しないので対象外。スライドに重なるよう、await の前=今ここで点火する。
   if (allGoal && !REDUCED) G.rooms.forEach((rm) => {
     rm.goal.classList.remove('sucking'); void rm.goal.offsetWidth; rm.goal.classList.add('sucking');
-    // 600ms まで保持: 黒皿のバウンド一発(plate-pop 560ms: ゆっくり拡大→0へ縮小)を最後まで見せてから外す
+    // 600ms まで保持: ゴール吸着の余韻を見せてから外す
     clearTimeout(rm.goal._suckT); rm.goal._suckT = setTimeout(() => rm.goal.classList.remove('sucking'), 600);
   });
   G.history.push(G.pos);
@@ -935,10 +895,8 @@ async function checkClear() {
   }
   lastClear = { moves: G.moves, min, best };
 
-  // 点火: ボールが金(最短)/白(クリア)に発光して弾み、ゴールに光が満ちる。約1秒見せて A画面へ。
-  // ダークは球が自発光するため、ゴール吸着(白い輪の伸縮 ~320ms)が収まってから点火し、吸着を潰さない。
-  // ライト/モーション無効は球がマット or 演出なしで干渉しないので即時(従来どおり)。
-  const afterSuck = !REDUCED && boardSkin !== 'light';
+  // 点火: ボールが弾み、ゴールに光が満ちる。約1秒見せて A画面へ。
+  const afterSuck = false;
   const ignite = () => {
     if (!G.cleared || !$('#overlay-gap').hidden) return; // 待ちの間に遷移済みなら何もしない
     G.rooms.forEach((rm) => rm.goal.classList.add('filled')); // 光が満ちる
@@ -1325,12 +1283,6 @@ $('#btn-share').addEventListener('click', async () => {
   } catch (e) {}
 });
 
-$('#btn-theme').addEventListener('click', () => {
-  playTap();
-  theme = theme === 'light' ? 'dark' : 'light';
-  localStorage.setItem(THEME_KEY, theme);
-  applyTheme();
-});
 // 設定ドロワー(右サイドシート): 歯車で開く / ×・スクリム・Esc で閉じる
 function openSettings() { $('#settings-drawer').classList.add('open'); }
 function closeSettings() { $('#settings-drawer').classList.remove('open'); }
@@ -1605,7 +1557,6 @@ function showLoginModal(result) {
 }
 
 // ---- 起動 ----
-applyTheme(); // data-theme を確定し、トグルの状態を反映
 fillI18n(); // 静的文言(ボタン・タグライン等)をロケールで流し込む
 updateSettingsUI(); // 設定の言語値・スイッチ状態を反映
 showChapters();
