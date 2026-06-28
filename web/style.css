@@ -284,14 +284,69 @@ button:active { transform: translateY(1px); }
   color: var(--bg);
 }
 #level-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.level-group {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.level-group-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 0 2px;
+}
+.level-group-range {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.18em;
+}
+.level-group-state {
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.72;
+}
+.level-group-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+.level-lock-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0;
   overflow: hidden;
   border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  box-shadow: inset 0 2px 9px rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.level-lock-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+.level-lock-cell:last-child { border-right: 0; }
+.level-lock-cell.lead {
+  background: rgba(255, 255, 255, 0.02);
+}
+.level-lock-no {
+  font-size: 18px;
+  color: var(--text-dim);
+}
+.level-lock-msg {
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--text-dim);
+  opacity: 0.88;
 }
 .level-tile {
   aspect-ratio: 1;
@@ -301,15 +356,14 @@ button:active { transform: translateY(1px); }
   justify-content: center;
   gap: 4px;
   padding: 0;
-  background: transparent;
-  border: 0;
-  border-right: 0.5px solid var(--line);
-  border-bottom: 0.5px solid var(--line);
-  border-radius: 0;
-  box-shadow: none;
+  background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 .level-tile .lv-no {
   font-size: 18px;
+  color: var(--text-dim);
 }
 .level-tile .lv-moves {
   display: grid;
@@ -319,11 +373,11 @@ button:active { transform: translateY(1px); }
   color: var(--text-dim);
 }
 .level-tile.cleared {
-  background: rgba(232, 217, 176, 0.05);
+  border-color: rgba(232, 217, 176, 0.35);
 }
-.level-tile.cleared .lv-no { color: #3f7fad; }
+.level-tile.cleared .lv-no { color: var(--gold); }
+.level-tile.boss { border-color: rgba(232, 176, 80, 0.5); }
 .level-tile.boss .lv-no { color: #b14a42; }
-.level-tile.boss { background: transparent; }
 .level-tile.boss .lv-no { font-weight: 700; }
 /* クリア印 = A画面のつがいエンブレム(縮小)。最短=金 / クリア=白(銀)。
    220x176座標の本物の意匠を transform: scale で縮小し、発光/影も比率を保つ。
@@ -1432,19 +1486,24 @@ button:active { transform: translateY(1px); }
 
 /* 一覧タイルの壁カード ライト: washi壁(.cell.wall light と同色)＋彫り出しハイライト */
 :root[data-theme="light"] .level-tile {
-  border-right-color: rgba(95, 75, 56, 0.15);
-  border-bottom-color: rgba(95, 75, 56, 0.15);
+  background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
+  border-color: rgba(43, 38, 32, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
-:root[data-board="light"] #level-grid {
-  background: #e7d8c3;
-  border: 2px solid rgba(78, 64, 49, 0.16);
-  border-radius: 12px;
-  box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.75), inset 0 -10px 20px rgba(62, 55, 45, 0.06);
+:root[data-theme="light"] .level-lock-strip {
+  background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
+  border-color: rgba(43, 38, 32, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
-:root[data-theme="light"] .level-tile {
-  background: transparent;
-  border-right-color: var(--line);
-  border-bottom-color: var(--line);
+:root[data-theme="light"] .level-lock-cell {
+  border-right-color: rgba(43, 38, 32, 0.08);
+}
+:root[data-theme="light"] .level-lock-cell.lead {
+  background: rgba(255, 255, 255, 0.2);
+}
+:root[data-theme="light"] .level-lock-no,
+:root[data-theme="light"] .level-lock-msg {
+  color: var(--text-dim);
 }
 :root[data-ball="light"] .lv-corner.clear .lv-corner-block.front,
 :root[data-ball="light"] .lv-corner.best .lv-corner-block {
@@ -1467,9 +1526,7 @@ button:active { transform: translateY(1px); }
   background: rgba(168, 128, 31, 0.05);
 }
 :root[data-theme="light"] .level-tile.boss {
-  background: transparent;
-  border-right-color: rgba(177, 74, 66, 0.28);
-  border-bottom-color: rgba(177, 74, 66, 0.28);
+  border-color: rgba(177, 74, 66, 0.28);
 }
 
 /* レベル一覧のクリア印 ライト: 碁石2球＋金(最短)/銀(クリア)の楕円皿＋後光(A画面と同意匠) */

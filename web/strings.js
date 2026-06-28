@@ -22,6 +22,8 @@ window.NIKENZUME_STRINGS = {
     resetConfirm: '進捗(クリア・最短の記録)をすべて消去します。よろしいですか?',
     play: '再生', pause: '一時停止', prev: '前へ', next: '次へ', close: 'とじる',
     restart: '初手から', nextPuzzle: '次の問題へ', levels: '一覧へ', retryAgain: 'もう一度',
+    levelRange: ({ from, to }) => `${from}〜${to}`,
+    levelUnlockAfter: ({ n }) => `レベル${n}クリア後に開放`,
     // メッセージ
     controlsHint: '矢印キー / スワイプで両方の部屋が動く',
     missNote: 'ゴールは、ふたつ同時でなければ開かない',
@@ -113,6 +115,8 @@ window.NIKENZUME_STRINGS = {
     resetConfirm: 'This will erase all progress (clear & best records). Continue?',
     play: 'Play', pause: 'Pause', prev: 'Prev', next: 'Next', close: 'Close',
     restart: 'Retry', nextPuzzle: 'Next puzzle', levels: 'Levels', retryAgain: 'Try again',
+    levelRange: ({ from, to }) => `${from}–${to}`,
+    levelUnlockAfter: ({ n }) => `Unlock after clearing level ${n}`,
     controlsHint: 'Arrow keys or swipe move both rooms',
     missNote: 'The goal opens only when both arrive together.',
     tapHint: 'Tap to continue',
