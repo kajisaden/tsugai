@@ -472,7 +472,7 @@ button:active { transform: translateY(1px); }
    色は --glow でテーマ自動追従(ダーク=金/ライト=琥珀)。実不透明度は WAAPI 側で更に抑える */
 .bump-ripple {
   position: absolute;
-  border-radius: 50%;
+  border-radius: 12px;
   border: 1.5px solid var(--b-glow);
   opacity: 0;
   pointer-events: none;
@@ -528,17 +528,18 @@ button:active { transform: translateY(1px); }
   box-shadow:
     0 0 14px 3px rgba(240, 220, 170, 0.18),
     inset 0 0 10px 1px rgba(255, 250, 240, 0.08);
-  animation: trail-ring-shrink 460ms ease-out forwards;
+  animation: trail-ring-shrink 620ms ease-out forwards;
 }
 @keyframes trail-ring-shrink {
   0% { transform: scale(1.06); }
   100% { transform: scale(0.74); }
 }
-:root[data-theme="light"] .trail-cell::before {
-  border-color: rgba(18, 17, 14, 0.34);
-  box-shadow:
-    0 0 12px 3px rgba(168, 128, 31, 0.14),
-    inset 0 0 8px 1px rgba(18, 17, 14, 0.06);
+:root[data-ball="light"] .trail-cell::before {
+  inset: 10%;
+  border-radius: 12px;
+  border: 2px solid rgba(36, 107, 143, 0.26);
+  background: transparent;
+  box-shadow: none;
 }
 
 .cells {

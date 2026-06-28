@@ -821,7 +821,7 @@ function showTrail(rm, from, to, d) {
       { opacity: 0,    offset: 0 },
       { opacity: 0.72, offset: 0.18 },
       { opacity: 0,    offset: 1 },
-    ], { duration: 460, delay: reach, easing: 'ease-out', fill: 'backwards' });
+    ], { duration: 620, delay: reach, easing: 'ease-out', fill: 'backwards' });
     a.onfinish = a.oncancel = () => cell.remove(); // 退色しきったら DOM を片付ける
   }
 }
