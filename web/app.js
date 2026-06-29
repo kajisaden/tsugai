@@ -326,10 +326,10 @@ function clampHomeIndex(index) {
   return Math.max(0, Math.min(levels.length - 1, index));
 }
 
-function resultLabel(result) {
-  if (!result) return '';
-  if (locale === 'ja') return result.best ? '最短クリア' : 'クリア';
-  return result.best ? 'Best clear' : 'Clear';
+function homeStatusLabel(isBest, isCleared) {
+  if (isBest) return locale === 'ja' ? '最短クリア' : 'Best clear';
+  if (isCleared) return locale === 'ja' ? 'クリア' : 'Clear';
+  return '';
 }
 
 function renderHome(result = null) {
@@ -347,8 +347,10 @@ function renderHome(result = null) {
     (isBoss ? ' boss' : '') +
     (result ? ' result-enter' : '');
   const resultText = $('#home-result-text');
-  resultText.textContent = resultLabel(result);
-  resultText.classList.toggle('empty', !result);
+  const statusText = homeStatusLabel(isBest, isCleared);
+  resultText.textContent = statusText;
+  resultText.classList.toggle('empty', !statusText);
+  resultText.classList.toggle('result-active', !!result && !!statusText);
   const center = $('.home-center');
   center.classList.toggle('result-mode', !!result);
   $('#home-level-no').textContent = homeIndex + 1;

@@ -251,6 +251,9 @@ button:active { transform: translateY(1px); }
   visibility: hidden;
   display: grid;
 }
+.home-result-text.result-active {
+  animation: home-result-text-pop 680ms ease-out both;
+}
 .home-stage {
   display: grid;
   grid-template-columns: 48px 142px 48px;
@@ -295,13 +298,14 @@ button:active { transform: translateY(1px); }
   line-height: 1;
 }
 .home-step:disabled {
-  opacity: 0.22;
+  opacity: 0.34;
 }
 .home-center.result-mode .home-step,
 .home-center.result-mode .home-play {
-  visibility: hidden;
   pointer-events: none;
+  opacity: 0.54;
 }
+.home-center.result-mode .home-step:disabled { opacity: 0.34; }
 .home-level {
   color: #5874f0;
   font-weight: 700;
@@ -336,6 +340,10 @@ button:active { transform: translateY(1px); }
 @keyframes home-result-disc {
   from { transform: translateY(8px) scaleX(0.72); opacity: 0; }
   to { transform: translateY(0) scaleX(1); opacity: 1; }
+}
+@keyframes home-result-text-pop {
+  from { transform: translateY(6px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 .home-footer {
   position: fixed;
