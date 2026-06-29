@@ -1,0 +1,108 @@
+name: Tone down emblem glow
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tone down shared emblem glow and bump build mark
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          style_path = Path('web/style.css')
+          s = style_path.read_text(encoding='utf-8')
+          marker = '/* ---- emblem glow override: keep color readable, remove bloom ---- */'
+          block = r'''
+/* ---- emblem glow override: keep color readable, remove bloom ----
+   クリア画面(#gap-emblem)、ホーム(.home-emblem)、一覧(.lv-emblem)共通。
+   後光・外側発光を抑え、色そのものを読ませる。 */
+#gap-emblem .emblem-halo,
+.home-emblem .emblem-halo,
+.lv-emblem .le-halo {
+  display: none !important;
+  opacity: 0 !important;
+  background: none !important;
+  filter: none !important;
+}
+
+#gap-emblem .emblem-ball,
+.home-emblem .emblem-ball {
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.46),
+    inset -3px -3px 0 rgba(74, 48, 35, 0.14),
+    0 4px 8px rgba(92, 62, 45, 0.12) !important;
+}
+
+.lv-emblem .le-ball {
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.46),
+    inset -3px -3px 0 rgba(74, 48, 35, 0.14),
+    0 2px 4px rgba(92, 62, 45, 0.10) !important;
+}
+
+#gap-emblem .emblem-disc,
+.home-emblem .emblem-disc {
+  filter: none !important;
+  box-shadow:
+    0 5px 9px rgba(95, 76, 35, 0.10),
+    inset 0 2px 4px rgba(255, 248, 224, 0.58),
+    inset 0 -5px 8px rgba(115, 89, 36, 0.18) !important;
+}
+
+.lv-emblem .le-disc {
+  filter: none !important;
+  box-shadow:
+    0 2px 4px rgba(95, 76, 35, 0.08),
+    inset 0 2px 3px rgba(255, 248, 224, 0.52),
+    inset 0 -3px 5px rgba(115, 89, 36, 0.14) !important;
+}
+
+#gap-emblem.win .emblem-disc,
+.home-emblem.win .emblem-disc {
+  box-shadow:
+    0 5px 9px rgba(84, 92, 104, 0.10),
+    inset 0 2px 4px rgba(255, 255, 255, 0.58),
+    inset 0 -5px 8px rgba(110, 124, 140, 0.16) !important;
+}
+
+.lv-emblem.win .le-disc {
+  box-shadow:
+    0 2px 4px rgba(84, 92, 104, 0.08),
+    inset 0 2px 3px rgba(255, 255, 255, 0.52),
+    inset 0 -3px 5px rgba(110, 124, 140, 0.12) !important;
+}
+'''
+          if marker not in s:
+            s = s.rstrip() + '\n\n' + block + '\n'
+          style_path.write_text(s, encoding='utf-8')
+
+          index_path = Path('web/index.html')
+          i = index_path.read_text(encoding='utf-8')
+          # Current deployed mark may be 120. Bump to 121 and bust CSS cache.
+          import re
+          i = re.sub(r"var V='\d+'", "var V='121'", i, count=1)
+          i = re.sub(r'id="build-mark" aria-hidden="true">\d+</span>', 'id="build-mark" aria-hidden="true">121</span>', i, count=1)
+          i = re.sub(r'style\.css\?v=[^"\']+', 'style.css?v=emblem121', i, count=1)
+          index_path.write_text(i, encoding='utf-8')
+
+          for p in [Path('.github/workflows/tone-down-emblem-glow.yml'), Path('.github/tone-down-emblem-glow.trigger')]:
+            if p.exists():
+              p.unlink()
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/style.css web/index.html .github/workflows/tone-down-emblem-glow.yml .github/tone-down-emblem-glow.trigger
+          git commit -m "Tone down emblem glow effects" || exit 0
+          git push
