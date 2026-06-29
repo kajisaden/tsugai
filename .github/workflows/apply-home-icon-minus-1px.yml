@@ -1,0 +1,41 @@
+name: Apply home icon minus 1px
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch home icon and build mark
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          s = Path('web/strings.js').read_text(encoding='utf-8')
+          s = s.replace('transform: translateY(0.5px) !important;', 'transform: translateY(-1px) !important;')
+          Path('web/strings.js').write_text(s, encoding='utf-8')
+
+          i = Path('web/index.html').read_text(encoding='utf-8')
+          i = i.replace("var V='115'", "var V='116'")
+          i = i.replace('id="build-mark" aria-hidden="true">115</span>', 'id="build-mark" aria-hidden="true">116</span>')
+          Path('web/index.html').write_text(i, encoding='utf-8')
+
+          for p in [Path('.github/workflows/apply-home-icon-minus-1px.yml'), Path('.github/apply-home-icon-minus-1px.trigger')]:
+            if p.exists():
+              p.unlink()
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/strings.js web/index.html .github/workflows/apply-home-icon-minus-1px.yml .github/apply-home-icon-minus-1px.trigger
+          git commit -m "Set home icon vertical offset to -1px" || exit 0
+          git push
