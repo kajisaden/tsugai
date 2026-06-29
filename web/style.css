@@ -60,7 +60,7 @@ main {
    プレイ画面(view-play)は対象外＝従来どおり */
 main:has(#view-chapters:not([hidden])),
 main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
-#view-chapters { margin-top: 36px; }
+#view-chapters { width: 100%; flex: 1; margin-top: 0; }
 #view-levels { margin-top: 60px; }
 
 /* ---- ヘッダ ---- */
@@ -86,12 +86,12 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
   position: relative; /* ビルド印(.build-mark)の絶対配置の基準。印は流れから外し中央寄せのロゴを崩さない */
   width: fit-content;
   margin: 0;
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-weight: 400;
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-weight: 800;
   font-size: 22px;
-  letter-spacing: 0.5em;
-  text-indent: 0.5em; /* 字間の右余白を相殺して中央に */
-  color: var(--gold);
+  letter-spacing: 0.01em;
+  text-indent: 0;
+  color: #29356c;
 }
 /* ビルド印: ロゴ右上の小さな番号。配信が実機に反映されたかの確認用(stamp-cache.mjs が +1)。
    絶対配置でロゴの中央寄せに干渉しない。控えめだが読める程度の薄字 */
@@ -221,6 +221,110 @@ button:active { transform: translateY(1px); }
 }
 .chapter-card .ch-name { font-size: 15px; letter-spacing: 0.15em; }
 .chapter-card .ch-meta { font-size: 12px; color: var(--text-dim); }
+
+/* ---- ホームハブ ---- */
+.home-hub {
+  min-height: calc(100dvh - 96px - env(safe-area-inset-top, 0px));
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  width: 100%;
+}
+.home-center {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  min-height: 430px;
+  padding-bottom: 26px;
+}
+.home-emblem {
+  transform: scale(0.56);
+  transform-origin: center;
+  margin: -34px 0 -28px;
+}
+.home-level {
+  color: #5874f0;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+}
+.home-play {
+  width: min(220px, 72vw);
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-top: 166px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(180deg, #6680ff 0%, #526df3 100%);
+  box-shadow: 0 10px 18px rgba(82, 109, 243, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.home-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin: 0;
+  padding: 8px 18px calc(10px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(43, 38, 32, 0.08);
+  background: #e9edf7;
+}
+.home-nav-btn {
+  min-width: 0;
+  height: 58px;
+  display: grid;
+  grid-template-rows: 28px 18px;
+  justify-items: center;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #4d587a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.home-nav-btn:active {
+  transform: none;
+  color: #5874f0;
+}
+.home-nav-icon {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.home-board-icon {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  padding: 2px;
+  border-radius: 5px;
+  background: #d8ccb8;
+}
+.home-board-icon span {
+  border-radius: 2px;
+  background: #f6efe2;
+  border: 1px solid rgba(63, 127, 173, 0.28);
+}
 
 /* ---- 問題一覧 ---- */
 #levels-title {
@@ -918,9 +1022,14 @@ button:active { transform: translateY(1px); }
 
 /* ③ 画面切り替え(章/問題/プレイ)の登場: 瞬間カットを和らげ、ふわっと立ち上げる。showView で .view-enter を付け直す */
 .view-enter { animation: view-enter 360ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+#view-chapters.view-enter { animation-name: view-enter-fade; }
 @keyframes view-enter {
   from { opacity: 0; transform: translateY(12px) scale(0.985); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes view-enter-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 
@@ -1210,19 +1319,22 @@ body {
 }
 
 /* A画面エンブレム ライト(案C): 磨いた碁石2球＋漆金精緻化(最短)/精緻化銀(クリア)の楕円皿＋温かな後光halo。発光ではなく実体＋素材感 */
-#gap-emblem .emblem-ball {
+#gap-emblem .emblem-ball,
+.home-emblem .emblem-ball {
   border-radius: 12px;
   background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
   box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.46), inset -3px -3px 0 rgba(74, 48, 35, 0.14), 0 8px 14px rgba(92, 62, 45, 0.2);
 }
-#gap-emblem .emblem-ball::before {
+#gap-emblem .emblem-ball::before,
+.home-emblem .emblem-ball::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   border: 2px solid rgba(36, 107, 143, 0.5);
 }
-#gap-emblem .emblem-ball::after {
+#gap-emblem .emblem-ball::after,
+.home-emblem .emblem-ball::after {
   display: block;
   content: "";
   position: absolute;
@@ -1238,22 +1350,26 @@ body {
 }
 .emblem-disc { display: block; }
 /* 漆金精緻化(ツヤ): 上面に磨きハイライト＋細い金縁。チープな均一黄でなく金箔の照り */
-#gap-emblem.best .emblem-disc {
+#gap-emblem.best .emblem-disc,
+.home-emblem.best .emblem-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
   box-shadow: 0 10px 16px rgba(95, 76, 35, 0.14), inset 0 2px 4px rgba(255, 248, 224, 0.72), inset 0 -6px 10px rgba(115, 89, 36, 0.24);
 }
 /* 銀も金と同じ精緻化ツヤで揃える */
-#gap-emblem.win .emblem-disc {
+#gap-emblem.win .emblem-disc,
+.home-emblem.win .emblem-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f8fbfe 0%, #d8e3ee 40%, #b6c6d7 72%, #8e9daf 100%);
   box-shadow: 0 10px 16px rgba(84, 92, 104, 0.14), inset 0 2px 4px rgba(255, 255, 255, 0.72), inset 0 -6px 10px rgba(110, 124, 140, 0.22);
 }
 /* 後光(halo) ライト: 状態で色を出し分け(最短=金 / クリア=銀)。背後に敷いて温かさを足す */
-#gap-emblem.best .emblem-halo {
+#gap-emblem.best .emblem-halo,
+.home-emblem.best .emblem-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(216, 183, 95, 0.2), rgba(216, 183, 95, 0.07) 48%, transparent 76%);
   filter: blur(4px);
 }
-#gap-emblem.win .emblem-halo {
+#gap-emblem.win .emblem-halo,
+.home-emblem.win .emblem-halo {
   display: block;
   background: radial-gradient(closest-side, rgba(63, 127, 173, 0.14), rgba(63, 127, 173, 0.05) 62%, transparent 100%);
   filter: blur(4px);
