@@ -16,7 +16,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- 更新の目印: URL も画面のビルド印も同じ版番号に揃える -->
-<script>try{var V='129',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
+<script>try{var V='130',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
 <link rel="stylesheet" href="style.css?v=c3f1b4cd49">
 <style>
 .hdr-left { grid-column: 1; justify-self: start; }
@@ -33,7 +33,8 @@
   border: 1px solid rgba(64, 56, 48, 0.13);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), 0 2px 4px rgba(88, 66, 45, 0.08);
 }
-body.view-play #btn-home { display: grid; }
+body.view-play #btn-home,
+body.view-levels #btn-home { display: grid; }
 #btn-home svg { width: 19px; height: 19px; display: block; }
 #btn-home:active { transform: translateY(1px); }
 </style>
@@ -51,7 +52,7 @@ body.view-play #btn-home { display: grid; }
     </a>
   </div>
   <div id="hdr-center">
-    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">129</span></h1>
+    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">130</span></h1>
     <div id="play-status" aria-live="polite">
       <span id="puzzle-no"></span>
       <span id="play-progress"></span>
