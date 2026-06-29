@@ -184,3 +184,24 @@ window.NIKENZUME_STRINGS = {
     ach_daily1: 'First daily clear', ach_streak7: '7-day streak', ach_streak14: '14-day streak', ach_streak30: '30-day streak',
   },
 };
+
+// Home icon visual centering. This runs after the inline index style and keeps the SVG center aligned to the circular card center.
+(function centerHomeIcon() {
+  const style = document.createElement('style');
+  style.textContent = `
+    #btn-home {
+      align-items: center !important;
+      justify-items: center !important;
+      line-height: 0 !important;
+    }
+    #btn-home svg {
+      display: block !important;
+      margin: 0 !important;
+      width: 18px !important;
+      height: 18px !important;
+      transform: translateY(0.5px) !important;
+      transform-origin: 50% 50% !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
