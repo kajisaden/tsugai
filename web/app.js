@@ -311,8 +311,21 @@ function showView(name) {
   $('#play-status').hidden = name !== 'play';
 }
 
+function nextHomeIndex() {
+  const levels = chapterLevels(CHAPTERS[0]);
+  const index = levels.findIndex((p) => !cleared.has(p.id));
+  return index < 0 ? Math.max(0, levels.length - 1) : index;
+}
+
+function renderHome() {
+  curChapter = CHAPTERS[0];
+  const levelNo = nextHomeIndex() + 1;
+  $('#home-level-no').textContent = levelNo;
+}
+
 function showChapters() {
-  showLevels(CHAPTERS[0]);
+  showView('chapters');
+  renderHome();
 }
 
 document.querySelectorAll('.mode-tab').forEach(tab => {
@@ -493,6 +506,10 @@ function startDailyPuzzle(entrance = true) {
   dailyMode = true;
   const puz = getDailyPuzzle();
   _initPuzzle(puz, t('dailyTitle'), entrance, false);
+}
+
+function startHomePuzzle() {
+  startPuzzle(CHAPTERS[0], nextHomeIndex());
 }
 
 function restartCurrentPuzzle(entrance = true) {
@@ -1399,6 +1416,11 @@ $('#settings-drawer').addEventListener('click', (e) => {
   if (e.target.closest('[data-soon]')) showToast(t('soon'));
 });
 
+$('#home-play').addEventListener('click', startHomePuzzle);
+$('#home-daily').addEventListener('click', () => startDailyPuzzle());
+$('#home-list').addEventListener('click', () => showLevels(CHAPTERS[0]));
+$('#home-goals').addEventListener('click', openStats);
+$('#home-store').addEventListener('click', () => showToast(t('soon')));
 $('#daily-card').addEventListener('click', () => startDailyPuzzle());
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
