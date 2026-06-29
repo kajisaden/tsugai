@@ -18,6 +18,7 @@ jobs:
         run: |
           python3 <<'PY'
           from pathlib import Path
+          import re
 
           style_path = Path('web/style.css')
           s = style_path.read_text(encoding='utf-8')
@@ -88,11 +89,9 @@ jobs:
 
           index_path = Path('web/index.html')
           i = index_path.read_text(encoding='utf-8')
-          # Current deployed mark may be 120. Bump to 121 and bust CSS cache.
-          import re
           i = re.sub(r"var V='\d+'", "var V='121'", i, count=1)
           i = re.sub(r'id="build-mark" aria-hidden="true">\d+</span>', 'id="build-mark" aria-hidden="true">121</span>', i, count=1)
-          i = re.sub(r'style\.css\?v=[^"\']+', 'style.css?v=emblem121', i, count=1)
+          i = re.sub(r"style\.css\?v=[^\"']+", 'style.css?v=emblem121', i, count=1)
           index_path.write_text(i, encoding='utf-8')
 
           for p in [Path('.github/workflows/tone-down-emblem-glow.yml'), Path('.github/tone-down-emblem-glow.trigger')]:
