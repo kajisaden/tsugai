@@ -982,8 +982,8 @@ button:active { transform: translateY(1px); }
 
 /* つがいエンブレム(2球が45°で寄り添う)。最短=金 / クリア=銀 */
 .emblem { position: relative; width: 220px; height: 176px; }
-/* 後光(halo): エンブレム背後の温かなオーラ。状態別に後段で表示する */
-.emblem-halo { display: none; position: absolute; inset: -12% -6% -20% -6%; border-radius: 50%; pointer-events: none; }
+/* 後光(halo): エンブレム色が見えにくくなるため、クリア画面では使わない */
+.emblem-halo { display: none !important; position: absolute; inset: -12% -6% -20% -6%; border-radius: 50%; pointer-events: none; opacity: 0; }
 .emblem-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 20px; display: none; }
 .emblem-balls { position: absolute; inset: 0; }
 .emblem-ball {
@@ -1232,9 +1232,10 @@ body {
 }
 :root[data-boss="boss"] #gap-emblem.best .emblem-halo,
 :root[data-boss="boss"] #gap-emblem.win .emblem-halo {
-  display: block;
-  background: radial-gradient(closest-side, rgba(198, 91, 82, 0.18), rgba(198, 91, 82, 0.06) 52%, transparent 78%);
-  filter: blur(4px);
+  display: none !important;
+  background: none;
+  filter: none;
+  opacity: 0;
 }
 
 .goal::before {
