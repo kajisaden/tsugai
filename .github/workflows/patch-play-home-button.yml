@@ -1,0 +1,82 @@
+name: Patch play home button
+
+on:
+  push:
+    branches:
+      - codex/add-play-home-button
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Add play home button
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          index = Path('web/index.html')
+          s = index.read_text(encoding='utf-8')
+
+          if 'id="btn-home"' not in s:
+              insert = '''  <!-- 左スロット: プレイ画面だけ表示するホーム導線。href で初期ホームへ戻すため、JS 状態に依存しない -->
+  <div class="hdr-left">
+    <a id="btn-home" href="index.html" data-i18n-aria="title" aria-label="ホーム">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 11 12 4l8 7"/>
+        <path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"/>
+      </svg>
+    </a>
+  </div>
+'''
+              s = s.replace('<header id="app-header">\n', '<header id="app-header">\n' + insert, 1)
+
+          # CSS キャッシュを確実に更新する。既存の版管理コメントの意図に合わせて index 側の query だけ更新。
+          s = s.replace('style.css?v=e8eb54a94c', 'style.css?v=play-home-1')
+          index.write_text(s, encoding='utf-8')
+
+          css = Path('web/style.css')
+          c = css.read_text(encoding='utf-8')
+          marker = '/* 戻る(左)と設定(右)は同じ盤色の丸ボタンで対。直径=トグルの高さ(32px) */'
+          block = '''.hdr-left { grid-column: 1; justify-self: start; }
+#btn-home {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: none;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-dim);
+  text-decoration: none;
+  background: linear-gradient(160deg, #fff8eb 0%, #e8d8c4 100%);
+  border: 1px solid rgba(64, 56, 48, 0.13);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), 0 2px 4px rgba(88, 66, 45, 0.08);
+}
+body.view-play #btn-home { display: grid; }
+#btn-home svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+}
+#btn-home:active { transform: translateY(1px); }
+'''
+          if '#btn-home' not in c:
+              c = c.replace(marker, block + marker, 1)
+          css.write_text(c, encoding='utf-8')
+
+          wf = Path('.github/workflows/patch-play-home-button.yml')
+          wf.unlink()
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/index.html web/style.css .github/workflows/patch-play-home-button.yml
+          git commit -m "Add play home button" || exit 0
+          git push
