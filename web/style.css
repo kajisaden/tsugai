@@ -1603,6 +1603,14 @@ body {
     inset 0 2px 4px rgba(255, 255, 255, 0.58),
     inset 0 -5px 8px rgba(110, 124, 140, 0.16);
 }
+.level-emblem.boss.best .le-ball,
+.level-emblem.boss.win .le-ball {
+  background: linear-gradient(145deg, #fff8f7 0%, #e79e98 52%, #c65b52 100%);
+}
+.level-emblem.boss.best .le-ball::before,
+.level-emblem.boss.win .le-ball::before {
+  border-color: rgba(157, 52, 44, 0.52);
+}
 .level-tile.cleared { border-color: rgba(168, 128, 31, 0.4); }
 
 /* 金アクセントのボタン: 薄い金縁だと紙で消えるので濃い琥珀の縁にする */
