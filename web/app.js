@@ -298,6 +298,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // ---- 画面遷移 ----
 let curChapter = null;
 let curIndex = 0;
+let homeIndex = null;
+let homeResultTimer = null;
+let homeResultMode = false;
 function showView(name) {
   for (const v of ['chapters', 'levels', 'play']) {
     $('#view-' + v).hidden = v !== name;
@@ -317,15 +320,79 @@ function nextHomeIndex() {
   return index < 0 ? Math.max(0, levels.length - 1) : index;
 }
 
-function renderHome() {
+function clampHomeIndex(index) {
+  const levels = chapterLevels(CHAPTERS[0]);
+  if (!levels.length) return 0;
+  return Math.max(0, Math.min(levels.length - 1, index));
+}
+
+function resultLabel(result) {
+  if (!result) return '';
+  if (locale === 'ja') return result.best ? '最短クリア' : 'クリア';
+  return result.best ? 'Best clear' : 'Clear';
+}
+
+function renderHome(result = null) {
   curChapter = CHAPTERS[0];
-  const levelNo = nextHomeIndex() + 1;
-  $('#home-level-no').textContent = levelNo;
+  const levels = chapterLevels(CHAPTERS[0]);
+  if (homeIndex == null) homeIndex = nextHomeIndex();
+  homeIndex = clampHomeIndex(homeIndex);
+  const puz = levels[homeIndex];
+  const isCleared = puz && cleared.has(puz.id);
+  const isBest = puz && bestCleared.has(puz.id);
+  const isBoss = !!modeData().boss[homeIndex];
+  const em = $('#home-emblem');
+  em.className = 'emblem home-emblem ' +
+    (isBest ? 'best' : isCleared ? 'win' : 'pending') +
+    (isBoss ? ' boss' : '') +
+    (result ? ' result-enter' : '');
+  const resultText = $('#home-result-text');
+  resultText.textContent = resultLabel(result);
+  resultText.classList.toggle('empty', !result);
+  const center = $('.home-center');
+  center.classList.toggle('result-mode', !!result);
+  $('#home-level-no').textContent = homeIndex + 1;
+  $('#home-prev').disabled = !!result || homeIndex <= 0;
+  $('#home-next').disabled = !!result || homeIndex >= levels.length - 1;
+  $('#home-play').disabled = !!result || !puz;
 }
 
 function showChapters() {
   showView('chapters');
-  renderHome();
+  renderHome(homeResultMode ? lastClear : null);
+}
+
+function setHomeIndex(index) {
+  homeResultMode = false;
+  clearTimeout(homeResultTimer);
+  homeIndex = clampHomeIndex(index);
+  showChapters();
+}
+
+function homePrev() {
+  if (homeResultMode) return;
+  setHomeIndex((homeIndex == null ? nextHomeIndex() : homeIndex) - 1);
+}
+
+function homeNext() {
+  if (homeResultMode) return;
+  setHomeIndex((homeIndex == null ? nextHomeIndex() : homeIndex) + 1);
+}
+
+function showHomeResult(result) {
+  if (!result) return;
+  clearTimeout(homeResultTimer);
+  homeResultMode = true;
+  homeIndex = clampHomeIndex(result.index);
+  showChapters();
+  const em = $('#home-emblem');
+  if (!REDUCED) { em.classList.remove('result-enter'); void em.offsetWidth; em.classList.add('result-enter'); }
+  const nextIndex = clampHomeIndex(result.index + 1);
+  homeResultTimer = setTimeout(() => {
+    homeResultMode = false;
+    homeIndex = nextIndex;
+    showChapters();
+  }, REDUCED ? 900 : 2200);
 }
 
 document.querySelectorAll('.mode-tab').forEach(tab => {
@@ -509,7 +576,8 @@ function startDailyPuzzle(entrance = true) {
 }
 
 function startHomePuzzle() {
-  startPuzzle(CHAPTERS[0], nextHomeIndex());
+  const index = homeIndex == null ? nextHomeIndex() : homeIndex;
+  startPuzzle(CHAPTERS[0], clampHomeIndex(index));
 }
 
 function restartCurrentPuzzle(entrance = true) {
@@ -910,7 +978,12 @@ async function checkClear() {
     markCleared(G.puz.id);
     if (best) markBest(G.puz.id);
   }
-  lastClear = { moves: G.moves, min, best };
+  lastClear = { moves: G.moves, min, best, index: curIndex };
+
+  const finishClearPresentation = () => {
+    if (dailyMode) goToGap();
+    else showHomeResult(lastClear);
+  };
 
   // 点火: ボールが弾み、ゴールに光が満ちる。約1秒見せて A画面へ。
   const afterSuck = false;
@@ -920,7 +993,7 @@ async function checkClear() {
     $('#boards').classList.add(best ? 'clear-best' : 'clear-win', 'bouncing');
     playClear(best); // クリアの効果音(最短はきらめきを追加)。音はモーション無効でも鳴らす
     haptic('heavy'); // クリアの祝福
-    if (REDUCED) { goToGap(); return; } // モーション無効: 演出を飛ばして A画面へ
+    if (REDUCED) { finishClearPresentation(); return; } // モーション無効: 演出を飛ばして結果表示へ
     // A: つがいが同時に座る瞬間の一発演出(チャイムと同期)。両部屋のボールが祝福発光し、ゴールが一拍明るむ。
     // 既存のメダリオン/バウンスを壊さないよう、ジオメトリ非干渉(opacity/filter)だけで重ねる。
     G.rooms.forEach((rm) => {
@@ -941,7 +1014,7 @@ async function checkClear() {
     });
     // 球の発光＋弾みを約1秒見せてから A画面へ自動遷移(幕は廃止)。旧 200ms の余韻＋1秒を畳む
     clearTimeout(tsumiTimer);
-    tsumiTimer = setTimeout(goToGap, 1200);
+    tsumiTimer = setTimeout(finishClearPresentation, 1200);
   };
 
   if (afterSuck) setTimeout(ignite, GOAL_SUCK_HOLD_MS); // 吸着の収まりを見せてから点火
@@ -1417,6 +1490,8 @@ $('#settings-drawer').addEventListener('click', (e) => {
 });
 
 $('#home-play').addEventListener('click', startHomePuzzle);
+$('#home-prev').addEventListener('click', homePrev);
+$('#home-next').addEventListener('click', homeNext);
 $('#home-daily').addEventListener('click', () => startDailyPuzzle());
 $('#home-list').addEventListener('click', () => showLevels(CHAPTERS[0]));
 $('#home-goals').addEventListener('click', openStats);
