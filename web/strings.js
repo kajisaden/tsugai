@@ -199,7 +199,7 @@ window.NIKENZUME_STRINGS = {
       margin: 0 !important;
       width: 18px !important;
       height: 18px !important;
-      transform: translateY(0.5px) !important;
+      transform: translateY(-1px) !important;
       transform-origin: 50% 50% !important;
     }
   `;
