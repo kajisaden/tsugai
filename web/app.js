@@ -300,8 +300,11 @@ let curChapter = null;
 let curIndex = 0;
 let homeIndex = null;
 let homeAutoAdvanceTimer = null;
+let homeSlideTimer = null;
 let homeFeedback = false;
 let homeControlsLocked = false;
+let homeTransition = null;
+const HOME_SLIDE_MS = 680;
 function showView(name) {
   for (const v of ['chapters', 'levels', 'play']) {
     $('#view-' + v).hidden = v !== name;
@@ -333,34 +336,83 @@ function homeStatusLabel(isBest, isCleared) {
   return '';
 }
 
+function homeViewState(index) {
+  const levels = chapterLevels(CHAPTERS[0]);
+  const clamped = clampHomeIndex(index);
+  const puz = levels[clamped];
+  const isCleared = puz && cleared.has(puz.id);
+  const isBest = puz && bestCleared.has(puz.id);
+  return {
+    index: clamped,
+    puz,
+    isCleared,
+    isBest,
+    isBoss: !!modeData().boss[clamped],
+    statusText: homeStatusLabel(isBest, isCleared),
+  };
+}
+
+function renderHomePanel(panel, state, options = {}) {
+  const feedback = !!options.feedback;
+  const statusEl = panel.querySelector('.home-status-text');
+  statusEl.textContent = state.statusText;
+  statusEl.className = 'home-status-text' +
+    (state.statusText ? '' : ' empty') +
+    (state.isBest ? ' best' : '') +
+    (!state.isBest && state.isCleared ? ' win' : '') +
+    (feedback && state.statusText ? ' clear-feedback' : '');
+
+  const em = panel.querySelector('.home-emblem');
+  em.className = 'emblem home-emblem ' +
+    (state.isBest ? 'best' : state.isCleared ? 'win' : 'pending') +
+    (state.isBoss ? ' boss' : '') +
+    (feedback ? ' clear-feedback' : '');
+}
+
 function renderHome(options = {}) {
   const feedback = !!options.feedback;
   curChapter = CHAPTERS[0];
   const levels = chapterLevels(CHAPTERS[0]);
   if (homeIndex == null) homeIndex = nextHomeIndex();
   homeIndex = clampHomeIndex(homeIndex);
-  const puz = levels[homeIndex];
-  const isCleared = puz && cleared.has(puz.id);
-  const isBest = puz && bestCleared.has(puz.id);
-  const isBoss = !!modeData().boss[homeIndex];
-  const em = $('#home-emblem');
-  em.className = 'emblem home-emblem ' +
-    (isBest ? 'best' : isCleared ? 'win' : 'pending') +
-    (isBoss ? ' boss' : '') +
-    (feedback ? ' clear-feedback' : '');
-  const statusEl = $('#home-status-text');
-  const statusText = homeStatusLabel(isBest, isCleared);
-  statusEl.textContent = statusText;
-  statusEl.classList.toggle('empty', !statusText);
-  statusEl.classList.toggle('best', isBest);
-  statusEl.classList.toggle('win', !isBest && isCleared);
-  statusEl.classList.toggle('clear-feedback', feedback && !!statusText);
   const center = $('.home-center');
-  center.classList.toggle('controls-locked', homeControlsLocked);
-  $('#home-level-no').textContent = homeIndex + 1;
-  $('#home-prev').disabled = homeControlsLocked || homeIndex <= 0;
-  $('#home-next').disabled = homeControlsLocked || homeIndex >= levels.length - 1;
-  $('#home-play').disabled = homeControlsLocked || !puz;
+  center.classList.remove('home-transitioning', 'home-slide-forward', 'home-slide-back', 'home-level-up', 'home-level-down');
+
+  const panelA = $('#home-panel-a');
+  const panelB = $('#home-panel-b');
+  const currentLevelEl = $('#home-level-no');
+  const nextLevelEl = $('#home-level-next-no');
+  const transition = homeTransition;
+  const currentState = homeViewState(homeIndex);
+
+  if (transition) {
+    const fromState = homeViewState(transition.from);
+    const toState = homeViewState(transition.to);
+    const forward = transition.direction > 0;
+    renderHomePanel(panelA, forward ? fromState : toState);
+    renderHomePanel(panelB, forward ? toState : fromState);
+    panelA.setAttribute('aria-hidden', 'false');
+    panelB.setAttribute('aria-hidden', 'false');
+    currentLevelEl.textContent = fromState.index + 1;
+    nextLevelEl.textContent = toState.index + 1;
+    center.classList.add(
+      'home-transitioning',
+      forward ? 'home-slide-forward' : 'home-slide-back',
+      forward ? 'home-level-up' : 'home-level-down'
+    );
+  } else {
+    renderHomePanel(panelA, currentState, { feedback });
+    panelB.setAttribute('aria-hidden', 'true');
+    renderHomePanel(panelB, currentState);
+    currentLevelEl.textContent = currentState.index + 1;
+    nextLevelEl.textContent = currentState.index + 1;
+  }
+
+  const locked = homeControlsLocked || !!transition;
+  center.classList.toggle('controls-locked', locked);
+  $('#home-prev').disabled = locked || homeIndex <= 0;
+  $('#home-next').disabled = locked || homeIndex >= levels.length - 1;
+  $('#home-play').disabled = locked || !currentState.puz;
 }
 
 function showChapters() {
@@ -372,34 +424,64 @@ function setHomeIndex(index) {
   homeFeedback = false;
   homeControlsLocked = false;
   clearTimeout(homeAutoAdvanceTimer);
+  clearTimeout(homeSlideTimer);
+  homeTransition = null;
   homeIndex = clampHomeIndex(index);
   showChapters();
 }
 
+function startHomeSlide(toIndex, options = {}) {
+  const fromIndex = clampHomeIndex(homeIndex == null ? nextHomeIndex() : homeIndex);
+  const nextIndex = clampHomeIndex(toIndex);
+  homeFeedback = false;
+  clearTimeout(homeAutoAdvanceTimer);
+  clearTimeout(homeSlideTimer);
+  if (fromIndex === nextIndex || REDUCED) {
+    homeTransition = null;
+    homeControlsLocked = false;
+    homeIndex = nextIndex;
+    showChapters();
+    return;
+  }
+  homeControlsLocked = true;
+  homeTransition = {
+    from: fromIndex,
+    to: nextIndex,
+    direction: nextIndex > fromIndex ? 1 : -1,
+  };
+  homeIndex = fromIndex;
+  showChapters();
+  homeSlideTimer = setTimeout(() => {
+    homeTransition = null;
+    homeControlsLocked = false;
+    homeIndex = nextIndex;
+    showChapters();
+  }, HOME_SLIDE_MS);
+}
+
 function homePrev() {
   if (homeControlsLocked) return;
-  setHomeIndex((homeIndex == null ? nextHomeIndex() : homeIndex) - 1);
+  startHomeSlide((homeIndex == null ? nextHomeIndex() : homeIndex) - 1);
 }
 
 function homeNext() {
   if (homeControlsLocked) return;
-  setHomeIndex((homeIndex == null ? nextHomeIndex() : homeIndex) + 1);
+  startHomeSlide((homeIndex == null ? nextHomeIndex() : homeIndex) + 1);
 }
 
 function showHomeClearFeedback(clearIndex) {
   clearTimeout(homeAutoAdvanceTimer);
+  clearTimeout(homeSlideTimer);
+  homeTransition = null;
   homeFeedback = true;
   homeControlsLocked = true;
   homeIndex = clampHomeIndex(clearIndex);
   showChapters();
-  const em = $('#home-emblem');
+  const em = $('#home-panel-a .home-emblem');
   if (!REDUCED) { em.classList.remove('clear-feedback'); void em.offsetWidth; em.classList.add('clear-feedback'); }
   const nextIndex = clampHomeIndex(clearIndex + 1);
   homeAutoAdvanceTimer = setTimeout(() => {
-    homeFeedback = false;
-    homeControlsLocked = false;
-    homeIndex = nextIndex;
-    showChapters();
+    startHomeSlide(nextIndex);
   }, REDUCED ? 900 : 2200);
 }
 

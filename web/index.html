@@ -16,8 +16,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- 更新の目印: URL も画面のビルド印も同じ版番号に揃える -->
-<script>try{var V='137',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=207787e28a">
+<script>try{var V='138',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
+<link rel="stylesheet" href="style.css?v=33678559be">
 <style>
 .hdr-left { grid-column: 1; justify-self: start; }
 #btn-home {
@@ -52,7 +52,7 @@ body.view-levels #btn-home { display: grid; }
     </a>
   </div>
   <div id="hdr-center">
-    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">137</span></h1>
+    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">138</span></h1>
     <div id="play-status" aria-live="polite">
       <span id="puzzle-no"></span>
       <span id="play-progress"></span>
@@ -74,19 +74,36 @@ body.view-levels #btn-home { display: grid; }
   <section id="view-chapters">
     <div class="home-hub">
       <div class="home-center">
-        <div class="home-status-text empty" id="home-status-text"></div>
         <div class="home-stage">
           <button class="home-step home-prev" id="home-prev" type="button" aria-label="前の問題">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M14.2 6.2 8.4 12l5.8 5.8"></path>
             </svg>
           </button>
-          <div class="emblem home-emblem pending" id="home-emblem" aria-hidden="true">
-            <div class="emblem-halo"></div>
-            <div class="emblem-disc"></div>
-            <div class="emblem-balls">
-              <div class="emblem-ball eb1"></div>
-              <div class="emblem-ball eb2"></div>
+          <div class="home-slot" id="home-slot">
+            <div class="home-slide-track" id="home-slide-track">
+              <div class="home-slide-panel" id="home-panel-a">
+                <div class="home-status-text empty"></div>
+                <div class="emblem home-emblem pending" aria-hidden="true">
+                  <div class="emblem-halo"></div>
+                  <div class="emblem-disc"></div>
+                  <div class="emblem-balls">
+                    <div class="emblem-ball eb1"></div>
+                    <div class="emblem-ball eb2"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-slide-panel" id="home-panel-b" aria-hidden="true">
+                <div class="home-status-text empty"></div>
+                <div class="emblem home-emblem pending" aria-hidden="true">
+                  <div class="emblem-halo"></div>
+                  <div class="emblem-disc"></div>
+                  <div class="emblem-balls">
+                    <div class="emblem-ball eb1"></div>
+                    <div class="emblem-ball eb2"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <button class="home-step home-next" id="home-next" type="button" aria-label="次の問題">
@@ -95,7 +112,13 @@ body.view-levels #btn-home { display: grid; }
             </svg>
           </button>
         </div>
-        <div class="home-level">レベル <span id="home-level-no">18</span></div>
+        <div class="home-level">
+          <span>レベル</span>
+          <span class="home-level-num-box">
+            <span class="home-level-num current" id="home-level-no">18</span>
+            <span class="home-level-num next" id="home-level-next-no" aria-hidden="true">19</span>
+          </span>
+        </div>
         <button id="home-play" class="home-play" type="button">プレイ</button>
       </div>
       <nav class="home-footer" aria-label="ホームメニュー">
@@ -507,6 +530,6 @@ body.view-levels #btn-home { display: grid; }
 <script src="normal-levels.js?v=ebc7dffa9b"></script>
 <script src="advanced-levels.js?v=bf52c8d4d8"></script>
 <script src="strings.js?v=e00ebb0675"></script>
-<script src="app.js?v=6d76434f8d"></script>
+<script src="app.js?v=2bbb93e6ee"></script>
 </body>
 </html>
