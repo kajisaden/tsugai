@@ -373,10 +373,12 @@ button:active { transform: translateY(1px); }
 }
 .home-center.controls-locked .home-step:disabled { opacity: 1; }
 .home-level {
-  display: inline-flex;
+  width: 180px;
+  display: grid;
+  grid-template-columns: auto 3.2em;
   align-items: center;
   justify-content: center;
-  gap: 0.35em;
+  column-gap: 0.35em;
   margin-top: 10px;
   color: #5874f0;
   font-weight: 700;
@@ -386,7 +388,7 @@ button:active { transform: translateY(1px); }
 }
 .home-level-num-box {
   position: relative;
-  width: 3.2em;
+  width: 100%;
   height: 1em;
   display: inline-grid;
   place-items: center;
