@@ -305,6 +305,8 @@ let homeFeedback = false;
 let homeControlsLocked = false;
 let homeTransition = null;
 const HOME_SLIDE_MS = 680;
+const HOME_AUTO_ADVANCE_DELAY_MS = 500;
+const HOME_AUTO_ADVANCE_REDUCED_DELAY_MS = 250;
 const HOME_SWIPE_MIN_X = 40;
 const HOME_SWIPE_MAX_Y_RATIO = 0.6;
 function showView(name, options = {}) {
@@ -507,7 +509,7 @@ function showHomeClearFeedback(clearIndex) {
   const nextIndex = clampHomeIndex(clearIndex + 1);
   homeAutoAdvanceTimer = setTimeout(() => {
     startHomeSlide(nextIndex);
-  }, 0);
+  }, REDUCED ? HOME_AUTO_ADVANCE_REDUCED_DELAY_MS : HOME_AUTO_ADVANCE_DELAY_MS);
 }
 
 document.querySelectorAll('.mode-tab').forEach(tab => {
