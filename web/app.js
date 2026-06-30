@@ -408,11 +408,11 @@ function renderHome(options = {}) {
     nextLevelEl.textContent = currentState.index + 1;
   }
 
-  const locked = homeControlsLocked || !!transition;
-  center.classList.toggle('controls-locked', locked);
-  $('#home-prev').disabled = locked || homeIndex <= 0;
-  $('#home-next').disabled = locked || homeIndex >= levels.length - 1;
-  $('#home-play').disabled = locked || !currentState.puz;
+  const stepLocked = homeControlsLocked || !!transition;
+  center.classList.toggle('controls-locked', stepLocked);
+  $('#home-prev').disabled = stepLocked || homeIndex <= 0;
+  $('#home-next').disabled = stepLocked || homeIndex >= levels.length - 1;
+  $('#home-play').disabled = !currentState.puz;
 }
 
 function showChapters() {
@@ -449,12 +449,11 @@ function startHomeSlide(toIndex, options = {}) {
     to: nextIndex,
     direction: nextIndex > fromIndex ? 1 : -1,
   };
-  homeIndex = fromIndex;
+  homeIndex = nextIndex;
   showChapters();
   homeSlideTimer = setTimeout(() => {
     homeTransition = null;
     homeControlsLocked = false;
-    homeIndex = nextIndex;
     showChapters();
   }, HOME_SLIDE_MS);
 }
