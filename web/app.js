@@ -650,20 +650,23 @@ function showLevels(ch) {
     btn.className = 'level-tile' +
       (!isLocked && isCleared ? ' cleared' : '') +
       (!isLocked && isBest ? ' best' : '') +
-      (!isLocked && isBoss ? ' boss' : '') +
+      (isBoss ? ' boss' : '') +
       (isLocked ? ' locked' : '');
     btn.disabled = isLocked;
     const emblem = (state) =>
       `<span class="lv-emblem level-emblem ${state}${isBoss ? ' boss' : ''}"><span class="le-inner">` +
       `<span class="le-disc"></span>` +
-      `<span class="le-ball eb1"></span><span class="le-ball eb2"></span></span></span>`;
+      `<span class="le-lock-shackle back"></span><span class="le-ball eb2"></span>` +
+      `<span class="le-lock-shackle front"></span><span class="le-ball eb1"></span>` +
+      `<span class="le-lock-latch back"><span></span><span></span><span></span></span>` +
+      `<span class="le-lock-latch front"><span></span><span></span><span></span></span></span></span>`;
     const mark = isLocked
-      ? t('levelLocked')
+      ? emblem('locked')
       : isBest
         ? emblem('best')
-        : isCleared
-          ? emblem('win')
-          : t('levelMoves', { n: p.solution.minMoves });
+      : isCleared
+        ? emblem('win')
+        : emblem('pending');
     btn.innerHTML = `<span class="lv-no">${globalIdx + 1}</span>` +
       `<span class="lv-moves">${mark}</span>`;
     btn.addEventListener('click', () => {

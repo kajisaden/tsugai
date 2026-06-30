@@ -1933,6 +1933,89 @@ body {
   background: rgba(255, 255, 255, 0.55);
 }
 .lv-emblem .le-disc { display: block; }
+.lv-emblem.pending .le-disc {
+  background: linear-gradient(180deg, rgba(234, 225, 209, 0.58), rgba(214, 203, 184, 0.42));
+  border: 1px solid rgba(138, 120, 92, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 8px 11px rgba(64, 50, 30, 0.12);
+}
+.lv-emblem.locked .le-ball {
+  background: linear-gradient(145deg, #fafdff 0%, #e9f1f6 56%, #ccd8df 100%);
+}
+.lv-emblem.locked .le-ball::before {
+  border-color: rgba(41, 53, 108, 0.32);
+}
+.lv-emblem.locked.boss .le-ball {
+  background: linear-gradient(145deg, #fff8f7 0%, #ead7d4 56%, #d3a9a4 100%);
+}
+.lv-emblem.locked.boss .le-ball::before {
+  border-color: rgba(157, 52, 44, 0.34);
+}
+.lv-emblem.locked .le-disc {
+  background: linear-gradient(180deg, rgba(234, 225, 209, 0.58), rgba(214, 203, 184, 0.42));
+  border: 1px solid rgba(138, 120, 92, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 8px 11px rgba(64, 50, 30, 0.12);
+}
+.lv-emblem .le-lock-shackle,
+.lv-emblem .le-lock-latch {
+  display: none;
+  position: absolute;
+}
+.lv-emblem.locked .le-lock-shackle,
+.lv-emblem.locked .le-lock-latch {
+  display: block;
+}
+.lv-emblem.locked .le-lock-latch {
+  display: grid;
+}
+.lv-emblem.locked .le-ball.eb1 { z-index: 3; }
+.lv-emblem .le-lock-shackle {
+  width: 57px;
+  height: 50px;
+  border: 11px solid rgba(41, 53, 108, 0.28);
+  border-bottom: 0;
+  border-radius: 32px 32px 0 0;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.38));
+}
+.lv-emblem .le-lock-shackle.front {
+  left: 53px;
+  top: 30px;
+  z-index: 2;
+}
+.lv-emblem .le-lock-shackle.back {
+  left: 108px;
+  top: -2px;
+  z-index: 0;
+}
+.lv-emblem.locked .le-lock-latch {
+  z-index: 5;
+  display: grid;
+  gap: 7px;
+}
+.lv-emblem.locked .le-lock-latch.front {
+  left: 103px;
+  top: 85px;
+}
+.lv-emblem.locked .le-lock-latch.back {
+  left: 158px;
+  top: 53px;
+}
+.lv-emblem.locked .le-lock-latch::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  right: 5px;
+  width: 3px;
+  height: 67px;
+  background: rgba(41, 53, 108, 0.26);
+  opacity: 0.48;
+}
+.lv-emblem.locked .le-lock-latch span {
+  width: 27px;
+  height: 11px;
+  border-radius: 5px;
+  background: rgba(41, 53, 108, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
 .lv-emblem.best .le-disc {
   background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
   box-shadow: 0 10px 16px rgba(95, 76, 35, 0.14), inset 0 2px 4px rgba(255, 248, 224, 0.72), inset 0 -6px 10px rgba(115, 89, 36, 0.24);
