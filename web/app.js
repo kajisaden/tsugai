@@ -119,15 +119,17 @@ function isLevelPlayable(index, mode = curMode) {
 function defaultHomeIndex() {
   return levelLockOn ? unlockedIndex(curMode) : nextHomeIndex();
 }
-function unlockAfterClear(mode, index) {
+function unlockAfterClear(mode, index, currentOverride = null) {
   const levels = MODES[mode].levels;
-  if (!levels.length || index < 0 || index >= levels.length) return;
+  if (!levels.length || index < 0 || index >= levels.length) return null;
   const next = Math.min(index + 1, levels.length - 1);
-  const current = unlockedIndex(mode);
+  const current = currentOverride == null ? unlockedIndex(mode) : currentOverride;
   if (next > current) {
     unlockedState[mode] = next;
     saveUnlockedState();
+    return next;
   }
+  return null;
 }
 
 // ヒント設定(問題ごと)。違う問題に移ると必ずオフから始める(同じ問題の初形/答え再生では保持)。
@@ -344,10 +346,14 @@ let curIndex = 0;
 let homeIndex = null;
 let homeAutoAdvanceTimer = null;
 let homeSlideTimer = null;
+let homeUnlockTimer = null;
 let homeFeedback = false;
 let homeControlsLocked = false;
 let homeTransition = null;
+let homeUnlockReveal = null;
 const HOME_SLIDE_MS = 680;
+const HOME_UNLOCK_REVEAL_MS = 840;
+const HOME_UNLOCK_LEVEL_DELAY_MS = 450;
 const HOME_AUTO_ADVANCE_DELAY_MS = 1000;
 const HOME_AUTO_ADVANCE_REDUCED_DELAY_MS = 500;
 const HOME_SWIPE_MIN_X = 40;
@@ -394,15 +400,17 @@ function homeViewState(index) {
   const puz = levels[clamped];
   const isCleared = puz && cleared.has(puz.id);
   const isBest = puz && bestCleared.has(puz.id);
-  const isLocked = isHomeLevelLocked(clamped);
+  const unlockReveal = homeUnlockReveal && homeUnlockReveal.index === clamped ? homeUnlockReveal : null;
+  const isLocked = isHomeLevelLocked(clamped) || !!unlockReveal;
   return {
     index: clamped,
     puz,
     isCleared,
     isBest,
     isLocked,
+    isUnlocking: unlockReveal && unlockReveal.phase === 'unlocking',
     unlockByLevel: Math.max(1, clamped),
-    isBoss: !isLocked && !!modeData().boss[clamped],
+    isBoss: !!modeData().boss[clamped],
     statusText: isLocked ? '' : homeStatusLabel(isBest, isCleared),
   };
 }
@@ -420,6 +428,7 @@ function renderHomePanel(panel, state, options = {}) {
   const em = panel.querySelector('.home-emblem');
   em.className = 'emblem home-emblem ' +
     (state.isLocked ? 'locked pending' : state.isBest ? 'best' : state.isCleared ? 'win' : 'pending') +
+    (state.isUnlocking ? ' unlocking' : '') +
     (state.isBoss ? ' boss' : '') +
     (feedback ? ' clear-feedback' : '');
 }
@@ -432,6 +441,7 @@ function renderHome(options = {}) {
   homeIndex = clampHomeIndex(homeIndex);
   const center = $('.home-center');
   center.classList.remove('home-transitioning', 'home-slide-forward', 'home-slide-back', 'home-level-up', 'home-level-down');
+  center.style.removeProperty('--home-level-delay');
 
   const panelA = $('#home-panel-a');
   const panelB = $('#home-panel-b');
@@ -455,6 +465,7 @@ function renderHome(options = {}) {
       forward ? 'home-slide-forward' : 'home-slide-back',
       forward ? 'home-level-up' : 'home-level-down'
     );
+    if (transition.levelDelay) center.style.setProperty('--home-level-delay', `${transition.levelDelay}ms`);
   } else {
     renderHomePanel(panelA, currentState, { feedback });
     panelB.setAttribute('aria-hidden', 'true');
@@ -482,7 +493,9 @@ function setHomeIndex(index) {
   homeControlsLocked = false;
   clearTimeout(homeAutoAdvanceTimer);
   clearTimeout(homeSlideTimer);
+  clearTimeout(homeUnlockTimer);
   homeTransition = null;
+  homeUnlockReveal = null;
   homeIndex = clampHomeIndex(index);
   showChapters({ animate: false });
 }
@@ -502,28 +515,43 @@ function goHomeFromHeader() {
 function startHomeSlide(toIndex, options = {}) {
   const fromIndex = clampHomeIndex(homeIndex == null ? defaultHomeIndex() : homeIndex);
   const nextIndex = clampHomeIndex(toIndex);
+  const unlockRevealIndex = options.unlockIndex === nextIndex ? nextIndex : null;
   homeFeedback = false;
   clearTimeout(homeAutoAdvanceTimer);
   clearTimeout(homeSlideTimer);
+  clearTimeout(homeUnlockTimer);
   if (fromIndex === nextIndex || REDUCED) {
     homeTransition = null;
+    homeUnlockReveal = null;
     homeControlsLocked = false;
     homeIndex = nextIndex;
     showChapters({ animate: false });
     return;
   }
   homeControlsLocked = true;
+  homeUnlockReveal = unlockRevealIndex == null ? null : { index: unlockRevealIndex, phase: 'locked' };
   homeTransition = {
     from: fromIndex,
     to: nextIndex,
     direction: nextIndex > fromIndex ? 1 : -1,
+    levelDelay: unlockRevealIndex == null ? 0 : HOME_UNLOCK_LEVEL_DELAY_MS,
   };
   homeIndex = nextIndex;
   showChapters({ animate: false });
   homeSlideTimer = setTimeout(() => {
     homeTransition = null;
-    homeControlsLocked = false;
+    if (unlockRevealIndex == null) {
+      homeControlsLocked = false;
+      showChapters({ animate: false });
+      return;
+    }
+    homeUnlockReveal = { index: unlockRevealIndex, phase: 'unlocking' };
     showChapters({ animate: false });
+    homeUnlockTimer = setTimeout(() => {
+      homeUnlockReveal = null;
+      homeControlsLocked = false;
+      showChapters({ animate: false });
+    }, HOME_UNLOCK_REVEAL_MS);
   }, HOME_SLIDE_MS);
 }
 
@@ -560,10 +588,12 @@ function finishHomeSwipe(e) {
   dx < 0 ? homeNext() : homePrev();
 }
 
-function showHomeClearFeedback(clearIndex) {
+function showHomeClearFeedback(clearIndex, unlockIndex = null) {
   clearTimeout(homeAutoAdvanceTimer);
   clearTimeout(homeSlideTimer);
+  clearTimeout(homeUnlockTimer);
   homeTransition = null;
+  homeUnlockReveal = null;
   homeFeedback = true;
   homeControlsLocked = true;
   homeIndex = clampHomeIndex(clearIndex);
@@ -572,7 +602,7 @@ function showHomeClearFeedback(clearIndex) {
   if (!REDUCED) { em.classList.remove('clear-feedback'); void em.offsetWidth; em.classList.add('clear-feedback'); }
   const nextIndex = clampHomeIndex(clearIndex + 1);
   homeAutoAdvanceTimer = setTimeout(() => {
-    startHomeSlide(nextIndex);
+    startHomeSlide(nextIndex, { unlockIndex });
   }, REDUCED ? HOME_AUTO_ADVANCE_REDUCED_DELAY_MS : HOME_AUTO_ADVANCE_DELAY_MS);
 }
 
@@ -1167,16 +1197,18 @@ async function checkClear() {
   G.busy = true;
   const min = G.puz.solution.minMoves;
   const best = G.moves === min;
+  let unlockIndex = null;
+  const currentUnlockedBeforeClear = dailyMode ? null : unlockedIndex(curMode);
   if (!dailyMode) {
     markCleared(G.puz.id);
     if (best) markBest(G.puz.id);
-    unlockAfterClear(curMode, curIndex);
+    unlockIndex = unlockAfterClear(curMode, curIndex, currentUnlockedBeforeClear);
   }
   lastClear = { moves: G.moves, min, best, index: curIndex };
 
   const finishClearPresentation = () => {
     if (dailyMode) goToGap();
-    else showHomeClearFeedback(curIndex);
+    else showHomeClearFeedback(curIndex, unlockIndex);
   };
 
   // 点火: ボールが弾み、ゴールに光が満ちる。約1秒見せて A画面へ。
