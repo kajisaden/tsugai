@@ -368,12 +368,14 @@ button:active { transform: translateY(1px); }
 .home-step:disabled {
   opacity: 0.34;
 }
-.home-center.controls-locked .home-step,
 .home-center.controls-locked .home-play {
   pointer-events: none;
   opacity: 0.54;
 }
-.home-center.controls-locked .home-step:disabled { opacity: 0.34; }
+.home-center.controls-locked .home-step {
+  pointer-events: none;
+}
+.home-center.controls-locked .home-step:disabled { opacity: 1; }
 .home-level {
   display: inline-flex;
   align-items: center;
