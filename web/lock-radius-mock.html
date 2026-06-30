@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lock Radius Mock</title>
+<style>
+:root {
+  --bg: #f3efe6;
+  --panel: #fbf8f1;
+  --text: #2b2620;
+  --text-dim: #8a8276;
+  --gold: #a8801f;
+  --logo: #29356c;
+  --blue: #5874f0;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: radial-gradient(120% 100% at 50% 0%, #fbf7ed 0%, var(--bg) 60%);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+header {
+  display: grid;
+  justify-items: center;
+  padding: 30px 16px 10px;
+}
+h1 {
+  margin: 0;
+  color: var(--logo);
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+}
+.note {
+  width: min(760px, calc(100vw - 32px));
+  margin: 8px auto 16px;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.grid {
+  width: min(760px, calc(100vw - 32px));
+  margin: 0 auto 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 14px;
+}
+.card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 24px;
+  background: rgba(251, 248, 241, 0.72);
+  border: 1px solid rgba(95, 75, 56, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.56), 0 12px 28px rgba(70, 55, 30, 0.08);
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card h2 {
+  margin: 0;
+  color: var(--logo);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.tag {
+  color: var(--gold);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.sample {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 12px 6px;
+  border-radius: 18px;
+  border: 1px solid rgba(95, 75, 56, 0.08);
+  background: rgba(255, 253, 248, 0.36);
+}
+.label {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.stage {
+  width: 160px;
+  height: 118px;
+  display: grid;
+  place-items: center;
+  padding-bottom: 18px;
+}
+.level {
+  color: var(--blue);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+.desc {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.emblem {
+  position: relative;
+  width: 124px;
+  height: 99px;
+}
+.disc {
+  position: absolute;
+  left: 10px;
+  top: 54px;
+  width: 105px;
+  height: 43px;
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgba(234, 225, 209, 0.58), rgba(214, 203, 184, 0.42));
+  border: 1px solid rgba(138, 120, 92, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 8px 11px rgba(64, 50, 30, 0.12);
+}
+.block {
+  position: absolute;
+  width: 49px;
+  height: 49px;
+  border-radius: var(--r);
+  background: linear-gradient(145deg, #fafdff 0%, #b7ddec 52%, #72a8c4 100%);
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.46),
+    inset -3px -3px 0 rgba(74, 48, 35, 0.14),
+    0 2px 4px rgba(92, 62, 45, 0.12);
+}
+.block::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2.5px solid rgba(74, 126, 154, 0.74);
+}
+.block::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.54);
+}
+.locked .block {
+  background: linear-gradient(145deg, #fafdff 0%, #e9f1f6 56%, #ccd8df 100%);
+}
+.locked .block::before {
+  border-color: rgba(41, 53, 108, 0.32);
+}
+.back { left: 53px; top: 17px; z-index: 1; }
+.front { left: 22px; top: 35px; z-index: 2; }
+.shackle {
+  position: absolute;
+  width: 32px;
+  height: 28px;
+  border: 6px solid rgba(41, 53, 108, 0.28);
+  border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.38));
+}
+.front-shackle { left: 30px; top: 17px; z-index: 1; }
+.back-shackle { left: 61px; top: -1px; z-index: 0; }
+.latch {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  gap: 4px;
+}
+.front-latch { left: 58px; top: 48px; }
+.back-latch { left: 89px; top: 30px; }
+.bar {
+  width: 15px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(41, 53, 108, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.stem {
+  position: absolute;
+  width: 1.5px;
+  height: 38px;
+  top: -5px;
+  right: 3px;
+  background: rgba(41, 53, 108, 0.26);
+  opacity: 0.48;
+}
+.r13 { --r: 13px; }
+.r11 { --r: 11px; }
+.r9 { --r: 9px; }
+.r7 { --r: 7px; }
+.r5 { --r: 5px; }
+.r3 { --r: 3px; }
+@media (max-width: 560px) {
+  .pair { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header><h1>Tsugai</h1></header>
+<p class="note">D案をベースに、ブロック角丸だけを比較。各カードで左がロック、右が通常エンブレムです。</p>
+
+<main class="grid">
+  <article class="card r13">
+    <div class="card-head"><h2>A: radius 13</h2><span class="tag">current</span></div>
+    <div class="pair"><div class="sample"><div class="label">Locked</div><div class="stage"><div class="emblem locked"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div><div class="level">レベル 6</div></div><div class="sample"><div class="label">Normal</div><div class="stage"><div class="emblem"><div class="disc"></div><div class="block back"></div><div class="block front"></div></div></div><div class="level">レベル 6</div></div></div>
+    <p class="desc">現在に近い。柔らかいが、鍵の角としては丸い。</p>
+  </article>
+  <article class="card r11">
+    <div class="card-head"><h2>B: radius 11</h2><span class="tag">soft</span></div>
+    <div class="pair"><div class="sample"><div class="label">Locked</div><div class="stage"><div class="emblem locked"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div><div class="level">レベル 6</div></div><div class="sample"><div class="label">Normal</div><div class="stage"><div class="emblem"><div class="disc"></div><div class="block back"></div><div class="block front"></div></div></div><div class="level">レベル 6</div></div></div>
+    <p class="desc">少しだけ締める案。通常エンブレムの可愛さは残る。</p>
+  </article>
+  <article class="card r9">
+    <div class="card-head"><h2>C: radius 9</h2><span class="tag">balanced</span></div>
+    <div class="pair"><div class="sample"><div class="label">Locked</div><div class="stage"><div class="emblem locked"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div><div class="level">レベル 6</div></div><div class="sample"><div class="label">Normal</div><div class="stage"><div class="emblem"><div class="disc"></div><div class="block back"></div><div class="block front"></div></div></div><div class="level">レベル 6</div></div></div>
+    <p class="desc">ブロック感と南京錠感のバランス。個人的には第一候補。</p>
+  </article>
+  <article class="card r7">
+    <div class="card-head"><h2>D: radius 7</h2><span class="tag">sharp</span></div>
+    <div class="pair"><div class="sample"><div class="label">Locked</div><div class="stage"><div class="emblem locked"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div><div class="level">レベル 6</div></div><div class="sample"><div class="label">Normal</div><div class="stage"><div class="emblem"><div class="disc"></div><div class="block back"></div><div class="block front"></div></div></div><div class="level">レベル 6</div></div></div>
+    <p class="desc">だいぶ角に寄る。南京錠としては良いが、通常エンブレムも少し硬い。</p>
+  </article>
+  <article class="card r5">
+    <div class="card-head"><h2>E: radius 5</h2><span class="tag">lock</span></div>
+    <div class="pair"><div class="sample"><div class="label">Locked</div><div class="stage"><div class="emblem locked"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div><div class="level">レベル 6</div></div><div class="sample"><div class="label">Normal</div><div class="stage"><div class="emblem"><div class="disc"></div><div class="block back"></div><div class="block front"></div></div></div><div class="level">レベル 6</div></div></div>
+    <p class="desc">鍵感は強い。通常エンブレムとしては少し無機質。</p>
+  </article>
+  <article class="card r3">
+    <div class="card-head"><h2>F: radius 3</h2><span class="tag">square</span></div>
+    <div class="pair"><div class="sample"><div class="label">Locked</div><div class="stage"><div class="emblem locked"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div><div class="level">レベル 6</div></div><div class="sample"><div class="label">Normal</div><div class="stage"><div class="emblem"><div class="disc"></div><div class="block back"></div><div class="block front"></div></div></div><div class="level">レベル 6</div></div></div>
+    <p class="desc">かなり四角。南京錠には近いが、Tsugaiらしさは薄くなる。</p>
+  </article>
+</main>
+</body>
+</html>

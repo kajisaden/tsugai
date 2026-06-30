@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Standard Position Lock Mock</title>
+<style>
+:root {
+  --bg: #f3efe6;
+  --panel: #fbf8f1;
+  --text: #2b2620;
+  --text-dim: #8a8276;
+  --gold: #a8801f;
+  --logo: #29356c;
+  --blue: #5874f0;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: radial-gradient(120% 100% at 50% 0%, #fbf7ed 0%, var(--bg) 60%);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+header {
+  display: grid;
+  justify-items: center;
+  padding: 30px 16px 10px;
+}
+h1 {
+  margin: 0;
+  color: var(--logo);
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+}
+.note {
+  width: min(560px, calc(100vw - 32px));
+  margin: 8px auto 16px;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.grid {
+  width: min(560px, calc(100vw - 32px));
+  margin: 0 auto 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.card {
+  min-height: 342px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 18px 18px 20px;
+  border-radius: 24px;
+  background: rgba(251, 248, 241, 0.72);
+  border: 1px solid rgba(95, 75, 56, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.56), 0 12px 28px rgba(70, 55, 30, 0.08);
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card h2 {
+  margin: 0;
+  color: var(--logo);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.tag {
+  color: var(--gold);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.home-sample {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 10px;
+}
+.status {
+  min-height: 44px;
+  color: transparent;
+}
+.stage {
+  display: grid;
+  grid-template-columns: 56px 160px 56px;
+  align-items: center;
+  justify-items: center;
+}
+.arrow {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+}
+.arrow svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.slot {
+  width: 160px;
+  height: 118px;
+  display: grid;
+  place-items: center;
+  padding-bottom: 18px;
+}
+.level {
+  width: 180px;
+  display: grid;
+  grid-template-columns: auto 3.2em;
+  align-items: center;
+  justify-content: center;
+  column-gap: 0.35em;
+  color: var(--blue);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  transform: translateX(14px);
+}
+.play {
+  width: min(220px, 72vw);
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-top: 34px;
+  border-radius: 999px;
+  color: rgba(41, 53, 108, 0.64);
+  background: linear-gradient(180deg, rgba(232, 224, 208, 0.85), rgba(211, 202, 186, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.desc {
+  margin: 14px 0 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.emblem {
+  position: relative;
+  width: 124px;
+  height: 99px;
+}
+.disc {
+  position: absolute;
+  left: 10px;
+  top: 54px;
+  width: 105px;
+  height: 43px;
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgba(234, 225, 209, 0.58), rgba(214, 203, 184, 0.42));
+  border: 1px solid rgba(138, 120, 92, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 8px 11px rgba(64, 50, 30, 0.12);
+}
+.block {
+  position: absolute;
+  width: 49px;
+  height: 49px;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #fffdf8 0%, #eee5d6 56%, #d7cbb8 100%);
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.5),
+    inset -3px -3px 0 rgba(74, 48, 35, 0.08),
+    0 2px 4px rgba(92, 62, 45, 0.12);
+}
+.block::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2.5px solid rgba(138, 130, 118, 0.46);
+}
+.block::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  width: 24px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.42);
+  transform: rotate(-28deg);
+}
+.back { left: 53px; top: 17px; z-index: 1; }
+.front { left: 22px; top: 35px; z-index: 2; }
+.shackle {
+  position: absolute;
+  width: var(--shackle-w);
+  height: var(--shackle-h);
+  border: var(--shackle-stroke) solid var(--shackle);
+  border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.38));
+}
+.front-shackle {
+  left: calc(22px + var(--shackle-x));
+  top: calc(35px + var(--shackle-y));
+  z-index: 1;
+}
+.back-shackle {
+  left: calc(53px + var(--shackle-x));
+  top: calc(17px + var(--shackle-y));
+  z-index: 0;
+}
+.latch {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  gap: var(--latch-gap);
+}
+.front-latch {
+  left: calc(22px + var(--latch-x));
+  top: calc(35px + var(--latch-y));
+}
+.back-latch {
+  left: calc(53px + var(--latch-x));
+  top: calc(17px + var(--latch-y));
+}
+.bar {
+  width: var(--bar-w);
+  height: var(--bar-h);
+  border-radius: 3px;
+  background: var(--bar);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.stem {
+  position: absolute;
+  width: 1.5px;
+  height: var(--stem-h);
+  top: -5px;
+  right: 3px;
+  background: color-mix(in srgb, var(--bar), transparent 20%);
+  opacity: var(--stem-opacity);
+}
+.mock-a {
+  --shackle: rgba(218, 216, 208, 0.92);
+  --bar: rgba(168, 128, 31, 0.48);
+  --shackle-w: 32px;
+  --shackle-h: 28px;
+  --shackle-stroke: 6px;
+  --shackle-x: 8px;
+  --shackle-y: -18px;
+  --latch-x: 36px;
+  --latch-y: 13px;
+  --bar-w: 15px;
+  --bar-h: 6px;
+  --latch-gap: 4px;
+  --stem-h: 38px;
+  --stem-opacity: 0.52;
+}
+.mock-b {
+  --shackle: rgba(218, 216, 208, 0.94);
+  --bar: rgba(168, 128, 31, 0.62);
+  --shackle-w: 34px;
+  --shackle-h: 31px;
+  --shackle-stroke: 7px;
+  --shackle-x: 7px;
+  --shackle-y: -22px;
+  --latch-x: 35px;
+  --latch-y: 13px;
+  --bar-w: 18px;
+  --bar-h: 7px;
+  --latch-gap: 4px;
+  --stem-h: 40px;
+  --stem-opacity: 0.62;
+}
+.mock-c {
+  --shackle: rgba(218, 216, 208, 0.88);
+  --bar: rgba(168, 128, 31, 0.42);
+  --shackle-w: 30px;
+  --shackle-h: 26px;
+  --shackle-stroke: 5px;
+  --shackle-x: 9px;
+  --shackle-y: -16px;
+  --latch-x: 37px;
+  --latch-y: 14px;
+  --bar-w: 12px;
+  --bar-h: 6px;
+  --latch-gap: 4px;
+  --stem-h: 36px;
+  --stem-opacity: 0.42;
+}
+.mock-d {
+  --shackle: rgba(41, 53, 108, 0.28);
+  --bar: rgba(41, 53, 108, 0.32);
+  --shackle-w: 32px;
+  --shackle-h: 28px;
+  --shackle-stroke: 6px;
+  --shackle-x: 8px;
+  --shackle-y: -18px;
+  --latch-x: 36px;
+  --latch-y: 13px;
+  --bar-w: 15px;
+  --bar-h: 6px;
+  --latch-gap: 4px;
+  --stem-h: 38px;
+  --stem-opacity: 0.48;
+}
+.mock-e {
+  --shackle: rgba(218, 216, 208, 0.92);
+  --bar: rgba(168, 128, 31, 0.48);
+  --shackle-w: 32px;
+  --shackle-h: 28px;
+  --shackle-stroke: 6px;
+  --shackle-x: 8px;
+  --shackle-y: -18px;
+  --latch-x: 37px;
+  --latch-y: 13px;
+  --bar-w: 13px;
+  --bar-h: 6px;
+  --latch-gap: 4px;
+  --stem-h: 38px;
+  --stem-opacity: 0;
+}
+.mock-f {
+  --shackle: rgba(218, 216, 208, 0.88);
+  --bar: rgba(138, 130, 118, 0.42);
+  --shackle-w: 30px;
+  --shackle-h: 27px;
+  --shackle-stroke: 5px;
+  --shackle-x: 9px;
+  --shackle-y: -17px;
+  --latch-x: 36px;
+  --latch-y: 14px;
+  --bar-w: 15px;
+  --bar-h: 5px;
+  --latch-gap: 3px;
+  --stem-h: 35px;
+  --stem-opacity: 0.44;
+}
+.mock-b .block::before { border-color: rgba(168, 128, 31, 0.42); }
+.mock-d .block {
+  background: linear-gradient(145deg, #fafdff 0%, #e9f1f6 56%, #ccd8df 100%);
+}
+.mock-d .block::before {
+  border-color: rgba(41, 53, 108, 0.32);
+}
+.mock-e .disc {
+  background: linear-gradient(180deg, rgba(239, 227, 174, 0.54), rgba(204, 164, 62, 0.30));
+}
+@media (max-width: 420px) {
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header><h1>Tsugai</h1></header>
+<p class="note">通常ホームエンブレムの座標に完全準拠。皿・2ブロックは最終形と同じ位置で、南京錠パーツだけを追加しています。右ラッチは短めです。</p>
+
+<main class="grid">
+  <article class="card">
+    <div class="card-head"><h2>A: standard</h2><span class="tag">base</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="emblem mock-a"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div><div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">通常座標準拠の標準案。ラッチは短め、南京錠感も残す。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>B: readable</h2><span class="tag">lock</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="emblem mock-b"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div><div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">取っ手とラッチを少し強く。遠目で南京錠と分かりやすい。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>C: tiny latch</h2><span class="tag">short</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="emblem mock-c"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div><div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">ラッチをかなり短く。通常エンブレムへの馴染みを優先。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>D: cool</h2><span class="tag">blue</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="emblem mock-d"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div><div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">本体を薄い青へ。解除後の青エンブレムに近いが未解放感は弱め。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>E: no stem</h2><span class="tag">simple</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="emblem mock-e"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div><div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">縦線なし。解除アニメーションではラッチだけ外せる。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>F: quiet gray</h2><span class="tag">soft</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="emblem mock-f"><div class="disc"></div><div class="shackle back-shackle"></div><div class="block back"></div><div class="shackle front-shackle"></div><div class="block front"></div><div class="latch back-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><div class="latch front-latch"><span class="stem"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div></div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div><div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">ラッチをグレー化。主張を抑えたい場合の案。</p>
+  </article>
+</main>
+</body>
+</html>

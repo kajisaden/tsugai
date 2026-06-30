@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Double Lock Emblem Mock</title>
+<style>
+:root {
+  --bg: #f3efe6;
+  --panel: #fbf8f1;
+  --text: #2b2620;
+  --text-dim: #8a8276;
+  --gold: #a8801f;
+  --logo: #29356c;
+  --blue: #5874f0;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: radial-gradient(120% 100% at 50% 0%, #fbf7ed 0%, var(--bg) 60%);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+header {
+  display: grid;
+  justify-items: center;
+  padding: 30px 16px 10px;
+}
+h1 {
+  margin: 0;
+  color: var(--logo);
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+}
+.note {
+  width: min(560px, calc(100vw - 32px));
+  margin: 8px auto 16px;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.grid {
+  width: min(560px, calc(100vw - 32px));
+  margin: 0 auto 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.card {
+  min-height: 342px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 18px 18px 20px;
+  border-radius: 24px;
+  background: rgba(251, 248, 241, 0.72);
+  border: 1px solid rgba(95, 75, 56, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.56), 0 12px 28px rgba(70, 55, 30, 0.08);
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card h2 {
+  margin: 0;
+  color: var(--logo);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.tag {
+  color: var(--gold);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.home-sample {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 10px;
+}
+.status {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  color: transparent;
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.stage {
+  display: grid;
+  grid-template-columns: 56px 160px 56px;
+  align-items: center;
+  justify-items: center;
+}
+.arrow {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+}
+.arrow svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.slot {
+  width: 160px;
+  height: 122px;
+  display: grid;
+  place-items: center;
+  padding-bottom: 18px;
+}
+.level {
+  width: 180px;
+  display: grid;
+  grid-template-columns: auto 3.2em;
+  align-items: center;
+  justify-content: center;
+  column-gap: 0.35em;
+  color: var(--blue);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  transform: translateX(14px);
+}
+.play {
+  width: min(220px, 72vw);
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-top: 34px;
+  border-radius: 999px;
+  color: rgba(41, 53, 108, 0.64);
+  background: linear-gradient(180deg, rgba(232, 224, 208, 0.85), rgba(211, 202, 186, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.desc {
+  margin: 14px 0 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.emblem {
+  position: relative;
+  width: 124px;
+  height: 99px;
+}
+.disc {
+  position: absolute;
+  left: 10px;
+  top: 54px;
+  width: 105px;
+  height: 43px;
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgba(234, 225, 209, 0.58), rgba(214, 203, 184, 0.42));
+  border: 1px solid rgba(138, 120, 92, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 8px 11px rgba(64, 50, 30, 0.12);
+}
+.block {
+  position: absolute;
+  width: 49px;
+  height: 49px;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #fafdff 0%, #b7ddec 52%, #72a8c4 100%);
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.46),
+    inset -3px -3px 0 rgba(74, 48, 35, 0.14),
+    0 2px 4px rgba(92, 62, 45, 0.12);
+}
+.block::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2.5px solid rgba(74, 126, 154, 0.74);
+}
+.block::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  left: 12px;
+  top: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.54);
+}
+.back {
+  left: 53px;
+  top: 17px;
+  z-index: 1;
+}
+.front {
+  left: 22px;
+  top: 35px;
+  z-index: 2;
+}
+.lock-part {
+  position: absolute;
+  pointer-events: none;
+}
+.shackle {
+  width: 30px;
+  height: 25px;
+  border: 5px solid var(--lock);
+  border-bottom: 0;
+  border-radius: 15px 15px 0 0;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.34));
+}
+.hole {
+  width: 8px;
+  height: 17px;
+  color: var(--hole);
+}
+.hole::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.hole::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 5px;
+  width: 4px;
+  height: 12px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.front-shackle { left: 31px; top: 19px; z-index: 5; }
+.front-hole { left: 42px; top: 51px; z-index: 6; }
+.back-shackle { left: 62px; top: 1px; z-index: 4; }
+.back-hole { left: 73px; top: 33px; z-index: 5; }
+
+.mock-a { --lock: rgba(41, 53, 108, 0.74); --hole: rgba(41, 53, 108, 0.58); }
+.mock-b { --lock: rgba(168, 128, 31, 0.72); --hole: rgba(168, 128, 31, 0.60); }
+.mock-c { --lock: rgba(138, 130, 118, 0.74); --hole: rgba(96, 87, 75, 0.48); }
+.mock-d { --lock: rgba(168, 128, 31, 0.68); --hole: rgba(41, 53, 108, 0.52); }
+.mock-e { --lock: rgba(41, 53, 108, 0.62); --hole: transparent; }
+.mock-f { --lock: rgba(168, 128, 31, 0.58); --hole: rgba(168, 128, 31, 0.46); }
+
+.mock-b .disc,
+.mock-d .disc {
+  background: linear-gradient(180deg, rgba(239, 227, 174, 0.58), rgba(204, 164, 62, 0.36));
+  border-color: rgba(168, 128, 31, 0.16);
+}
+.mock-c .block,
+.mock-f .block {
+  background: linear-gradient(145deg, #fffdf8 0%, #eee5d6 56%, #d6cab8 100%);
+}
+.mock-c .block::before,
+.mock-f .block::before {
+  border-color: rgba(138, 130, 118, 0.48);
+}
+.mock-d .block {
+  background: linear-gradient(145deg, #fafdff 0%, #cce7f2 52%, #8ebed5 100%);
+}
+.mock-e .shackle {
+  height: 20px;
+  border-width: 4px;
+  opacity: 0.86;
+}
+.mock-e .hole::before,
+.mock-e .hole::after { display: none; }
+.mock-e .block::before {
+  border-color: rgba(41, 53, 108, 0.45);
+}
+.mock-f .shackle {
+  border-style: dashed;
+  opacity: 0.9;
+}
+.mock-f .hole {
+  opacity: 0.72;
+}
+@media (max-width: 420px) {
+  .grid { grid-template-columns: 1fr; }
+  .card { min-height: 320px; }
+}
+</style>
+</head>
+<body>
+<header><h1>Tsugai</h1></header>
+<p class="note">通常エンブレムの2ブロックを同じ位置に置き、それぞれを小さな南京錠化した案。解放時は取っ手と鍵穴だけを外す想定です。</p>
+
+<main class="grid">
+  <article class="card">
+    <div class="card-head"><h2>A: logo navy</h2><span class="tag">clear</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot">
+          <div class="emblem mock-a">
+            <div class="disc"></div><div class="block back"></div><div class="block front"></div>
+            <div class="lock-part shackle back-shackle"></div><div class="lock-part hole back-hole"></div>
+            <div class="lock-part shackle front-shackle"></div><div class="lock-part hole front-hole"></div>
+          </div>
+        </div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">ロゴ紺のロックパーツ。読み取りやすく、青ブロックとも馴染む。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>B: gold parts</h2><span class="tag">reward</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot">
+          <div class="emblem mock-b">
+            <div class="disc"></div><div class="block back"></div><div class="block front"></div>
+            <div class="lock-part shackle back-shackle"></div><div class="lock-part hole back-hole"></div>
+            <div class="lock-part shackle front-shackle"></div><div class="lock-part hole front-hole"></div>
+          </div>
+        </div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">金パーツ。解除のご褒美感はあるが、BEST CLEARの金と少し意味が近い。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>C: cream blocks</h2><span class="tag">locked</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot">
+          <div class="emblem mock-c">
+            <div class="disc"></div><div class="block back"></div><div class="block front"></div>
+            <div class="lock-part shackle back-shackle"></div><div class="lock-part hole back-hole"></div>
+            <div class="lock-part shackle front-shackle"></div><div class="lock-part hole front-hole"></div>
+          </div>
+        </div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">ブロック自体も未解放色。解除後に青へ変わる演出を足すなら強い。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>D: mixed</h2><span class="tag">balanced</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot">
+          <div class="emblem mock-d">
+            <div class="disc"></div><div class="block back"></div><div class="block front"></div>
+            <div class="lock-part shackle back-shackle"></div><div class="lock-part hole back-hole"></div>
+            <div class="lock-part shackle front-shackle"></div><div class="lock-part hole front-hole"></div>
+          </div>
+        </div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">本体は青、取っ手は金、鍵穴は紺。意味と馴染みのバランス狙い。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>E: handle only</h2><span class="tag">quiet</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot">
+          <div class="emblem mock-e">
+            <div class="disc"></div><div class="block back"></div><div class="block front"></div>
+            <div class="lock-part shackle back-shackle"></div><div class="lock-part hole back-hole"></div>
+            <div class="lock-part shackle front-shackle"></div><div class="lock-part hole front-hole"></div>
+          </div>
+        </div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">鍵穴なし。上品だが、南京錠としては少し弱い。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>F: soft seal</h2><span class="tag">light</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot">
+          <div class="emblem mock-f">
+            <div class="disc"></div><div class="block back"></div><div class="block front"></div>
+            <div class="lock-part shackle back-shackle"></div><div class="lock-part hole back-hole"></div>
+            <div class="lock-part shackle front-shackle"></div><div class="lock-part hole front-hole"></div>
+          </div>
+        </div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">線を軽くして封印っぽく。アニメーションで外れる軽さは一番出しやすい。</p>
+  </article>
+</main>
+</body>
+</html>

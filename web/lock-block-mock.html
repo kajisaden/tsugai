@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tsugai Block Lock Mock</title>
+<style>
+:root {
+  --bg: #f3efe6;
+  --panel: #fbf8f1;
+  --line: rgba(95, 75, 56, 0.15);
+  --text: #2b2620;
+  --text-dim: #8a8276;
+  --gold: #a8801f;
+  --logo: #29356c;
+  --blue: #5874f0;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: radial-gradient(120% 100% at 50% 0%, #fbf7ed 0%, var(--bg) 60%);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+header {
+  display: grid;
+  justify-items: center;
+  padding: 30px 16px 10px;
+}
+h1 {
+  margin: 0;
+  color: var(--logo);
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+}
+.note {
+  width: min(560px, calc(100vw - 32px));
+  margin: 8px auto 16px;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.grid {
+  width: min(560px, calc(100vw - 32px));
+  margin: 0 auto 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.card {
+  min-height: 340px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 18px 18px 20px;
+  border-radius: 24px;
+  background: rgba(251, 248, 241, 0.72);
+  border: 1px solid rgba(95, 75, 56, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.56), 0 12px 28px rgba(70, 55, 30, 0.08);
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card h2 {
+  margin: 0;
+  color: var(--logo);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.tag {
+  color: var(--gold);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.home-sample {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 10px;
+}
+.status {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  color: transparent;
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.stage {
+  display: grid;
+  grid-template-columns: 56px 160px 56px;
+  align-items: center;
+  justify-items: center;
+}
+.arrow {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+}
+.arrow svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.slot {
+  width: 160px;
+  height: 122px;
+  display: grid;
+  place-items: center;
+  padding-bottom: 18px;
+}
+.level {
+  width: 180px;
+  display: grid;
+  grid-template-columns: auto 3.2em;
+  align-items: center;
+  justify-content: center;
+  column-gap: 0.35em;
+  color: var(--blue);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  transform: translateX(14px);
+}
+.play {
+  width: min(220px, 72vw);
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-top: 34px;
+  border-radius: 999px;
+  color: rgba(41, 53, 108, 0.64);
+  background: linear-gradient(180deg, rgba(232, 224, 208, 0.85), rgba(211, 202, 186, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.desc {
+  margin: 14px 0 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.block-lock {
+  position: relative;
+  width: 124px;
+  height: 99px;
+}
+.block-lock svg {
+  position: absolute;
+  inset: 0;
+  width: 124px;
+  height: 99px;
+  overflow: visible;
+}
+.dish {
+  fill: url(#dish-gold-soft);
+  filter: drop-shadow(0 8px 11px rgba(64, 50, 30, 0.12));
+}
+.block {
+  filter: drop-shadow(0 5px 8px rgba(64, 50, 30, 0.12));
+}
+.block-fill {
+  fill: url(#lock-block-blue);
+}
+.block-stroke {
+  fill: none;
+  stroke: rgba(74, 126, 154, 0.74);
+  stroke-width: 4.5;
+}
+.hi { fill: rgba(255,255,255,0.58); }
+.shackle {
+  fill: none;
+  stroke: rgba(74, 126, 154, 0.74);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.slot-line {
+  fill: none;
+  stroke: rgba(41, 53, 108, 0.62);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.keyhole {
+  fill: rgba(41, 53, 108, 0.58);
+}
+.seal {
+  fill: rgba(168, 128, 31, 0.58);
+}
+
+.mock-b .block-fill { fill: url(#lock-block-cream); }
+.mock-b .block-stroke,
+.mock-b .shackle { stroke: rgba(168, 128, 31, 0.72); }
+.mock-b .keyhole,
+.mock-b .slot-line { stroke: rgba(168, 128, 31, 0.72); fill: rgba(168, 128, 31, 0.56); }
+
+.mock-c .block-fill { fill: url(#lock-block-white); }
+.mock-c .block-stroke,
+.mock-c .shackle { stroke: rgba(41, 53, 108, 0.66); }
+.mock-c .keyhole { fill: rgba(41, 53, 108, 0.52); }
+
+.mock-d .block-fill { fill: url(#lock-block-muted); }
+.mock-d .block-stroke,
+.mock-d .shackle { stroke: rgba(138, 130, 118, 0.7); }
+.mock-d .keyhole,
+.mock-d .slot-line { fill: rgba(96, 87, 75, 0.48); stroke: rgba(96, 87, 75, 0.5); }
+
+.mock-e .block-fill { fill: url(#lock-block-blue); }
+.mock-e .block-stroke { stroke: rgba(74, 126, 154, 0.74); }
+.mock-e .strap { fill: rgba(168, 128, 31, 0.28); stroke: rgba(168, 128, 31, 0.58); stroke-width: 2; }
+
+.mock-f .block-fill { fill: url(#lock-block-cream); }
+.mock-f .block-stroke { stroke: rgba(168, 128, 31, 0.66); }
+.mock-f .shackle { stroke: rgba(168, 128, 31, 0.64); }
+.mock-f .seal { fill: rgba(41, 53, 108, 0.58); }
+
+@media (max-width: 420px) {
+  .grid { grid-template-columns: 1fr; }
+  .card { min-height: 320px; }
+}
+</style>
+</head>
+<body>
+<header><h1>Tsugai</h1></header>
+<p class="note">皿あり固定。南京錠を既存のTsugaiブロックの角丸・重なり・ハイライトに寄せた案です。</p>
+
+<svg width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="dish-gold-soft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f1e4ae"/>
+      <stop offset="0.55" stop-color="#dcc170"/>
+      <stop offset="1" stop-color="#c49d34"/>
+    </linearGradient>
+    <linearGradient id="lock-block-blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fafdff"/>
+      <stop offset="0.48" stop-color="#b7ddec"/>
+      <stop offset="1" stop-color="#72a8c4"/>
+    </linearGradient>
+    <linearGradient id="lock-block-cream" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffdf8"/>
+      <stop offset="1" stop-color="#eadfcb"/>
+    </linearGradient>
+    <linearGradient id="lock-block-white" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#edf3f7"/>
+    </linearGradient>
+    <linearGradient id="lock-block-muted" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#faf7ef"/>
+      <stop offset="1" stop-color="#d7cebd"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<main class="grid">
+  <article class="card">
+    <div class="card-head"><h2>A: one block</h2><span class="tag">simple</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="block-lock mock-a">
+          <svg viewBox="0 0 124 99"><rect class="dish" x="10" y="54" width="105" height="43" rx="13"/><path class="shackle" d="M43 47V36c0-14 8-22 19-22s19 8 19 22v11"/><rect class="block block-fill" x="35" y="42" width="54" height="46" rx="13"/><rect class="block-stroke" x="35" y="42" width="54" height="46" rx="13"/><circle class="hi" cx="51" cy="55" r="7"/><circle class="keyhole" cx="62" cy="65" r="4"/><rect class="keyhole" x="60" y="66" width="4" height="11" rx="2"/></svg>
+        </div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">標準南京錠をブロック化。読み取りやすく、実装も軽い。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>B: cream block</h2><span class="tag">soft</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="block-lock mock-b">
+          <svg viewBox="0 0 124 99"><rect class="dish" x="10" y="54" width="105" height="43" rx="13"/><path class="shackle" d="M43 47V36c0-14 8-22 19-22s19 8 19 22v11"/><rect class="block block-fill" x="35" y="42" width="54" height="46" rx="13"/><rect class="block-stroke" x="35" y="42" width="54" height="46" rx="13"/><circle class="hi" cx="51" cy="55" r="7"/><circle class="keyhole" cx="62" cy="65" r="4"/><rect class="keyhole" x="60" y="66" width="4" height="11" rx="2"/></svg>
+        </div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">未解放っぽさが強い。青ブロックとの差分も明確。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>C: twin blocks</h2><span class="tag">tsugai</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="block-lock mock-c">
+          <svg viewBox="0 0 124 99"><rect class="dish" x="10" y="54" width="105" height="43" rx="13"/><path class="shackle" d="M45 47V36c0-13 7-21 17-21s17 8 17 21v11"/><rect class="block block-fill" x="53" y="30" width="41" height="41" rx="11"/><rect class="block-stroke" x="53" y="30" width="41" height="41" rx="11"/><rect class="block block-fill" x="31" y="48" width="46" height="40" rx="11"/><rect class="block-stroke" x="31" y="48" width="46" height="40" rx="11"/><circle class="hi" cx="64" cy="40" r="5"/><circle class="hi" cx="43" cy="58" r="5"/><circle class="keyhole" cx="55" cy="69" r="3.4"/><rect class="keyhole" x="53.4" y="70" width="3.2" height="9" rx="1.6"/></svg>
+        </div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">既存エンブレムに最も近い。錠前としては少し読み取りに時間がかかる。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>D: slot lock</h2><span class="tag">mark</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="block-lock mock-d">
+          <svg viewBox="0 0 124 99"><rect class="dish" x="10" y="54" width="105" height="43" rx="13"/><path class="shackle" d="M39 48V37c0-15 9-24 23-24s23 9 23 24v11"/><rect class="block block-fill" x="30" y="43" width="64" height="45" rx="14"/><rect class="block-stroke" x="30" y="43" width="64" height="45" rx="14"/><circle class="hi" cx="46" cy="56" r="6"/><path class="slot-line" d="M52 67h20"/></svg>
+        </div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">鍵穴を線スロットに簡略化。アイコンとして上品で、遠目でもうるさくない。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>E: strapped pair</h2><span class="tag">pair</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="block-lock mock-e">
+          <svg viewBox="0 0 124 99"><rect class="dish" x="10" y="54" width="105" height="43" rx="13"/><rect class="block block-fill" x="53" y="28" width="42" height="42" rx="11"/><rect class="block-stroke" x="53" y="28" width="42" height="42" rx="11"/><rect class="block block-fill" x="30" y="48" width="48" height="40" rx="11"/><rect class="block-stroke" x="30" y="48" width="48" height="40" rx="11"/><rect class="strap" x="50" y="46" width="34" height="12" rx="6" transform="rotate(-24 67 52)"/><circle class="hi" cx="64" cy="39" r="5"/><circle class="hi" cx="42" cy="58" r="5"/><circle class="keyhole" cx="58" cy="68" r="3.4"/><rect class="keyhole" x="56.4" y="69" width="3.2" height="9" rx="1.6"/></svg>
+        </div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">二つのブロックが帯で封じられている案。南京錠よりTsugaiらしい。</p>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><h2>F: seal block</h2><span class="tag">seal</span></div>
+    <div class="home-sample">
+      <div class="status"> </div>
+      <div class="stage">
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></div>
+        <div class="slot"><div class="block-lock mock-f">
+          <svg viewBox="0 0 124 99"><rect class="dish" x="10" y="54" width="105" height="43" rx="13"/><path class="shackle" d="M43 47V36c0-14 8-22 19-22s19 8 19 22v11"/><rect class="block block-fill" x="35" y="42" width="54" height="46" rx="13"/><rect class="block-stroke" x="35" y="42" width="54" height="46" rx="13"/><circle class="hi" cx="51" cy="55" r="7"/><circle class="seal" cx="62" cy="66" r="8"/><path d="M58 66h8" stroke="#fbf8f1" stroke-width="3" stroke-linecap="round"/></svg>
+        </div></div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>
+      </div>
+      <div class="level"><span>レベル</span><span>6</span></div>
+      <div class="play">レベル5 CLEARで開放</div>
+    </div>
+    <p class="desc">鍵穴ではなく封印マーク。日本語UIには馴染むが、ロック意味は少し抽象的。</p>
+  </article>
+</main>
+</body>
+</html>

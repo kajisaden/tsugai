@@ -87,6 +87,49 @@ function markBest(puzId) {
   localStorage.setItem(BEST_KEY, JSON.stringify([...bestCleared]));
 }
 
+// ---- レベルロック ----
+// ON: レベルNクリアでN+1を解放。既存データは先頭からの連続クリアで安全に移行する。
+const LEVEL_LOCK_KEY = 'nikenzume.levelLock.v1';
+const UNLOCKED_KEY = 'nikenzume.unlocked.v1';
+let levelLockOn = localStorage.getItem(LEVEL_LOCK_KEY) !== '0';
+function loadUnlockedState() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(UNLOCKED_KEY)); } catch (e) {}
+  if (!s || typeof s !== 'object') s = {};
+  return s;
+}
+let unlockedState = loadUnlockedState();
+function saveUnlockedState() { localStorage.setItem(UNLOCKED_KEY, JSON.stringify(unlockedState)); }
+function contiguousUnlockedIndex(mode = curMode) {
+  const levels = MODES[mode].levels;
+  if (!levels.length) return 0;
+  let clearedRun = 0;
+  while (clearedRun < levels.length && cleared.has(levels[clearedRun].id)) clearedRun++;
+  return Math.min(clearedRun, levels.length - 1);
+}
+function unlockedIndex(mode = curMode) {
+  const levels = MODES[mode].levels;
+  if (!levels.length) return 0;
+  const saved = Number.isFinite(unlockedState[mode]) ? unlockedState[mode] : 0;
+  return Math.max(0, Math.min(levels.length - 1, Math.max(saved, contiguousUnlockedIndex(mode))));
+}
+function isLevelPlayable(index, mode = curMode) {
+  return !levelLockOn || index <= unlockedIndex(mode);
+}
+function defaultHomeIndex() {
+  return levelLockOn ? unlockedIndex(curMode) : nextHomeIndex();
+}
+function unlockAfterClear(mode, index) {
+  const levels = MODES[mode].levels;
+  if (!levels.length || index < 0 || index >= levels.length) return;
+  const next = Math.min(index + 1, levels.length - 1);
+  const current = unlockedIndex(mode);
+  if (next > current) {
+    unlockedState[mode] = next;
+    saveUnlockedState();
+  }
+}
+
 // ヒント設定(問題ごと)。違う問題に移ると必ずオフから始める(同じ問題の初形/答え再生では保持)。
 // light=ぶつかる壁を常時光らせる。next は旧UI互換の保存値だけ残す。
 const hintSettings = { light: false };
@@ -341,19 +384,26 @@ function homeStatusLabel(isBest, isCleared) {
   return '';
 }
 
+function isHomeLevelLocked(index) {
+  return levelLockOn && index > unlockedIndex();
+}
+
 function homeViewState(index) {
   const levels = chapterLevels(CHAPTERS[0]);
   const clamped = clampHomeIndex(index);
   const puz = levels[clamped];
   const isCleared = puz && cleared.has(puz.id);
   const isBest = puz && bestCleared.has(puz.id);
+  const isLocked = isHomeLevelLocked(clamped);
   return {
     index: clamped,
     puz,
     isCleared,
     isBest,
-    isBoss: !!modeData().boss[clamped],
-    statusText: homeStatusLabel(isBest, isCleared),
+    isLocked,
+    unlockByLevel: Math.max(1, clamped),
+    isBoss: !isLocked && !!modeData().boss[clamped],
+    statusText: isLocked ? '' : homeStatusLabel(isBest, isCleared),
   };
 }
 
@@ -369,7 +419,7 @@ function renderHomePanel(panel, state, options = {}) {
 
   const em = panel.querySelector('.home-emblem');
   em.className = 'emblem home-emblem ' +
-    (state.isBest ? 'best' : state.isCleared ? 'win' : 'pending') +
+    (state.isLocked ? 'locked pending' : state.isBest ? 'best' : state.isCleared ? 'win' : 'pending') +
     (state.isBoss ? ' boss' : '') +
     (feedback ? ' clear-feedback' : '');
 }
@@ -378,7 +428,7 @@ function renderHome(options = {}) {
   const feedback = !!options.feedback;
   curChapter = CHAPTERS[0];
   const levels = chapterLevels(CHAPTERS[0]);
-  if (homeIndex == null) homeIndex = nextHomeIndex();
+  if (homeIndex == null) homeIndex = defaultHomeIndex();
   homeIndex = clampHomeIndex(homeIndex);
   const center = $('.home-center');
   center.classList.remove('home-transitioning', 'home-slide-forward', 'home-slide-back', 'home-level-up', 'home-level-down');
@@ -415,9 +465,11 @@ function renderHome(options = {}) {
 
   const stepLocked = homeControlsLocked || !!transition;
   center.classList.toggle('controls-locked', stepLocked);
+  const playButton = $('#home-play');
   $('#home-prev').disabled = stepLocked || homeIndex <= 0;
   $('#home-next').disabled = stepLocked || homeIndex >= levels.length - 1;
-  $('#home-play').disabled = !currentState.puz;
+  playButton.disabled = !currentState.puz || currentState.isLocked;
+  playButton.textContent = currentState.isLocked ? t('unlockByClear', { n: currentState.unlockByLevel }) : t('homePlay');
 }
 
 function showChapters(options = {}) {
@@ -435,8 +487,20 @@ function setHomeIndex(index) {
   showChapters({ animate: false });
 }
 
+function goHomeFromHeader() {
+  if (!$('#view-play').hidden && curChapter) {
+    setHomeIndex(curIndex);
+    return;
+  }
+  if (!$('#view-levels').hidden) {
+    setHomeIndex(homeIndex == null ? defaultHomeIndex() : homeIndex);
+    return;
+  }
+  showChapters();
+}
+
 function startHomeSlide(toIndex, options = {}) {
-  const fromIndex = clampHomeIndex(homeIndex == null ? nextHomeIndex() : homeIndex);
+  const fromIndex = clampHomeIndex(homeIndex == null ? defaultHomeIndex() : homeIndex);
   const nextIndex = clampHomeIndex(toIndex);
   homeFeedback = false;
   clearTimeout(homeAutoAdvanceTimer);
@@ -465,12 +529,12 @@ function startHomeSlide(toIndex, options = {}) {
 
 function homePrev() {
   if (homeControlsLocked) return;
-  startHomeSlide((homeIndex == null ? nextHomeIndex() : homeIndex) - 1);
+  startHomeSlide((homeIndex == null ? defaultHomeIndex() : homeIndex) - 1);
 }
 
 function homeNext() {
   if (homeControlsLocked) return;
-  startHomeSlide((homeIndex == null ? nextHomeIndex() : homeIndex) + 1);
+  startHomeSlide((homeIndex == null ? defaultHomeIndex() : homeIndex) + 1);
 }
 
 let homeSwipeStart = null;
@@ -552,19 +616,29 @@ function showLevels(ch) {
     const btn = document.createElement('button');
     const isCleared = cleared.has(p.id);
     const isBest = bestCleared.has(p.id);
-    btn.className = 'level-tile' + (isCleared ? ' cleared' : '') + (isBest ? ' best' : '') + (isBoss ? ' boss' : '');
+    const isLocked = !isLevelPlayable(globalIdx);
+    btn.className = 'level-tile' +
+      (!isLocked && isCleared ? ' cleared' : '') +
+      (!isLocked && isBest ? ' best' : '') +
+      (!isLocked && isBoss ? ' boss' : '') +
+      (isLocked ? ' locked' : '');
+    btn.disabled = isLocked;
     const emblem = (state) =>
       `<span class="lv-emblem level-emblem ${state}${isBoss ? ' boss' : ''}"><span class="le-inner">` +
       `<span class="le-disc"></span>` +
       `<span class="le-ball eb1"></span><span class="le-ball eb2"></span></span></span>`;
-    const mark = isBest
-      ? emblem('best')
-      : isCleared
-        ? emblem('win')
-        : t('levelMoves', { n: p.solution.minMoves });
+    const mark = isLocked
+      ? t('levelLocked')
+      : isBest
+        ? emblem('best')
+        : isCleared
+          ? emblem('win')
+          : t('levelMoves', { n: p.solution.minMoves });
     btn.innerHTML = `<span class="lv-no">${globalIdx + 1}</span>` +
       `<span class="lv-moves">${mark}</span>`;
-    btn.addEventListener('click', () => startPuzzle(ch, i));
+    btn.addEventListener('click', () => {
+      if (!isLocked) startPuzzle(ch, i);
+    });
     grid.append(btn);
   });
 }
@@ -693,8 +767,10 @@ function startDailyPuzzle(entrance = true) {
 }
 
 function startHomePuzzle() {
-  const index = homeIndex == null ? nextHomeIndex() : homeIndex;
-  startPuzzle(CHAPTERS[0], clampHomeIndex(index));
+  const index = homeIndex == null ? defaultHomeIndex() : homeIndex;
+  const clamped = clampHomeIndex(index);
+  if (isHomeLevelLocked(clamped)) return;
+  startPuzzle(CHAPTERS[0], clamped);
 }
 
 function restartCurrentPuzzle(entrance = true) {
@@ -1094,6 +1170,7 @@ async function checkClear() {
   if (!dailyMode) {
     markCleared(G.puz.id);
     if (best) markBest(G.puz.id);
+    unlockAfterClear(curMode, curIndex);
   }
   lastClear = { moves: G.moves, min, best, index: curIndex };
 
@@ -1506,6 +1583,7 @@ function updateSettingsUI() {
   const lv = $('#lang-value'); if (lv) lv.textContent = locale === 'ja' ? '日本語' : 'English';
   const se = $('#sw-se'); if (se) se.setAttribute('aria-pressed', String(seOn));
   const hp = $('#sw-haptics'); if (hp) hp.setAttribute('aria-pressed', String(hapticsOn));
+  const ll = $('#sw-level-lock'); if (ll) ll.setAttribute('aria-pressed', String(levelLockOn));
 }
 // 言語切替: ロケール変更→保存→静的文言再翻訳→表示中ビューの動的文言を再描画
 function relocalize(newLocale) {
@@ -1528,6 +1606,8 @@ function resetProgress() {
   if (!confirm(t('resetConfirm'))) return;
   cleared.clear(); localStorage.removeItem(STORE_KEY);
   bestCleared.clear(); localStorage.removeItem(BEST_KEY);
+  unlockedState = {};
+  localStorage.removeItem(UNLOCKED_KEY);
   localStorage.removeItem(DAILY_KEY);
   if (!$('#view-chapters').hidden) showChapters();
   else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
@@ -1601,12 +1681,24 @@ $('#set-contact').addEventListener('click', () => {
 });
 $('#sw-se').addEventListener('click', () => { seOn = !seOn; localStorage.setItem(SE_KEY, seOn ? '1' : '0'); updateSettingsUI(); });
 $('#sw-haptics').addEventListener('click', () => { hapticsOn = !hapticsOn; localStorage.setItem(HAPTICS_KEY, hapticsOn ? '1' : '0'); updateSettingsUI(); });
+$('#sw-level-lock').addEventListener('click', () => {
+  levelLockOn = !levelLockOn;
+  localStorage.setItem(LEVEL_LOCK_KEY, levelLockOn ? '1' : '0');
+  if (!$('#view-chapters').hidden) {
+    homeIndex = defaultHomeIndex();
+    showChapters();
+  } else if (!$('#view-levels').hidden && curChapter) {
+    showLevels(curChapter);
+  }
+  updateSettingsUI();
+});
 // 未実装項目(data-soon)タップ → 「準備中」
 $('#settings-drawer').addEventListener('click', (e) => {
   if (e.target.closest('[data-soon]')) showToast(t('soon'));
 });
 
 $('#home-play').addEventListener('click', startHomePuzzle);
+$('#btn-home').addEventListener('click', goHomeFromHeader);
 $('#home-prev').addEventListener('click', homePrev);
 $('#home-next').addEventListener('click', homeNext);
 $('.home-hub').addEventListener('touchstart', beginHomeSwipe, { passive: true });

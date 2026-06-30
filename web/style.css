@@ -335,6 +335,79 @@ button:active { transform: translateY(1px); }
   left: 53px;
   top: 17px;
 }
+.home-emblem .emblem-lock-shackles,
+.home-emblem .emblem-lock-latches {
+  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.home-emblem.locked .emblem-lock-shackles,
+.home-emblem.locked .emblem-lock-latches {
+  display: block;
+}
+.home-emblem.locked .emblem-ball {
+  background: linear-gradient(145deg, #fafdff 0%, #e9f1f6 56%, #ccd8df 100%);
+}
+.home-emblem.locked .emblem-ball::before {
+  border-color: rgba(41, 53, 108, 0.32);
+}
+.home-emblem .emblem-lock-shackle {
+  position: absolute;
+  width: 32px;
+  height: 28px;
+  border: 6px solid rgba(41, 53, 108, 0.28);
+  border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.38));
+}
+.home-emblem .emblem-lock-shackle.front {
+  left: 30px;
+  top: 17px;
+  z-index: 2;
+}
+.home-emblem .emblem-lock-shackle.back {
+  left: 61px;
+  top: -1px;
+  z-index: 0;
+}
+.home-emblem .emblem-lock-latch {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  gap: 4px;
+}
+.home-emblem .emblem-lock-latch.front {
+  left: 58px;
+  top: 48px;
+}
+.home-emblem .emblem-lock-latch.back {
+  left: 89px;
+  top: 30px;
+}
+.home-emblem .emblem-lock-latch::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  right: 3px;
+  width: 1.5px;
+  height: 38px;
+  background: rgba(41, 53, 108, 0.26);
+  opacity: 0.48;
+}
+.home-emblem .emblem-lock-latch span {
+  width: 15px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(41, 53, 108, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.home-emblem.locked .eb1 {
+  z-index: 3;
+}
+.home-emblem.locked .emblem-lock-latch.front {
+  z-index: 4;
+}
 .home-emblem.clear-feedback .eb1 {
   animation: home-clear-feedback-eb1 720ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
@@ -437,6 +510,18 @@ button:active { transform: translateY(1px); }
   font-size: 17px;
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+.home-play:disabled {
+  cursor: default;
+  color: rgba(41, 53, 108, 0.64);
+  background: linear-gradient(180deg, rgba(232, 224, 208, 0.85), rgba(211, 202, 186, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.home-play:disabled:active {
+  transform: none;
 }
 @keyframes home-clear-feedback-eb1 {
   from { transform: translate(-26px, 12px) scale(0.92); opacity: 0; }
@@ -603,6 +688,16 @@ button:active { transform: translateY(1px); }
 .level-tile.boss { border-color: rgba(232, 176, 80, 0.5); }
 .level-tile.boss .lv-no { color: #b14a42; }
 .level-tile.boss .lv-no { font-weight: 700; }
+.level-tile.locked {
+  cursor: default;
+  opacity: 0.58;
+  border-color: rgba(43, 38, 32, 0.14);
+}
+.level-tile.locked .lv-no,
+.level-tile.locked .lv-moves {
+  color: rgba(43, 38, 32, 0.38);
+}
+.level-tile.locked:active { transform: none; }
 /* クリア印 = A画面のつがいエンブレム(縮小)。最短=金 / クリア=白(銀)。
    220x176座標の本物の意匠を transform: scale で縮小し、影も比率を保つ。 */
 .lv-emblem { position: relative; display: inline-block; width: 52px; height: 42px; }
@@ -1576,7 +1671,7 @@ body {
   box-shadow: 0 10px 16px rgba(84, 92, 104, 0.14), inset 0 2px 4px rgba(255, 255, 255, 0.72), inset 0 -6px 10px rgba(110, 124, 140, 0.22);
 }
 .home-emblem .emblem-ball {
-  border-radius: 12px;
+  border-radius: 10px;
   background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
   box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.46), inset -3px -3px 0 rgba(74, 48, 35, 0.14), 0 8px 14px rgba(92, 62, 45, 0.2);
 }
