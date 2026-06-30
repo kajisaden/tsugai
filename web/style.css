@@ -385,6 +385,7 @@ button:active { transform: translateY(1px); }
   font-size: 22px;
   line-height: 1;
   letter-spacing: 0.04em;
+  transform: translateX(14px);
 }
 .home-level-num-box {
   position: relative;
