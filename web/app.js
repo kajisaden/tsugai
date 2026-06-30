@@ -474,6 +474,7 @@ function homeNext() {
 let homeSwipeStart = null;
 function beginHomeSwipe(e) {
   if ($('#view-chapters').hidden || homeControlsLocked || homeTransition) return;
+  if (e.target.closest('.home-footer')) return;
   if (e.target.closest('button, a, input, select, textarea')) return;
   const touch = e.touches && e.touches.length === 1 ? e.touches[0] : null;
   if (!touch) return;
@@ -1606,8 +1607,8 @@ $('#settings-drawer').addEventListener('click', (e) => {
 $('#home-play').addEventListener('click', startHomePuzzle);
 $('#home-prev').addEventListener('click', homePrev);
 $('#home-next').addEventListener('click', homeNext);
-$('.home-center').addEventListener('touchstart', beginHomeSwipe, { passive: true });
-$('.home-center').addEventListener('touchend', finishHomeSwipe, { passive: true });
+$('.home-hub').addEventListener('touchstart', beginHomeSwipe, { passive: true });
+$('.home-hub').addEventListener('touchend', finishHomeSwipe, { passive: true });
 $('#home-daily').addEventListener('click', () => startDailyPuzzle());
 $('#home-list').addEventListener('click', () => showLevels(CHAPTERS[0]));
 $('#home-goals').addEventListener('click', openStats);
