@@ -449,30 +449,28 @@ button:active { transform: translateY(1px); }
   to { transform: translateY(0); opacity: 1; }
 }
 @keyframes home-slide-forward {
-  0%, 16% { transform: translateX(0); }
-  56% { transform: translateX(-71px); }
-  84%, 100% { transform: translateX(-142px); }
+  from { transform: translateX(0); }
+  to { transform: translateX(-142px); }
 }
 @keyframes home-slide-back {
-  0%, 16% { transform: translateX(-142px); }
-  56% { transform: translateX(-71px); }
-  84%, 100% { transform: translateX(0); }
+  from { transform: translateX(-142px); }
+  to { transform: translateX(0); }
 }
 @keyframes home-level-current-up {
-  0%, 16% { transform: translateY(0) rotateX(0deg); opacity: 1; }
-  64%, 100% { transform: translateY(-72%) rotateX(-86deg); opacity: 0; }
+  from { transform: translateY(0) rotateX(0deg); opacity: 1; }
+  to { transform: translateY(-72%) rotateX(-86deg); opacity: 0; }
 }
 @keyframes home-level-next-up {
-  0%, 16% { transform: translateY(72%) rotateX(86deg); opacity: 0; }
-  64%, 100% { transform: translateY(0) rotateX(0deg); opacity: 1; }
+  from { transform: translateY(72%) rotateX(86deg); opacity: 0; }
+  to { transform: translateY(0) rotateX(0deg); opacity: 1; }
 }
 @keyframes home-level-current-down {
-  0%, 16% { transform: translateY(0) rotateX(0deg); opacity: 1; }
-  64%, 100% { transform: translateY(72%) rotateX(86deg); opacity: 0; }
+  from { transform: translateY(0) rotateX(0deg); opacity: 1; }
+  to { transform: translateY(72%) rotateX(86deg); opacity: 0; }
 }
 @keyframes home-level-next-down {
-  0%, 16% { transform: translateY(-72%) rotateX(-86deg); opacity: 0; }
-  64%, 100% { transform: translateY(0) rotateX(0deg); opacity: 1; }
+  from { transform: translateY(-72%) rotateX(-86deg); opacity: 0; }
+  to { transform: translateY(0) rotateX(0deg); opacity: 1; }
 }
 .home-footer {
   position: fixed;
