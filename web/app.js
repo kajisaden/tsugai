@@ -507,7 +507,7 @@ function showHomeClearFeedback(clearIndex) {
   const nextIndex = clampHomeIndex(clearIndex + 1);
   homeAutoAdvanceTimer = setTimeout(() => {
     startHomeSlide(nextIndex);
-  }, REDUCED ? 900 : 2200);
+  }, 0);
 }
 
 document.querySelectorAll('.mode-tab').forEach(tab => {
