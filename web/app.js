@@ -305,6 +305,8 @@ let homeFeedback = false;
 let homeControlsLocked = false;
 let homeTransition = null;
 const HOME_SLIDE_MS = 680;
+const HOME_SWIPE_MIN_X = 40;
+const HOME_SWIPE_MAX_Y_RATIO = 0.6;
 function showView(name, options = {}) {
   const animate = options.animate !== false;
   for (const v of ['chapters', 'levels', 'play']) {
@@ -467,6 +469,28 @@ function homePrev() {
 function homeNext() {
   if (homeControlsLocked) return;
   startHomeSlide((homeIndex == null ? nextHomeIndex() : homeIndex) + 1);
+}
+
+let homeSwipeStart = null;
+function beginHomeSwipe(e) {
+  if (!$('#view-chapters').hidden || homeControlsLocked || homeTransition) return;
+  if (e.target.closest('button, a, input, select, textarea')) return;
+  const touch = e.touches && e.touches.length === 1 ? e.touches[0] : null;
+  if (!touch) return;
+  homeSwipeStart = { x: touch.clientX, y: touch.clientY };
+}
+
+function finishHomeSwipe(e) {
+  if (!homeSwipeStart) return;
+  const touch = e.changedTouches && e.changedTouches.length ? e.changedTouches[0] : null;
+  if (!touch) { homeSwipeStart = null; return; }
+  const dx = touch.clientX - homeSwipeStart.x;
+  const dy = touch.clientY - homeSwipeStart.y;
+  homeSwipeStart = null;
+  if (homeControlsLocked || homeTransition) return;
+  if (Math.abs(dx) < HOME_SWIPE_MIN_X) return;
+  if (Math.abs(dy) > Math.abs(dx) * HOME_SWIPE_MAX_Y_RATIO) return;
+  dx < 0 ? homeNext() : homePrev();
 }
 
 function showHomeClearFeedback(clearIndex) {
@@ -1582,6 +1606,8 @@ $('#settings-drawer').addEventListener('click', (e) => {
 $('#home-play').addEventListener('click', startHomePuzzle);
 $('#home-prev').addEventListener('click', homePrev);
 $('#home-next').addEventListener('click', homeNext);
+$('.home-center').addEventListener('touchstart', beginHomeSwipe, { passive: true });
+$('.home-center').addEventListener('touchend', finishHomeSwipe, { passive: true });
 $('#home-daily').addEventListener('click', () => startDailyPuzzle());
 $('#home-list').addEventListener('click', () => showLevels(CHAPTERS[0]));
 $('#home-goals').addEventListener('click', openStats);

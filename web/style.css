@@ -236,6 +236,7 @@ button:active { transform: translateY(1px); }
   align-content: center;
   min-height: 430px;
   padding-bottom: 26px;
+  touch-action: pan-y;
 }
 .home-slide-panel {
   width: 160px;
