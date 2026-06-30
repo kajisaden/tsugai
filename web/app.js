@@ -299,8 +299,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let curChapter = null;
 let curIndex = 0;
 let homeIndex = null;
-let homeResultTimer = null;
-let homeResultMode = false;
+let homeAutoAdvanceTimer = null;
+let homeFeedback = false;
+let homeControlsLocked = false;
 function showView(name) {
   for (const v of ['chapters', 'levels', 'play']) {
     $('#view-' + v).hidden = v !== name;
@@ -332,7 +333,8 @@ function homeStatusLabel(isBest, isCleared) {
   return '';
 }
 
-function renderHome(result = null) {
+function renderHome(options = {}) {
+  const feedback = !!options.feedback;
   curChapter = CHAPTERS[0];
   const levels = chapterLevels(CHAPTERS[0]);
   if (homeIndex == null) homeIndex = nextHomeIndex();
@@ -345,53 +347,55 @@ function renderHome(result = null) {
   em.className = 'emblem home-emblem ' +
     (isBest ? 'best' : isCleared ? 'win' : 'pending') +
     (isBoss ? ' boss' : '') +
-    (result ? ' result-enter' : '');
-  const resultText = $('#home-result-text');
+    (feedback ? ' clear-feedback' : '');
+  const statusEl = $('#home-status-text');
   const statusText = homeStatusLabel(isBest, isCleared);
-  resultText.textContent = statusText;
-  resultText.classList.toggle('empty', !statusText);
-  resultText.classList.toggle('result-active', !!result && !!statusText);
+  statusEl.textContent = statusText;
+  statusEl.classList.toggle('empty', !statusText);
+  statusEl.classList.toggle('clear-feedback', feedback && !!statusText);
   const center = $('.home-center');
-  center.classList.toggle('result-mode', !!result);
+  center.classList.toggle('controls-locked', homeControlsLocked);
   $('#home-level-no').textContent = homeIndex + 1;
-  $('#home-prev').disabled = !!result || homeIndex <= 0;
-  $('#home-next').disabled = !!result || homeIndex >= levels.length - 1;
-  $('#home-play').disabled = !!result || !puz;
+  $('#home-prev').disabled = homeControlsLocked || homeIndex <= 0;
+  $('#home-next').disabled = homeControlsLocked || homeIndex >= levels.length - 1;
+  $('#home-play').disabled = homeControlsLocked || !puz;
 }
 
 function showChapters() {
   showView('chapters');
-  renderHome(homeResultMode ? lastClear : null);
+  renderHome({ feedback: homeFeedback });
 }
 
 function setHomeIndex(index) {
-  homeResultMode = false;
-  clearTimeout(homeResultTimer);
+  homeFeedback = false;
+  homeControlsLocked = false;
+  clearTimeout(homeAutoAdvanceTimer);
   homeIndex = clampHomeIndex(index);
   showChapters();
 }
 
 function homePrev() {
-  if (homeResultMode) return;
+  if (homeControlsLocked) return;
   setHomeIndex((homeIndex == null ? nextHomeIndex() : homeIndex) - 1);
 }
 
 function homeNext() {
-  if (homeResultMode) return;
+  if (homeControlsLocked) return;
   setHomeIndex((homeIndex == null ? nextHomeIndex() : homeIndex) + 1);
 }
 
-function showHomeResult(result) {
-  if (!result) return;
-  clearTimeout(homeResultTimer);
-  homeResultMode = true;
-  homeIndex = clampHomeIndex(result.index);
+function showHomeClearFeedback(clearIndex) {
+  clearTimeout(homeAutoAdvanceTimer);
+  homeFeedback = true;
+  homeControlsLocked = true;
+  homeIndex = clampHomeIndex(clearIndex);
   showChapters();
   const em = $('#home-emblem');
-  if (!REDUCED) { em.classList.remove('result-enter'); void em.offsetWidth; em.classList.add('result-enter'); }
-  const nextIndex = clampHomeIndex(result.index + 1);
-  homeResultTimer = setTimeout(() => {
-    homeResultMode = false;
+  if (!REDUCED) { em.classList.remove('clear-feedback'); void em.offsetWidth; em.classList.add('clear-feedback'); }
+  const nextIndex = clampHomeIndex(clearIndex + 1);
+  homeAutoAdvanceTimer = setTimeout(() => {
+    homeFeedback = false;
+    homeControlsLocked = false;
     homeIndex = nextIndex;
     showChapters();
   }, REDUCED ? 900 : 2200);
@@ -984,7 +988,7 @@ async function checkClear() {
 
   const finishClearPresentation = () => {
     if (dailyMode) goToGap();
-    else showHomeResult(lastClear);
+    else showHomeClearFeedback(curIndex);
   };
 
   // 点火: ボールが弾み、ゴールに光が満ちる。約1秒見せて A画面へ。

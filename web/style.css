@@ -237,7 +237,7 @@ button:active { transform: translateY(1px); }
   min-height: 430px;
   padding-bottom: 26px;
 }
-.home-result-text {
+.home-status-text {
   min-height: 44px;
   display: grid;
   place-items: center;
@@ -247,12 +247,12 @@ button:active { transform: translateY(1px); }
   font-weight: 700;
   letter-spacing: 0.14em;
 }
-.home-result-text.empty {
+.home-status-text.empty {
   visibility: hidden;
   display: grid;
 }
-.home-result-text.result-active {
-  animation: home-result-text-pop 680ms ease-out both;
+.home-status-text.clear-feedback {
+  animation: home-clear-feedback-text-pop 680ms ease-out both;
 }
 .home-stage {
   display: grid;
@@ -275,14 +275,14 @@ button:active { transform: translateY(1px); }
 .home-emblem.boss .emblem-ball::before {
   border-color: rgba(157, 52, 44, 0.52);
 }
-.home-emblem.result-enter .eb1 {
-  animation: home-result-eb1 720ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+.home-emblem.clear-feedback .eb1 {
+  animation: home-clear-feedback-eb1 720ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.home-emblem.result-enter .eb2 {
-  animation: home-result-eb2 720ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+.home-emblem.clear-feedback .eb2 {
+  animation: home-clear-feedback-eb2 720ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.home-emblem.result-enter .emblem-disc {
-  animation: home-result-disc 720ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+.home-emblem.clear-feedback .emblem-disc {
+  animation: home-clear-feedback-disc 720ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 .home-step {
   width: 44px;
@@ -300,12 +300,12 @@ button:active { transform: translateY(1px); }
 .home-step:disabled {
   opacity: 0.34;
 }
-.home-center.result-mode .home-step,
-.home-center.result-mode .home-play {
+.home-center.controls-locked .home-step,
+.home-center.controls-locked .home-play {
   pointer-events: none;
   opacity: 0.54;
 }
-.home-center.result-mode .home-step:disabled { opacity: 0.34; }
+.home-center.controls-locked .home-step:disabled { opacity: 0.34; }
 .home-level {
   color: #5874f0;
   font-weight: 700;
@@ -329,19 +329,19 @@ button:active { transform: translateY(1px); }
   font-weight: 700;
   letter-spacing: 0.08em;
 }
-@keyframes home-result-eb1 {
+@keyframes home-clear-feedback-eb1 {
   from { transform: translate(-46px, 22px) scale(0.92); opacity: 0; }
   to { transform: translate(0, 0) scale(1); opacity: 1; }
 }
-@keyframes home-result-eb2 {
+@keyframes home-clear-feedback-eb2 {
   from { transform: translate(42px, -22px) scale(0.92); opacity: 0; }
   to { transform: translate(0, 0) scale(1); opacity: 1; }
 }
-@keyframes home-result-disc {
+@keyframes home-clear-feedback-disc {
   from { transform: translateY(8px) scaleX(0.72); opacity: 0; }
   to { transform: translateY(0) scaleX(1); opacity: 1; }
 }
-@keyframes home-result-text-pop {
+@keyframes home-clear-feedback-text-pop {
   from { transform: translateY(6px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
