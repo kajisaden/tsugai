@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tsugai Uncleared Emblem Options</title>
+<style>
+:root {
+  --bg: #f3efe6;
+  --paper: #fbf7ef;
+  --ink: #24306f;
+  --blue: #5874f0;
+  --gold: #a8801f;
+  --silver: #8e9daf;
+  --line: rgba(43, 38, 32, 0.12);
+  --dish-line: rgba(138, 120, 92, 0.24);
+  --shadow: rgba(88, 66, 45, 0.11);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background:
+    radial-gradient(120% 85% at 50% 0%, rgba(255,255,255,0.68), transparent 56%),
+    var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+  padding: 28px 18px 42px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; }
+.top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+.note { margin: 0; color: #81796d; font-size: 13px; line-height: 1.6; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+.card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 251, 242, 0.72);
+  box-shadow: 0 10px 28px rgba(98, 78, 48, 0.08);
+  padding: 18px 16px 16px;
+}
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+}
+.name {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+.tag {
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.mock {
+  min-height: 282px;
+  display: grid;
+  place-items: center;
+  padding: 12px 0 0;
+}
+.phone {
+  width: min(230px, 100%);
+  min-height: 260px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #fbf7ef 0%, #f2ecdf 100%);
+  border: 1px solid rgba(43,38,32,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+  padding: 22px 12px;
+}
+.stage {
+  display: grid;
+  grid-template-columns: 44px 112px 44px;
+  align-items: center;
+  justify-items: center;
+}
+.arrow {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+}
+.arrow svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.level {
+  color: var(--blue);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.play {
+  width: 166px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  margin-top: 42px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(180deg, #6680ff 0%, #526df3 100%);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  box-shadow: 0 10px 18px rgba(82,109,243,0.2), inset 0 1px 0 rgba(255,255,255,0.28);
+}
+.emblem {
+  position: relative;
+  width: 112px;
+  height: 90px;
+  transform: scale(0.72);
+}
+.disc {
+  position: absolute;
+  left: 9px;
+  top: 50px;
+  width: 96px;
+  height: 39px;
+  border-radius: 12px;
+}
+.balls { position: absolute; inset: 0; }
+.ball {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,0.46),
+    inset -3px -3px 0 rgba(74,48,35,0.14),
+    0 4px 8px rgba(92,62,45,0.12);
+}
+.ball::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(36,107,143,0.52);
+}
+.ball::after {
+  content: "";
+  position: absolute;
+  left: 27%;
+  top: 24%;
+  width: 18%;
+  height: 18%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.55);
+}
+.b1 { left: 20px; top: 32px; z-index: 2; }
+.b2 { left: 48px; top: 16px; z-index: 1; }
+.caption {
+  margin: 12px 0 0;
+  color: #746c61;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.a-none .disc { display: none; }
+
+.b-white .disc {
+  background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(245,241,232,0.58));
+  box-shadow:
+    0 5px 9px rgba(84, 92, 104, 0.06),
+    inset 0 1px 3px rgba(255,255,255,0.72),
+    inset 0 -3px 6px rgba(138,120,92,0.08);
+}
+
+.c-outline .disc {
+  border: 2px solid rgba(138, 120, 92, 0.28);
+  background: transparent;
+}
+
+.d-hairline .disc {
+  border: 1px solid rgba(168, 128, 31, 0.28);
+  background: rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.48);
+}
+
+.e-shadow .disc {
+  background: transparent;
+  box-shadow: 0 8px 12px rgba(88, 66, 45, 0.09);
+}
+
+.f-frost .disc {
+  background: linear-gradient(180deg, rgba(236,246,252,0.54), rgba(214,228,238,0.28));
+  border: 1px solid rgba(63, 127, 173, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.56),
+    0 4px 8px rgba(63,127,173,0.06);
+}
+
+.g-low .disc {
+  background: linear-gradient(180deg, rgba(234,225,209,0.58), rgba(214,203,184,0.42));
+  border: 1px solid rgba(138,120,92,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.34);
+}
+
+.h-dots .disc {
+  background:
+    radial-gradient(circle at 14px 14px, rgba(168,128,31,0.18) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 34px 24px, rgba(168,128,31,0.14) 0 1px, transparent 1.5px),
+    transparent;
+  border: 1px solid rgba(168,128,31,0.16);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Uncleared Emblem Options</h1>
+      <p class="note">未クリア問題の皿表現比較。金/銀クリア皿より控えめに、でもホームの空白に沈みすぎない方向。</p>
+    </div>
+    <p class="note">青ブロックは共通、皿だけ差し替え</p>
+  </div>
+
+  <div class="grid">
+    <section class="card a-none">
+      <div class="head"><h2 class="name">A. No Dish</h2><span class="tag">現行</span></div>
+      <div class="mock"><div class="phone">
+        <div class="stage"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div><div class="emblem"><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div></div>
+        <div class="level">レベル 3</div><button class="play">プレイ</button>
+      </div></div>
+      <p class="caption">皿なし。未クリア感は一番強いが、金/銀エンブレムとの差がやや大きい。</p>
+    </section>
+
+    <section class="card b-white">
+      <div class="head"><h2 class="name">B. White Dish</h2><span class="tag">白皿</span></div>
+      <div class="mock"><div class="phone">
+        <div class="stage"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div><div class="emblem"><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div></div>
+        <div class="level">レベル 3</div><button class="play">プレイ</button>
+      </div></div>
+      <p class="caption">未クリアでも完成形の構造が見える。銀皿との差は影と色味で控えめに分ける。</p>
+    </section>
+
+    <section class="card c-outline">
+      <div class="head"><h2 class="name">C. Outline Dish</h2><span class="tag">枠線のみ</span></div>
+      <div class="mock"><div class="phone">
+        <div class="stage"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div><div class="emblem"><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div></div>
+        <div class="level">レベル 3</div><button class="play">プレイ</button>
+      </div></div>
+      <p class="caption">達成前の「器だけ」を見せる案。金/銀との意味差が明快で、軽い。</p>
+    </section>
+
+    <section class="card d-hairline">
+      <div class="head"><h2 class="name">D. Hairline Dish</h2><span class="tag">薄金枠</span></div>
+      <div class="mock"><div class="phone">
+        <div class="stage"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div><div class="emblem"><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div></div>
+        <div class="level">レベル 3</div><button class="play">プレイ</button>
+      </div></div>
+      <p class="caption">枠線だけより少し暖かい。ホームの金矢印とつながりやすい案。</p>
+    </section>
+
+    <section class="card e-shadow">
+      <div class="head"><h2 class="name">E. Shadow Only</h2><span class="tag">接地影</span></div>
+      <div class="mock"><div class="phone">
+        <div class="stage"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div><div class="emblem"><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div></div>
+        <div class="level">レベル 3</div><button class="play">プレイ</button>
+      </div></div>
+      <p class="caption">皿ではなく置かれている気配だけ。最も軽いが、皿の期待感は薄い。</p>
+    </section>
+
+    <section class="card f-frost">
+      <div class="head"><h2 class="name">F. Frost Dish</h2><span class="tag">淡青白</span></div>
+      <div class="mock"><div class="phone">
+        <div class="stage"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div><div class="emblem"><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div></div>
+        <div class="level">レベル 3</div><button class="play">プレイ</button>
+      </div></div>
+      <p class="caption">青ブロックと自然につながる淡い皿。銀皿と近いので差別化は要注意。</p>
+    </section>
+
+    <section class="card g-low">
+      <div class="head"><h2 class="name">G. Low Contrast Washi</h2><span class="tag">紙色皿</span></div>
+      <div class="mock"><div class="phone">
+        <div class="stage"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div><div class="emblem"><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div></div>
+        <div class="level">レベル 3</div><button class="play">プレイ</button>
+      </div></div>
+      <p class="caption">背景になじむ紙色の皿。完成形は見えるが、未クリアとしてかなり控えめ。</p>
+    </section>
+
+    <section class="card h-dots">
+      <div class="head"><h2 class="name">H. Dotted Placeholder</h2><span class="tag">未達成記号</span></div>
+      <div class="mock"><div class="phone">
+        <div class="stage"><div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div><div class="emblem"><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div><div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div></div>
+        <div class="level">レベル 3</div><button class="play">プレイ</button>
+      </div></div>
+      <p class="caption">未達成の「点描」表現。少し装飾的なので、採用するならもっと薄くしてもよい。</p>
+    </section>
+  </div>
+</div>
+</body>
+</html>
