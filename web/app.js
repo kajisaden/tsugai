@@ -473,7 +473,7 @@ function homeNext() {
 
 let homeSwipeStart = null;
 function beginHomeSwipe(e) {
-  if (!$('#view-chapters').hidden || homeControlsLocked || homeTransition) return;
+  if ($('#view-chapters').hidden || homeControlsLocked || homeTransition) return;
   if (e.target.closest('button, a, input, select, textarea')) return;
   const touch = e.touches && e.touches.length === 1 ? e.touches[0] : null;
   if (!touch) return;
