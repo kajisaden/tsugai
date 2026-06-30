@@ -305,7 +305,8 @@ let homeFeedback = false;
 let homeControlsLocked = false;
 let homeTransition = null;
 const HOME_SLIDE_MS = 680;
-function showView(name) {
+function showView(name, options = {}) {
+  const animate = options.animate !== false;
   for (const v of ['chapters', 'levels', 'play']) {
     $('#view-' + v).hidden = v !== name;
     document.body.classList.toggle('view-' + v, v === name);
@@ -313,7 +314,7 @@ function showView(name) {
   // ③ 画面切り替えをふわっと立ち上げる(瞬間カットを和らげる)。表示中の画面に enter を付け直して毎回再生。
   // プレイ画面は②の専用登場(animatePuzzleEntrance)を使うので、ここの一律ライズは付けない。
   const cur = $('#view-' + name);
-  if (!REDUCED && cur && name !== 'play') { cur.classList.remove('view-enter'); void cur.offsetWidth; cur.classList.add('view-enter'); }
+  if (animate && !REDUCED && cur && name !== 'play') { cur.classList.remove('view-enter'); void cur.offsetWidth; cur.classList.add('view-enter'); }
   $('#app-title').hidden = name === 'play';
   $('#play-status').hidden = name !== 'play';
 }
@@ -415,8 +416,8 @@ function renderHome(options = {}) {
   $('#home-play').disabled = !currentState.puz;
 }
 
-function showChapters() {
-  showView('chapters');
+function showChapters(options = {}) {
+  showView('chapters', options);
   renderHome({ feedback: homeFeedback });
 }
 
@@ -427,7 +428,7 @@ function setHomeIndex(index) {
   clearTimeout(homeSlideTimer);
   homeTransition = null;
   homeIndex = clampHomeIndex(index);
-  showChapters();
+  showChapters({ animate: false });
 }
 
 function startHomeSlide(toIndex, options = {}) {
@@ -440,7 +441,7 @@ function startHomeSlide(toIndex, options = {}) {
     homeTransition = null;
     homeControlsLocked = false;
     homeIndex = nextIndex;
-    showChapters();
+    showChapters({ animate: false });
     return;
   }
   homeControlsLocked = true;
@@ -450,11 +451,11 @@ function startHomeSlide(toIndex, options = {}) {
     direction: nextIndex > fromIndex ? 1 : -1,
   };
   homeIndex = nextIndex;
-  showChapters();
+  showChapters({ animate: false });
   homeSlideTimer = setTimeout(() => {
     homeTransition = null;
     homeControlsLocked = false;
-    showChapters();
+    showChapters({ animate: false });
   }, HOME_SLIDE_MS);
 }
 
@@ -475,7 +476,7 @@ function showHomeClearFeedback(clearIndex) {
   homeFeedback = true;
   homeControlsLocked = true;
   homeIndex = clampHomeIndex(clearIndex);
-  showChapters();
+  showChapters({ animate: false });
   const em = $('#home-panel-a .home-emblem');
   if (!REDUCED) { em.classList.remove('clear-feedback'); void em.offsetWidth; em.classList.add('clear-feedback'); }
   const nextIndex = clampHomeIndex(clearIndex + 1);
