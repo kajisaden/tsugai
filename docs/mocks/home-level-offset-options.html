@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tsugai Home Level Offset Options</title>
+<style>
+:root {
+  --bg: #f4efe5;
+  --ink: #25306c;
+  --blue: #5874f0;
+  --gold: #a8801f;
+  --line: rgba(43, 38, 32, 0.12);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background:
+    radial-gradient(120% 85% at 50% 0%, rgba(255,255,255,0.72), transparent 58%),
+    var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+  padding: 24px 16px 42px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; }
+.top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+h1 { margin: 0; font-size: 22px; letter-spacing: 0.02em; }
+.note { margin: 0; color: #81796d; font-size: 13px; line-height: 1.6; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 16px;
+}
+.card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 251, 242, 0.74);
+  box-shadow: 0 10px 28px rgba(98, 78, 48, 0.08);
+  padding: 16px 14px 14px;
+}
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.name { margin: 0; font-size: 14px; letter-spacing: 0.08em; }
+.tag { color: var(--gold); font-size: 11px; letter-spacing: 0.08em; white-space: nowrap; }
+.mock {
+  min-height: 342px;
+  display: grid;
+  place-items: center;
+}
+.phone {
+  position: relative;
+  width: min(250px, 100%);
+  min-height: 312px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #fbf7ef 0%, #f2ecdf 100%);
+  border: 1px solid rgba(43,38,32,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+  padding: 20px 8px 30px;
+  overflow: hidden;
+}
+.phone::before {
+  content: "";
+  position: absolute;
+  top: 46px;
+  bottom: 38px;
+  left: 50%;
+  width: 1px;
+  background: rgba(168, 128, 31, 0.18);
+}
+.status {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+.stage {
+  display: grid;
+  grid-template-columns: 56px 160px 56px;
+  align-items: center;
+  justify-items: center;
+}
+.arrow {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+}
+.arrow svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.slot {
+  width: 160px;
+  padding-bottom: 18px;
+  margin-bottom: -18px;
+  overflow: hidden;
+}
+.panel {
+  width: 160px;
+  display: grid;
+  justify-items: center;
+}
+.emblem {
+  position: relative;
+  width: 124px;
+  height: 99px;
+  margin: -3px 0 0;
+}
+.disc {
+  position: absolute;
+  left: 10px;
+  top: 54px;
+  width: 105px;
+  height: 43px;
+  border-radius: 11px;
+  background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
+  box-shadow: 0 10px 16px rgba(95, 76, 35, 0.14), inset 0 2px 4px rgba(255, 248, 224, 0.72), inset 0 -6px 10px rgba(115, 89, 36, 0.24);
+}
+.ball {
+  position: absolute;
+  width: 49px;
+  height: 49px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
+  box-shadow: inset 2px 2px 0 rgba(255,255,255,0.46), inset -3px -3px 0 rgba(74,48,35,0.14), 0 8px 14px rgba(92,62,45,0.2);
+}
+.ball::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid rgba(36, 107, 143, 0.5);
+}
+.ball::after {
+  content: "";
+  position: absolute;
+  left: 27%;
+  top: 24%;
+  width: 18%;
+  height: 18%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.55);
+}
+.b1 { left: 22px; top: 35px; z-index: 2; }
+.b2 { left: 53px; top: 17px; z-index: 1; }
+.level {
+  width: 180px;
+  display: grid;
+  grid-template-columns: auto 3.2em;
+  align-items: center;
+  justify-content: center;
+  column-gap: 0.35em;
+  margin-top: 10px;
+  color: var(--blue);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transform: translateX(var(--offset));
+}
+.num-box {
+  position: relative;
+  width: 100%;
+  height: 1em;
+  display: inline-grid;
+  place-items: center;
+  overflow: hidden;
+}
+.num {
+  display: grid;
+  place-items: center;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.caption {
+  margin: 10px 4px 0;
+  color: #746c61;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.o0 { --offset: 0px; }
+.o6 { --offset: 6px; }
+.o10 { --offset: 10px; }
+.o14 { --offset: 14px; }
+.o18 { --offset: 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Home Level Offset Options</h1>
+      <p class="note">レベル表示ブロックだけを右へずらす比較。薄い縦線がエンブレム/スロット中心です。</p>
+    </div>
+    <p class="note">実装候補</p>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="head"><h2 class="name">A: current</h2><span class="tag">+0px</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="status">BEST CLEAR</div>
+          <div class="stage">
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div>
+            <div class="slot"><div class="panel"><div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div></div></div>
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div>
+          </div>
+          <div class="level o0"><span>レベル</span><span class="num-box"><span class="num">9</span></span></div>
+        </div>
+      </div>
+      <p class="caption">現在値。数値上の中心は揃っているが、見た目は少し左寄りに見える案。</p>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2 class="name">B: subtle</h2><span class="tag">+6px</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="status">BEST CLEAR</div>
+          <div class="stage">
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div>
+            <div class="slot"><div class="panel"><div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div></div></div>
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div>
+          </div>
+          <div class="level o6"><span>レベル</span><span class="num-box"><span class="num">9</span></span></div>
+        </div>
+      </div>
+      <p class="caption">ほんの少し右へ。違和感を抑えて重心だけ補正する案。</p>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2 class="name">C: balanced</h2><span class="tag">+10px</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="status">BEST CLEAR</div>
+          <div class="stage">
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div>
+            <div class="slot"><div class="panel"><div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div></div></div>
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div>
+          </div>
+          <div class="level o10"><span>レベル</span><span class="num-box"><span class="num">9</span></span></div>
+        </div>
+      </div>
+      <p class="caption">おすすめ候補。黒枠の見た目の塊が中心に近づきやすい案。</p>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2 class="name">D: clear</h2><span class="tag">+14px</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="status">BEST CLEAR</div>
+          <div class="stage">
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div>
+            <div class="slot"><div class="panel"><div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div></div></div>
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div>
+          </div>
+          <div class="level o14"><span>レベル</span><span class="num-box"><span class="num">9</span></span></div>
+        </div>
+      </div>
+      <p class="caption">右補正がはっきり分かる案。好みによってはここが気持ちいい可能性あり。</p>
+    </section>
+
+    <section class="card">
+      <div class="head"><h2 class="name">E: strong</h2><span class="tag">+18px</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="status">BEST CLEAR</div>
+          <div class="stage">
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div>
+            <div class="slot"><div class="panel"><div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div></div></div>
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div>
+          </div>
+          <div class="level o18"><span>レベル</span><span class="num-box"><span class="num">9</span></span></div>
+        </div>
+      </div>
+      <p class="caption">かなり右へ寄せる案。左寄り感は消えるが、右寄りに感じるかもしれない。</p>
+    </section>
+  </div>
+</div>
+</body>
+</html>
