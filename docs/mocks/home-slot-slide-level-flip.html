@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tsugai Home Slot Slide + Level Flip</title>
+<style>
+:root {
+  --bg: #f3efe6;
+  --ink: #24306f;
+  --blue: #5874f0;
+  --gold: #a8801f;
+  --silver: #8e9daf;
+  --line: rgba(43, 38, 32, 0.12);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background:
+    radial-gradient(120% 85% at 50% 0%, rgba(255,255,255,0.68), transparent 56%),
+    var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+  padding: 28px 18px 42px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; }
+.top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+h1 { margin: 0; font-size: 22px; letter-spacing: 0.02em; color: var(--ink); }
+.note { margin: 0; color: #81796d; font-size: 13px; line-height: 1.6; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+}
+.card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 251, 242, 0.72);
+  box-shadow: 0 10px 28px rgba(98, 78, 48, 0.08);
+  padding: 18px 16px 16px;
+}
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+}
+.name { margin: 0; font-size: 14px; letter-spacing: 0.06em; }
+.tag { color: var(--gold); font-size: 11px; letter-spacing: 0.08em; white-space: nowrap; }
+.mock { min-height: 360px; display: grid; place-items: center; padding: 10px 0 0; }
+.phone {
+  width: min(250px, 100%);
+  min-height: 326px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 9px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #fbf7ef 0%, #f2ecdf 100%);
+  border: 1px solid rgba(43,38,32,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+  padding: 22px 12px;
+}
+.stage {
+  display: grid;
+  grid-template-columns: 44px 132px 44px;
+  align-items: center;
+  justify-items: center;
+}
+.arrow {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+}
+.arrow svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.slot {
+  width: 132px;
+  height: 126px;
+  overflow: hidden;
+  position: relative;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 15%, #000 85%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 15%, #000 85%, transparent 100%);
+}
+.track {
+  width: 264px;
+  height: 126px;
+  display: grid;
+  grid-template-columns: 132px 132px;
+  align-items: center;
+  animation: slide-forward 3.4s cubic-bezier(0.2, 0.72, 0.18, 1) infinite;
+}
+.panel {
+  width: 132px;
+  height: 126px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 6px;
+}
+.status {
+  min-height: 22px;
+  color: var(--gold);
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.status.clear { color: var(--silver); }
+.status.empty { visibility: hidden; }
+.emblem {
+  position: relative;
+  width: 112px;
+  height: 90px;
+  transform: scale(0.72);
+}
+.disc {
+  position: absolute;
+  left: 9px;
+  top: 50px;
+  width: 96px;
+  height: 39px;
+  border-radius: 12px;
+}
+.best .disc {
+  background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
+  box-shadow:
+    0 5px 9px rgba(95, 76, 35, 0.10),
+    inset 0 2px 4px rgba(255,248,224,0.58),
+    inset 0 -5px 8px rgba(115,89,36,0.18);
+}
+.pending .disc {
+  background: linear-gradient(180deg, rgba(234,225,209,0.58), rgba(214,203,184,0.42));
+  border: 1px solid rgba(138,120,92,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.34);
+}
+.ball {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,0.46),
+    inset -3px -3px 0 rgba(74,48,35,0.14),
+    0 4px 8px rgba(92,62,45,0.12);
+}
+.ball::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(36,107,143,0.52);
+}
+.ball::after {
+  content: "";
+  position: absolute;
+  left: 27%;
+  top: 24%;
+  width: 18%;
+  height: 18%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.55);
+}
+.b1 { left: 20px; top: 32px; z-index: 2; }
+.b2 { left: 48px; top: 16px; z-index: 1; }
+.level {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 7px;
+  color: var(--blue);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.num-box {
+  position: relative;
+  width: 1.2em;
+  height: 1.25em;
+  display: inline-grid;
+  place-items: center;
+  perspective: 360px;
+  overflow: hidden;
+}
+.num {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+}
+.num.current { animation: flip-current-up 3.4s cubic-bezier(0.2, 0.72, 0.18, 1) infinite; }
+.num.next { animation: flip-next-up 3.4s cubic-bezier(0.2, 0.72, 0.18, 1) infinite; }
+.play {
+  width: 166px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  margin-top: 42px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(180deg, #6680ff 0%, #526df3 100%);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  box-shadow: 0 10px 18px rgba(82,109,243,0.2), inset 0 1px 0 rgba(255,255,255,0.28);
+  opacity: 0.54;
+}
+.caption { margin: 12px 0 0; color: #746c61; font-size: 12px; line-height: 1.65; }
+
+@keyframes slide-forward {
+  0%, 18% { transform: translateX(0); }
+  52%, 100% { transform: translateX(-132px); }
+}
+@keyframes flip-current-up {
+  0%, 18% { transform: translateY(0) rotateX(0deg); opacity: 1; }
+  42%, 100% { transform: translateY(-72%) rotateX(-86deg); opacity: 0; }
+}
+@keyframes flip-next-up {
+  0%, 18% { transform: translateY(72%) rotateX(86deg); opacity: 0; }
+  52%, 100% { transform: translateY(0) rotateX(0deg); opacity: 1; }
+}
+
+.back .track {
+  transform: translateX(-132px);
+  animation: slide-back 3.4s cubic-bezier(0.2, 0.72, 0.18, 1) infinite;
+}
+.back .num.current { animation: flip-current-down 3.4s cubic-bezier(0.2, 0.72, 0.18, 1) infinite; }
+.back .num.next { animation: flip-next-down 3.4s cubic-bezier(0.2, 0.72, 0.18, 1) infinite; }
+@keyframes slide-back {
+  0%, 18% { transform: translateX(-132px); }
+  52%, 100% { transform: translateX(0); }
+}
+@keyframes flip-current-down {
+  0%, 18% { transform: translateY(0) rotateX(0deg); opacity: 1; }
+  42%, 100% { transform: translateY(72%) rotateX(86deg); opacity: 0; }
+}
+@keyframes flip-next-down {
+  0%, 18% { transform: translateY(-72%) rotateX(-86deg); opacity: 0; }
+  52%, 100% { transform: translateY(0) rotateX(0deg); opacity: 1; }
+}
+
+.wide .slot { width: 154px; }
+.wide .stage { grid-template-columns: 44px 154px 44px; }
+.wide .track { width: 308px; grid-template-columns: 154px 154px; }
+.wide .panel { width: 154px; }
+.wide .track { animation-name: slide-forward-wide; }
+@keyframes slide-forward-wide {
+  0%, 18% { transform: translateX(0); }
+  52%, 100% { transform: translateX(-154px); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Home Slot Slide + Level Flip</h1>
+      <p class="note">左右ボタン固定。中央スロット内でステータス+エンブレムが横スライドし、レベル数字だけが回転。</p>
+    </div>
+    <p class="note">ループ再生</p>
+  </div>
+
+  <div class="grid">
+    <section class="card forward">
+      <div class="head"><h2 class="name">Forward: 1 → 2</h2><span class="tag">次へ / 上回転</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="stage">
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div>
+            <div class="slot">
+              <div class="track">
+                <div class="panel">
+                  <div class="status">BEST CLEAR</div>
+                  <div class="emblem best"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+                </div>
+                <div class="panel">
+                  <div class="status empty">EMPTY</div>
+                  <div class="emblem pending"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+                </div>
+              </div>
+            </div>
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div>
+          </div>
+          <div class="level"><span>レベル</span><span class="num-box"><span class="num current">1</span><span class="num next">2</span></span></div>
+          <button class="play">プレイ</button>
+        </div>
+      </div>
+      <p class="caption">クリア後の自動送り想定。現在レベルが左に見切れ、次レベルが右から入る。</p>
+    </section>
+
+    <section class="card back">
+      <div class="head"><h2 class="name">Back: 2 → 1</h2><span class="tag">戻る / 下回転</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="stage">
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div>
+            <div class="slot">
+              <div class="track">
+                <div class="panel">
+                  <div class="status">BEST CLEAR</div>
+                  <div class="emblem best"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+                </div>
+                <div class="panel">
+                  <div class="status empty">EMPTY</div>
+                  <div class="emblem pending"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+                </div>
+              </div>
+            </div>
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div>
+          </div>
+          <div class="level"><span>レベル</span><span class="num-box"><span class="num current">2</span><span class="num next">1</span></span></div>
+          <button class="play">プレイ</button>
+        </div>
+      </div>
+      <p class="caption">手動で前レベルに戻る想定。数字は下へ回転するように切り替える。</p>
+    </section>
+
+    <section class="card forward wide">
+      <div class="head"><h2 class="name">Wide Slot</h2><span class="tag">同時表示長め</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="stage">
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div>
+            <div class="slot">
+              <div class="track">
+                <div class="panel">
+                  <div class="status">CLEAR</div>
+                  <div class="emblem best"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+                </div>
+                <div class="panel">
+                  <div class="status empty">EMPTY</div>
+                  <div class="emblem pending"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+                </div>
+              </div>
+            </div>
+            <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div>
+          </div>
+          <div class="level"><span>レベル</span><span class="num-box"><span class="num current">1</span><span class="num next">2</span></span></div>
+          <button class="play">プレイ</button>
+        </div>
+      </div>
+      <p class="caption">中央スロットを少し広げ、現在と次が同時に見える時間を長くした案。</p>
+    </section>
+  </div>
+</div>
+</body>
+</html>
