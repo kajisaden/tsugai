@@ -182,18 +182,19 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0.02em; color: var(--ink); }
 .b2 { left: 48px; top: 16px; z-index: 1; }
 .level {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
   gap: 7px;
   color: var(--blue);
   font-size: 20px;
+  line-height: 1;
   font-weight: 800;
   letter-spacing: 0.04em;
 }
 .num-box {
   position: relative;
   width: 1.2em;
-  height: 1.25em;
+  height: 1em;
   display: inline-grid;
   place-items: center;
   perspective: 360px;
@@ -204,6 +205,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0.02em; color: var(--ink); }
   inset: 0;
   display: grid;
   place-items: center;
+  line-height: 1;
   transform-origin: 50% 50%;
   backface-visibility: hidden;
 }
@@ -259,15 +261,6 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0.02em; color: var(--ink); }
   52%, 100% { transform: translateY(0) rotateX(0deg); opacity: 1; }
 }
 
-.wide .slot { width: 154px; }
-.wide .stage { grid-template-columns: 44px 154px 44px; }
-.wide .track { width: 308px; grid-template-columns: 154px 154px; }
-.wide .panel { width: 154px; }
-.wide .track { animation-name: slide-forward-wide; }
-@keyframes slide-forward-wide {
-  0%, 18% { transform: translateX(0); }
-  52%, 100% { transform: translateX(-154px); }
-}
 </style>
 </head>
 <body>
@@ -333,33 +326,6 @@ h1 { margin: 0; font-size: 22px; letter-spacing: 0.02em; color: var(--ink); }
         </div>
       </div>
       <p class="caption">手動で前レベルに戻る想定。数字は下へ回転するように切り替える。</p>
-    </section>
-
-    <section class="card forward wide">
-      <div class="head"><h2 class="name">Wide Slot</h2><span class="tag">同時表示長め</span></div>
-      <div class="mock">
-        <div class="phone">
-          <div class="stage">
-            <div class="arrow"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"></path></svg></div>
-            <div class="slot">
-              <div class="track">
-                <div class="panel">
-                  <div class="status">CLEAR</div>
-                  <div class="emblem best"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
-                </div>
-                <div class="panel">
-                  <div class="status empty">EMPTY</div>
-                  <div class="emblem pending"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
-                </div>
-              </div>
-            </div>
-            <div class="arrow"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path></svg></div>
-          </div>
-          <div class="level"><span>レベル</span><span class="num-box"><span class="num current">1</span><span class="num next">2</span></span></div>
-          <button class="play">プレイ</button>
-        </div>
-      </div>
-      <p class="caption">中央スロットを少し広げ、現在と次が同時に見える時間を長くした案。</p>
     </section>
   </div>
 </div>
