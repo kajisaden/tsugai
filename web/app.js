@@ -328,8 +328,8 @@ function clampHomeIndex(index) {
 }
 
 function homeStatusLabel(isBest, isCleared) {
-  if (isBest) return locale === 'ja' ? '最短クリア' : 'Best clear';
-  if (isCleared) return locale === 'ja' ? 'クリア' : 'Clear';
+  if (isBest) return 'BEST CLEAR';
+  if (isCleared) return 'CLEAR';
   return '';
 }
 
@@ -352,6 +352,8 @@ function renderHome(options = {}) {
   const statusText = homeStatusLabel(isBest, isCleared);
   statusEl.textContent = statusText;
   statusEl.classList.toggle('empty', !statusText);
+  statusEl.classList.toggle('best', isBest);
+  statusEl.classList.toggle('win', !isBest && isCleared);
   statusEl.classList.toggle('clear-feedback', feedback && !!statusText);
   const center = $('.home-center');
   center.classList.toggle('controls-locked', homeControlsLocked);

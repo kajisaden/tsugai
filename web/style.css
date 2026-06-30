@@ -241,11 +241,17 @@ button:active { transform: translateY(1px); }
   min-height: 44px;
   display: grid;
   place-items: center;
+  color: transparent;
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.home-status-text.best {
   color: var(--gold);
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+}
+.home-status-text.win {
+  color: #8e9daf;
 }
 .home-status-text.empty {
   visibility: hidden;
