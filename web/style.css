@@ -273,6 +273,8 @@ button:active { transform: translateY(1px); }
 }
 .home-slot {
   width: 142px;
+  padding-bottom: 18px;
+  margin-bottom: -18px;
   overflow: hidden;
 }
 .home-slide-track {
