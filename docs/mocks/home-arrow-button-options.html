@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tsugai Home Arrow Button Options</title>
+<style>
+:root {
+  --bg: #f3efe6;
+  --paper: #fbf7ef;
+  --ink: #24306f;
+  --ink-soft: #4d587a;
+  --blue: #5874f0;
+  --gold: #a8801f;
+  --gold-soft: #d8c18a;
+  --line: rgba(43, 38, 32, 0.12);
+  --shadow: rgba(88, 66, 45, 0.12);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background:
+    radial-gradient(120% 85% at 50% 0%, rgba(255,255,255,0.68), transparent 56%),
+    var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+  padding: 28px 18px 42px;
+}
+.wrap { max-width: 980px; margin: 0 auto; }
+.top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+.note { margin: 0; color: #81796d; font-size: 13px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+.card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 251, 242, 0.72);
+  box-shadow: 0 10px 28px rgba(98, 78, 48, 0.08);
+  padding: 18px 16px 16px;
+}
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+}
+.name {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+.tag {
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.mock {
+  min-height: 270px;
+  display: grid;
+  place-items: center;
+  padding: 12px 0 0;
+}
+.phone {
+  width: min(230px, 100%);
+  min-height: 250px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #fbf7ef 0%, #f2ecdf 100%);
+  border: 1px solid rgba(43,38,32,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+  padding: 22px 12px;
+}
+.status {
+  min-height: 24px;
+  color: var(--gold);
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.stage {
+  display: grid;
+  grid-template-columns: 46px 112px 46px;
+  align-items: center;
+  justify-items: center;
+}
+.emblem {
+  position: relative;
+  width: 112px;
+  height: 90px;
+  transform: scale(0.72);
+}
+.disc {
+  position: absolute;
+  left: 9px;
+  top: 50px;
+  width: 96px;
+  height: 39px;
+  border-radius: 12px;
+  background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
+  box-shadow:
+    0 5px 9px rgba(95, 76, 35, 0.10),
+    inset 0 2px 4px rgba(255,248,224,0.58),
+    inset 0 -5px 8px rgba(115,89,36,0.18);
+}
+.ball {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #fafdff 0%, #9ecde3 52%, #669fbe 100%);
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,0.46),
+    inset -3px -3px 0 rgba(74,48,35,0.14),
+    0 4px 8px rgba(92,62,45,0.12);
+}
+.ball::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(36,107,143,0.52);
+}
+.ball::after {
+  content: "";
+  position: absolute;
+  left: 27%;
+  top: 24%;
+  width: 18%;
+  height: 18%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.55);
+}
+.b1 { left: 20px; top: 32px; z-index: 2; }
+.b2 { left: 48px; top: 16px; z-index: 1; }
+.level {
+  color: var(--blue);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.play {
+  width: 166px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  margin-top: 42px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(180deg, #6680ff 0%, #526df3 100%);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  box-shadow: 0 10px 18px rgba(82,109,243,0.2), inset 0 1px 0 rgba(255,255,255,0.28);
+}
+button.arrow {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+}
+button.arrow svg { width: 24px; height: 24px; display: block; }
+.disabled .arrow { opacity: 0.36; }
+
+.a-solid .arrow {
+  color: var(--ink);
+  filter: drop-shadow(0 2px 2px rgba(43,38,32,0.10));
+}
+.a-solid .arrow svg { fill: currentColor; stroke: none; }
+
+.b-ring .arrow {
+  border: 1px solid rgba(36,48,111,0.20);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.46);
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.72), 0 4px 9px rgba(88,66,45,0.08);
+}
+.b-ring .arrow svg { fill: none; stroke: currentColor; stroke-width: 2.4; }
+
+.c-mincho .arrow {
+  color: var(--gold);
+}
+.c-mincho .arrow svg { fill: none; stroke: currentColor; stroke-width: 1.8; }
+
+.d-pill .arrow {
+  width: 38px;
+  height: 58px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(36,48,111,0.10), rgba(36,48,111,0.04));
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.62);
+}
+.d-pill .arrow svg { fill: currentColor; stroke: none; width: 19px; }
+
+.e-chip .arrow {
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fff8eb 0%, #e8d8c4 100%);
+  border: 1px solid rgba(168,128,31,0.22);
+  color: var(--gold);
+  box-shadow: 0 4px 9px rgba(88,66,45,0.08), inset 0 1px 0 rgba(255,255,255,0.68);
+}
+.e-chip .arrow svg { fill: none; stroke: currentColor; stroke-width: 2.2; }
+
+.f-logo .arrow {
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(88,116,240,0.12), rgba(88,116,240,0.04));
+  color: var(--blue);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.64);
+}
+.f-logo .arrow svg { fill: currentColor; stroke: none; width: 21px; }
+
+.caption {
+  margin: 12px 0 0;
+  color: #746c61;
+  font-size: 12px;
+  line-height: 1.65;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Home Arrow Button Options</h1>
+      <p class="note">ロゴの濃紺・青紫・金アクセントに合わせた左右ボタン比較</p>
+    </div>
+    <p class="note">disabled は下段の薄い表示で確認</p>
+  </div>
+
+  <div class="grid">
+    <section class="card a-solid">
+      <div class="head"><h2 class="name">A. Solid Logo Chevron</h2><span class="tag">濃紺・最小</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="status"></div>
+          <div class="stage">
+            <button class="arrow" aria-label="前へ"><svg viewBox="0 0 24 24"><path d="M15.5 4.5 7.5 12l8 7.5Z"/></svg></button>
+            <div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+            <button class="arrow" aria-label="次へ"><svg viewBox="0 0 24 24"><path d="m8.5 4.5 8 7.5-8 7.5Z"/></svg></button>
+          </div>
+          <div class="level">レベル 3</div><button class="play">プレイ</button>
+        </div>
+      </div>
+      <p class="caption">今の文字三角に一番近いが、SVG化して輪郭を揃える案。ロゴの濃紺に寄せる。</p>
+    </section>
+
+    <section class="card b-ring">
+      <div class="head"><h2 class="name">B. Paper Ring</h2><span class="tag">淡い円形</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="status">クリア</div>
+          <div class="stage">
+            <button class="arrow" aria-label="前へ"><svg viewBox="0 0 24 24"><path d="M14.5 6 9 12l5.5 6"/></svg></button>
+            <div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+            <button class="arrow" aria-label="次へ"><svg viewBox="0 0 24 24"><path d="M9.5 6 15 12l-5.5 6"/></svg></button>
+          </div>
+          <div class="level">レベル 3</div><button class="play">プレイ</button>
+        </div>
+      </div>
+      <p class="caption">設定ボタンと同じ「紙に浮いた丸」寄り。押せるUIとしては一番わかりやすい。</p>
+    </section>
+
+    <section class="card c-mincho">
+      <div class="head"><h2 class="name">C. Gold Stroke</h2><span class="tag">和風・細線</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="status">最短クリア</div>
+          <div class="stage">
+            <button class="arrow" aria-label="前へ"><svg viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></svg></button>
+            <div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+            <button class="arrow" aria-label="次へ"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
+          </div>
+          <div class="level">レベル 3</div><button class="play">プレイ</button>
+        </div>
+      </div>
+      <p class="caption">金アクセントで結果テキストとつながる案。上品だが、通常操作の主張は少し弱い。</p>
+    </section>
+
+    <section class="card d-pill">
+      <div class="head"><h2 class="name">D. Side Pill</h2><span class="tag">操作しやすい</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="status"></div>
+          <div class="stage">
+            <button class="arrow" aria-label="前へ"><svg viewBox="0 0 24 24"><path d="M15.5 4.5 7.5 12l8 7.5Z"/></svg></button>
+            <div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+            <button class="arrow" aria-label="次へ"><svg viewBox="0 0 24 24"><path d="m8.5 4.5 8 7.5-8 7.5Z"/></svg></button>
+          </div>
+          <div class="level">レベル 3</div><button class="play">プレイ</button>
+        </div>
+      </div>
+      <p class="caption">左右移動の操作面がわかりやすい案。少しゲームUI感が強くなる。</p>
+    </section>
+
+    <section class="card e-chip">
+      <div class="head"><h2 class="name">E. Gold Paper Chip</h2><span class="tag">皿と調和</span></div>
+      <div class="mock">
+        <div class="phone">
+          <div class="status">クリア</div>
+          <div class="stage">
+            <button class="arrow" aria-label="前へ"><svg viewBox="0 0 24 24"><path d="M14.2 6.2 8.4 12l5.8 5.8"/></svg></button>
+            <div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+            <button class="arrow" aria-label="次へ"><svg viewBox="0 0 24 24"><path d="m9.8 6.2 5.8 5.8-5.8 5.8"/></svg></button>
+          </div>
+          <div class="level">レベル 3</div><button class="play">プレイ</button>
+        </div>
+      </div>
+      <p class="caption">金皿・和紙と馴染む。ボタン感があり、でも青プレイボタンとは競合しにくい。</p>
+    </section>
+
+    <section class="card f-logo">
+      <div class="head"><h2 class="name">F. Blue Logo Dot</h2><span class="tag">青紫・軽い</span></div>
+      <div class="mock disabled">
+        <div class="phone">
+          <div class="status">最短クリア</div>
+          <div class="stage">
+            <button class="arrow" aria-label="前へ" disabled><svg viewBox="0 0 24 24"><path d="M15.5 4.5 7.5 12l8 7.5Z"/></svg></button>
+            <div class="emblem"><div class="disc"></div><div class="ball b1"></div><div class="ball b2"></div></div>
+            <button class="arrow" aria-label="次へ" disabled><svg viewBox="0 0 24 24"><path d="m8.5 4.5 8 7.5-8 7.5Z"/></svg></button>
+          </div>
+          <div class="level">レベル 3</div><button class="play">プレイ</button>
+        </div>
+      </div>
+      <p class="caption">レベル文字とプレイボタンの青系に寄せた案。disabled時も雰囲気が崩れにくい。</p>
+    </section>
+  </div>
+</div>
+</body>
+</html>
