@@ -1,4 +1,4 @@
-# 二間詰(にけんづめ・仮称)
+# Tsugai（つがい／旧称: 二間詰・にけんづめ）
 
 ふたつの部屋、ひとつの操作。詰将棋を目標体験とするターン制グリッドパズル。
 設計の全体像は [docs/SPEC.md](docs/SPEC.md)、作業の現在地は [docs/HANDOVER.md](docs/HANDOVER.md)。
@@ -31,6 +31,6 @@ node tools/generate-pool.mjs [--sizes 4x4,5x5] [--seeds 1-6000] [--rooms 2]
 `web/index.html` をブラウザで開くだけ(fetch 不使用なので `file://` で動く)。
 
 - 操作: 矢印キー / WASD / スワイプ
-- 章編成は `web/app.js` 冒頭の `CHAPTERS` で tags/analysis によりスライス
-- `index.html?debug=1` で「解答」ボタンが出る(解答再生+妙手ハイライト)。リリースUIでは非表示
+- レベル列は通常/上級のモード別。各モードの固定レベルID列は `tools/select-normal.mjs` / `select-advanced.mjs` が選別し `web/normal-levels.js` / `advanced-levels.js`(`window.NORMAL_LEVEL_IDS` / `ADVANCED_LEVEL_IDS`)へ出力。`web/app.js` の `CHAPTERS` はそのモード全レベルを束ねる単一章で `from`/`to` で slice するだけ
+- 「答え」ボタン(`#btn-answer-open`)はプレイ画面ヘッダに常設。押すと `answer` ヒント残数を1消費して正解を自動再生(残数0ならリワード広告、再生中は妙手=ぶつかる壁をハイライト)。妙手/壁のハイライトは別の常設ボタン「光ヒント」(`#btn-hint-light`)。`debug` パラメータは存在しない
 - クリア記録は localStorage(`nikenzume.cleared.v1`)
