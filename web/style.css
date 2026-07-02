@@ -664,21 +664,6 @@ button:active { transform: translateY(1px); }
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.home-board-icon {
-  width: 26px;
-  height: 26px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
-  padding: 2px;
-  border-radius: 5px;
-  background: #d8ccb8;
-}
-.home-board-icon span {
-  border-radius: 2px;
-  background: #f6efe2;
-  border: 1px solid rgba(63, 127, 173, 0.28);
-}
 
 /* ---- 問題一覧 ---- */
 #levels-title {
