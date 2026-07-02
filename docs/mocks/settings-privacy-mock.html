@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>プライバシーポリシー — モック</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0e;
+  color: #d8d4ca;
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+}
+.head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px;
+}
+.title {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 19px; letter-spacing: 0.25em; text-indent: 0.25em; color: #e8d9b0;
+}
+.close { font-size: 22px; color: #9d9a8e; background: none; border: none; cursor: pointer; padding: 4px 6px; }
+.body {
+  flex: 1; overflow-y: auto;
+  max-width: 480px; margin: 0 auto; width: 100%;
+  padding: 0 24px 40px;
+}
+.date { font-size: 11px; color: #6d6a60; margin-bottom: 24px; }
+.sec { margin-bottom: 24px; }
+.sec-h { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #d8d4ca; }
+.sec-p { font-size: 13px; line-height: 1.8; color: #b0ac9f; }
+.sec-ul { list-style: none; margin: 8px 0; }
+.sec-ul li {
+  padding: 4px 0 4px 16px; position: relative;
+  font-size: 13px; color: #b0ac9f; line-height: 1.6;
+}
+.sec-ul li::before { content: "·"; position: absolute; left: 4px; color: #e8d9b0; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="head">
+  <span class="title">プライバシーポリシー</span>
+  <button class="close">✕</button>
+</div>
+<div class="body">
+  <div class="date">最終更新: 2026年6月</div>
+
+  <div class="sec">
+    <div class="sec-h">収集するデータ</div>
+    <div class="sec-p">Tsugai はお名前・メールアドレス等の個人情報を収集しません。ゲームの進捗データはすべて端末内に保存されます。</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h">端末内のデータ</div>
+    <div class="sec-p">以下のデータを端末内（localStorage）に保存します。</div>
+    <ul class="sec-ul">
+      <li>クリア状況・最短手数の記録</li>
+      <li>表示テーマ（ダーク/ライト）の設定</li>
+      <li>効果音・触覚のON/OFF設定</li>
+      <li>言語設定</li>
+    </ul>
+    <div class="sec-p">これらはサーバーには送信されません。設定画面の「進捗をリセット」で全消去できます。</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h">広告</div>
+    <div class="sec-p">本アプリでは Google AdMob を利用して広告を表示します。AdMob は広告配信のために広告ID・デバイス情報を収集することがあります。詳細は Google のプライバシーポリシーをご確認ください。</div>
+    <div class="sec-p" style="margin-top:6px"><a href="https://policies.google.com/privacy" style="color:#e8d9b0;text-decoration:underline;text-underline-offset:3px">Google プライバシーポリシー ↗</a></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h">アナリティクス</div>
+    <div class="sec-p">アプリの改善のため、Firebase Analytics を利用して利用状況を匿名で収集します。個人を特定する情報は含まれません。</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h">お問い合わせ</div>
+    <div class="sec-p">ご質問がある場合は、設定画面の「お問い合わせ」からご連絡ください。</div>
+  </div>
+</div>
+</body>
+</html>

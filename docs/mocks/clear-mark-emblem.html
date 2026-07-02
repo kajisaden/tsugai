@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>一覧クリア印: 単球 → つがいエンブレム</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Hiragino Kaku Gothic ProN", system-ui, sans-serif; padding: 24px; background: #2a2a2e; color: #ddd; }
+  h1 { font-size: 15px; font-weight: 400; margin-bottom: 16px; }
+  .panel { border-radius: 18px; padding: 22px; margin-bottom: 22px; }
+  .panel.dark  { background: radial-gradient(120% 100% at 50% 0%, #101018 0%, #0a0a0e 60%); color: #c9c4ba; }
+  .panel.light { background: radial-gradient(120% 100% at 50% 0%, #fbf8f1 0%, #f3efe6 60%); color: #6b6256; }
+  .ptitle { font-size: 13px; letter-spacing: .12em; margin-bottom: 14px; opacity: .9; }
+  .row { display: flex; gap: 22px; flex-wrap: wrap; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .cap { font-size: 11px; letter-spacing: .06em; opacity: .85; text-align: center; }
+
+  /* ---- タイル ---- */
+  .tile { width: 118px; height: 118px; border-radius: 22px; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+  .tile .no { font-size: 26px; line-height: 1; }
+  .t-dark  { background: radial-gradient(120% 120% at 50% 42%, #32323f 0%, #1e1e27 72%);
+    border: 1px solid rgba(232, 217, 176, 0.35); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10); }
+  .t-dark  .no { color: #e8d9b0; }
+  .t-light { background: linear-gradient(160deg, #ddd5c4 0%, #cfc6b2 100%);
+    border: 1px solid rgba(168, 128, 31, 0.4); box-shadow: inset 0 1px 0 rgba(255,255,255,0.5); }
+  .t-light .no { color: #a8801f; }
+
+  /* ---- 現状: 単球 ---- */
+  .ball { border-radius: 50%; }
+  .ball.gold { width: 22px; height: 22px; }
+  .ball.white { width: 12px; height: 12px; }
+  .t-dark  .ball.gold  { background: radial-gradient(circle at 38% 32%, #fffdf6 0%, #f3e3bd 45%, #c9b585 100%); box-shadow: 0 0 10px 3px rgba(240,220,170,0.55); }
+  .t-dark  .ball.white { background: radial-gradient(circle at 38% 32%, #f4f7fc 0%, #c5ccdb 50%, #8a90a2 100%); box-shadow: 0 0 6px 1px rgba(200,212,235,0.35); }
+  .t-light .ball.gold  { background: radial-gradient(circle at 38% 30%, #f7e6b0 0%, #dcb44f 48%, #a8801f 100%); box-shadow: 0 1px 3px rgba(70,52,16,0.28); }
+  .t-light .ball.white { background: radial-gradient(circle at 38% 30%, #c6cdd9 0%, #8b94a3 55%, #6c7686 100%); box-shadow: 0 1px 2px rgba(60,70,86,0.28); }
+
+  /* ---- 新案: A画面つがいエンブレム(220x176座標を縮小) ---- */
+  .marker { position: relative; width: 60px; height: 46px; }
+  .marker .emb { position: absolute; top: 50%; left: 50%; margin: -88px 0 0 -110px; transform: scale(0.23); transform-origin: center; }
+  .emb { width: 220px; height: 176px; }
+  .emb-halo { position: absolute; inset: -12% -6% -20% -6%; border-radius: 50%; display: none; }
+  .emb-disc { position: absolute; left: 17px; top: 96px; width: 188px; height: 76px; border-radius: 50%; display: none; }
+  .emb-ball { position: absolute; width: 86px; height: 86px; border-radius: 50%; }
+  .b1 { left: 40px; top: 62px; z-index: 2; }
+  .b2 { left: 94px; top: 31px; z-index: 1; }
+
+  /* ダーク: 発光球(金=最短 / 白=クリア) */
+  .e-dark-gold  .emb-ball { background: radial-gradient(circle at 38% 32%, #fffdf6 0%, #f3e3bd 45%, #c9b585 100%); box-shadow: 0 0 26px 7px rgba(240,220,170,0.85); }
+  .e-dark-white .emb-ball { background: radial-gradient(circle at 38% 32%, #ffffff 0%, #eef1f7 45%, #c9cedb 100%); box-shadow: 0 0 26px 7px rgba(228,236,252,0.8); }
+
+  /* ライト: 碁石2球＋金/銀の楕円皿＋後光 */
+  .e-light-gold .emb-ball, .e-light-white .emb-ball {
+    background: radial-gradient(circle at 35% 26%, #6c6c77 0%, #37373f 30%, #1b1b21 68%, #0d0d11 100%);
+    box-shadow: inset -2px -3px 7px rgba(0,0,0,0.6), inset 3px 3px 6px rgba(255,255,255,0.16), 0 5px 9px rgba(40,32,16,0.42); }
+  .e-light-gold .emb-disc, .e-light-white .emb-disc { display: block; }
+  .e-light-gold .emb-disc { background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
+    box-shadow: 0 6px 13px rgba(70,52,18,0.22), inset 0 2px 4px rgba(255,248,224,0.7), inset 0 -6px 9px rgba(105,78,30,0.42), inset 0 0 0 1px rgba(255,242,205,0.18); }
+  .e-light-white .emb-disc { background: radial-gradient(120% 150% at 40% 24%, #f7fafd 0%, #d4dae3 40%, #aeb6c3 72%, #79808d 100%);
+    box-shadow: 0 6px 13px rgba(40,48,60,0.22), inset 0 2px 4px rgba(248,251,255,0.7), inset 0 -6px 9px rgba(70,78,92,0.42), inset 0 0 0 1px rgba(238,244,250,0.2); }
+  .e-light-gold .emb-halo { display: block; background: radial-gradient(closest-side, rgba(216,183,95,0.42), rgba(216,183,95,0.15) 46%, transparent 72%); filter: blur(3px); }
+  .e-light-white .emb-halo { display: block; background: radial-gradient(closest-side, rgba(185,192,204,0.4), rgba(185,192,204,0.14) 46%, transparent 72%); filter: blur(3px); }
+</style>
+</head>
+<body>
+  <h1>一覧画面 クリア印: 現状=単球 → 新案=A画面のつがいエンブレム（金=最短 / 白=クリア）</h1>
+  <div id="root"></div>
+  <script>
+    const emb = (cls) => `<div class="emb ${cls}"><div class="emb-halo"></div><div class="emb-disc"></div><div class="emb-ball b1"></div><div class="emb-ball b2"></div></div>`;
+    const ballMark = (state) => `<span class="ball ${state}"></span>`;
+    const embMark = (theme, state) => `<div class="marker">${emb('e-'+theme+'-'+state)}</div>`;
+    const tile = (theme, content) => `<div class="tile t-${theme}"><span class="no">1</span>${content}</div>`;
+    const panel = (theme, label) => `
+      <div class="panel ${theme}">
+        <div class="ptitle">${label}</div>
+        <div class="row">
+          <div class="cell">${tile(theme, ballMark('gold'))}<div class="cap">現状・金<br>(最短)</div></div>
+          <div class="cell">${tile(theme, ballMark('white'))}<div class="cap">現状・白<br>(クリア)</div></div>
+          <div class="cell">${tile(theme, embMark(theme,'gold'))}<div class="cap">新案・金<br>(最短)</div></div>
+          <div class="cell">${tile(theme, embMark(theme,'white'))}<div class="cap">新案・白<br>(クリア)</div></div>
+        </div>
+      </div>`;
+    document.getElementById('root').innerHTML = panel('dark','ダーク') + panel('light','ライト');
+  </script>
+</body>
+</html>

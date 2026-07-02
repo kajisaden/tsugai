@@ -9,3 +9,6 @@ desktop.ini
 
 # 依存(本作は依存ゼロだが念のため)
 node_modules/
+
+# デザインループの検証スクショ(devtool撮影の使い捨て。履歴に載せない)
+docs/mocks/**/*.png

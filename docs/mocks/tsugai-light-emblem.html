@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Hiragino Kaku Gothic ProN",sans-serif;padding:22px;background:#444}
+  h1{color:#eee;font-weight:400;font-size:16px;text-align:center;margin-bottom:4px;letter-spacing:.08em}
+  .note{color:#aaa;font-size:11px;text-align:center;margin-bottom:18px}
+  .row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:900px;margin:0 auto}
+  .card{border-radius:20px;padding:16px 10px 18px;background:linear-gradient(160deg,#ddd5c4,#cfc6b2);border:1px solid rgba(43,38,32,.10);text-align:center}
+  .lab{font-size:11px;color:#6b6357;margin-bottom:6px}
+
+  .emblem{position:relative;width:190px;height:150px;margin:0 auto;transform:scale(.92)}
+  .halo{position:absolute;inset:-12% -6% -20% -6%;display:none;border-radius:50%;
+        background:radial-gradient(closest-side,rgba(216,183,95,.45),rgba(216,183,95,.16) 46%,transparent 72%);filter:blur(3px)}
+  .disc{position:absolute;left:14px;top:82px;width:162px;height:66px;border-radius:50%}
+  .balls{position:absolute;inset:0}
+  .ball{position:absolute;width:74px;height:74px;border-radius:50%}
+  .b1{left:34px;top:54px;z-index:2}.b2{left:80px;top:28px;z-index:1}
+
+  /* --- 現状 --- */
+  .v-cur .disc{background:radial-gradient(circle at 42% 36%,#f4e1a8 0%,#d8b75f 52%,#b08a36 100%);
+    box-shadow:0 5px 10px rgba(80,58,18,.25), inset 0 2px 3px rgba(255,255,255,.55), inset 0 -4px 6px rgba(120,86,28,.45)}
+  .v-cur .ball{background:radial-gradient(circle at 38% 30%,#4a4a52 0%,#26262c 40%,#131316 100%);
+    box-shadow:inset -2px -3px 6px rgba(0,0,0,.55), inset 2px 2px 5px rgba(255,255,255,.10), 0 4px 7px rgba(40,32,16,.40)}
+
+  /* --- 案A 金箔精緻化(漆金) --- 落ち着いた金＋艶、磨いた碁石 */
+  .v-a .disc{background:radial-gradient(120% 150% at 40% 24%,#f7ecc8 0%,#e0c585 40%,#bd9c52 72%,#8f7032 100%);
+    box-shadow:0 6px 13px rgba(70,52,18,.22), inset 0 2px 4px rgba(255,248,224,.7), inset 0 -6px 9px rgba(105,78,30,.42), inset 0 0 0 1px rgba(255,242,205,.18)}
+  .v-a .ball{background:radial-gradient(circle at 35% 26%,#6c6c77 0%,#37373f 30%,#1b1b21 68%,#0d0d11 100%);
+    box-shadow:inset -2px -3px 7px rgba(0,0,0,.6), inset 3px 3px 6px rgba(255,255,255,.16), 0 5px 9px rgba(40,32,16,.42)}
+
+  /* --- 案B 後光(現状の素材＋温かなオーラ) --- */
+  .v-b .halo{display:block}
+  .v-b .disc{background:radial-gradient(circle at 42% 36%,#f4e1a8 0%,#d8b75f 52%,#b08a36 100%);
+    box-shadow:0 5px 10px rgba(80,58,18,.25), inset 0 2px 3px rgba(255,255,255,.55), inset 0 -4px 6px rgba(120,86,28,.45)}
+  .v-b .ball{background:radial-gradient(circle at 38% 30%,#4a4a52 0%,#26262c 40%,#131316 100%);
+    box-shadow:inset -2px -3px 6px rgba(0,0,0,.55), inset 2px 2px 5px rgba(255,255,255,.10), 0 4px 7px rgba(40,32,16,.40)}
+
+  /* --- 案C A＋B --- */
+  .v-c .halo{display:block}
+  .v-c .disc{background:radial-gradient(120% 150% at 40% 24%,#f7ecc8 0%,#e0c585 40%,#bd9c52 72%,#8f7032 100%);
+    box-shadow:0 6px 13px rgba(70,52,18,.22), inset 0 2px 4px rgba(255,248,224,.7), inset 0 -6px 9px rgba(105,78,30,.42), inset 0 0 0 1px rgba(255,242,205,.18)}
+  .v-c .ball{background:radial-gradient(circle at 35% 26%,#6c6c77 0%,#37373f 30%,#1b1b21 68%,#0d0d11 100%);
+    box-shadow:inset -2px -3px 7px rgba(0,0,0,.6), inset 3px 3px 6px rgba(255,255,255,.16), 0 5px 9px rgba(40,32,16,.42)}
+</style></head>
+<body>
+  <h1>ライト エンブレム 改善案(最短=金)</h1>
+  <div class="note">現状 / 案A 金箔精緻化(漆金＋磨き碁石) / 案B 後光(温かなオーラ) / 案C A＋B</div>
+  <div class="row">
+    <div class="card"><div class="lab">現状</div><div class="emblem v-cur"><div class="halo"></div><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div></div>
+    <div class="card"><div class="lab">案A 金箔精緻化</div><div class="emblem v-a"><div class="halo"></div><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div></div>
+    <div class="card"><div class="lab">案B 後光</div><div class="emblem v-b"><div class="halo"></div><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div></div>
+    <div class="card"><div class="lab">案C A＋B</div><div class="emblem v-c"><div class="halo"></div><div class="disc"></div><div class="balls"><div class="ball b1"></div><div class="ball b2"></div></div></div></div>
+  </div>
+</body></html>

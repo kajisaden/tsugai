@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>バージョン履歴 — モック</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0e;
+  color: #d8d4ca;
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+}
+.head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px;
+}
+.title {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 19px; letter-spacing: 0.25em; text-indent: 0.25em; color: #e8d9b0;
+}
+.close { font-size: 22px; color: #9d9a8e; background: none; border: none; cursor: pointer; padding: 4px 6px; }
+.body {
+  flex: 1; overflow-y: auto;
+  max-width: 480px; margin: 0 auto; width: 100%;
+  padding: 0 24px 40px;
+}
+
+/* バージョンエントリ */
+.ver-entry { margin-bottom: 28px; }
+.ver-head {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 8px;
+}
+.ver-num {
+  font-size: 17px; font-weight: 600; color: #d8d4ca;
+  letter-spacing: 0.02em;
+}
+.ver-date { font-size: 11px; color: #6d6a60; }
+.ver-tag {
+  font-size: 9px; color: #e8d9b0;
+  border: 1px solid rgba(232,217,176,0.3);
+  border-radius: 4px; padding: 1px 6px;
+  letter-spacing: 0.05em;
+}
+.ver-list { list-style: none; }
+.ver-list li {
+  padding: 4px 0 4px 16px; position: relative;
+  font-size: 13px; color: #b0ac9f; line-height: 1.7;
+}
+.ver-list li::before {
+  content: ""; position: absolute; left: 4px; top: 12px;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: rgba(232,217,176,0.4);
+}
+
+.ver-sep {
+  border: none; border-top: 1px solid rgba(255,255,255,0.06);
+  margin: 0 0 28px;
+}
+</style>
+</head>
+<body>
+<div class="head">
+  <span class="title">バージョン履歴</span>
+  <button class="close">✕</button>
+</div>
+<div class="body">
+
+  <div class="ver-entry">
+    <div class="ver-head">
+      <span class="ver-num">1.0.0</span>
+      <span class="ver-date">2026年6月</span>
+      <span class="ver-tag">現在</span>
+    </div>
+    <ul class="ver-list">
+      <li>初回リリース</li>
+      <li>第1章〜第3章（全30問）</li>
+      <li>光ヒント・次の手ヒント・答え再生</li>
+      <li>ダーク/ライトテーマ</li>
+      <li>日本語・英語対応</li>
+    </ul>
+  </div>
+
+  <hr class="ver-sep">
+
+  <!-- 将来のアップデート例（実装時は削除 or 追記） -->
+  <div class="ver-entry" style="opacity:0.35">
+    <div class="ver-head">
+      <span class="ver-num">1.1.0</span>
+      <span class="ver-date">予定</span>
+    </div>
+    <ul class="ver-list">
+      <li>第4章追加（10問）</li>
+      <li>3部屋モード</li>
+      <li>触覚フィードバック</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
