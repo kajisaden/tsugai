@@ -349,6 +349,7 @@ let homeSlideTimer = null;
 let homeUnlockTimer = null;
 let homeFeedback = false;
 let homeControlsLocked = false;
+let homeHardLock = false; // 解錠演出・クリア自動送りなど「割り込ませない」保護区間だけ true
 let homeTransition = null;
 let homeUnlockReveal = null;
 const HOME_SLIDE_MS = 680;
@@ -451,6 +452,8 @@ function renderHome(options = {}) {
   const currentState = homeViewState(homeIndex);
 
   if (transition) {
+    // 直前のスライドクラスを確定させてから再付与し、割り込み時もアニメを頭から再生する
+    void center.offsetWidth;
     const fromState = homeViewState(transition.from);
     const toState = homeViewState(transition.to);
     const forward = transition.direction > 0;
@@ -474,7 +477,7 @@ function renderHome(options = {}) {
     nextLevelEl.textContent = currentState.index + 1;
   }
 
-  const stepLocked = homeControlsLocked || !!transition;
+  const stepLocked = homeHardLock;
   center.classList.toggle('controls-locked', stepLocked);
   const playButton = $('#home-play');
   $('#home-prev').disabled = stepLocked || homeIndex <= 0;
@@ -491,6 +494,7 @@ function showChapters(options = {}) {
 function setHomeIndex(index) {
   homeFeedback = false;
   homeControlsLocked = false;
+  homeHardLock = false;
   clearTimeout(homeAutoAdvanceTimer);
   clearTimeout(homeSlideTimer);
   clearTimeout(homeUnlockTimer);
@@ -524,6 +528,7 @@ function startHomeSlide(toIndex, options = {}) {
     homeTransition = null;
     homeUnlockReveal = null;
     homeControlsLocked = false;
+    homeHardLock = false;
     homeIndex = nextIndex;
     showChapters({ animate: false });
     return;
@@ -542,6 +547,7 @@ function startHomeSlide(toIndex, options = {}) {
     homeTransition = null;
     if (unlockRevealIndex == null) {
       homeControlsLocked = false;
+      homeHardLock = false;
       showChapters({ animate: false });
       return;
     }
@@ -550,24 +556,25 @@ function startHomeSlide(toIndex, options = {}) {
     homeUnlockTimer = setTimeout(() => {
       homeUnlockReveal = null;
       homeControlsLocked = false;
+      homeHardLock = false;
       showChapters({ animate: false });
     }, HOME_UNLOCK_REVEAL_MS);
   }, HOME_SLIDE_MS);
 }
 
 function homePrev() {
-  if (homeControlsLocked) return;
+  if (homeHardLock) return;
   startHomeSlide((homeIndex == null ? defaultHomeIndex() : homeIndex) - 1);
 }
 
 function homeNext() {
-  if (homeControlsLocked) return;
+  if (homeHardLock) return;
   startHomeSlide((homeIndex == null ? defaultHomeIndex() : homeIndex) + 1);
 }
 
 let homeSwipeStart = null;
 function beginHomeSwipe(e) {
-  if ($('#view-chapters').hidden || homeControlsLocked || homeTransition) return;
+  if ($('#view-chapters').hidden || homeHardLock) return;
   if (e.target.closest('.home-footer')) return;
   if (e.target.closest('button, a, input, select, textarea')) return;
   const touch = e.touches && e.touches.length === 1 ? e.touches[0] : null;
@@ -582,7 +589,7 @@ function finishHomeSwipe(e) {
   const dx = touch.clientX - homeSwipeStart.x;
   const dy = touch.clientY - homeSwipeStart.y;
   homeSwipeStart = null;
-  if (homeControlsLocked || homeTransition) return;
+  if (homeHardLock) return;
   if (Math.abs(dx) < HOME_SWIPE_MIN_X) return;
   if (Math.abs(dy) > Math.abs(dx) * HOME_SWIPE_MAX_Y_RATIO) return;
   dx < 0 ? homeNext() : homePrev();
@@ -596,6 +603,7 @@ function showHomeClearFeedback(clearIndex, unlockIndex = null) {
   homeUnlockReveal = null;
   homeFeedback = true;
   homeControlsLocked = true;
+  homeHardLock = true;
   homeIndex = clampHomeIndex(clearIndex);
   showChapters({ animate: false });
   const em = $('#home-panel-a .home-emblem');
