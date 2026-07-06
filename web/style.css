@@ -765,42 +765,6 @@ button:active { transform: translateY(1px); }
     0 2px 4px rgba(92, 62, 45, 0.12);
 }
 
-/* ---- デイリーチャレンジカード ---- */
-#daily-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 14px 18px;
-  margin-bottom: 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(232, 176, 80, 0.3);
-  background: linear-gradient(135deg, rgba(232, 176, 80, 0.10) 0%, rgba(232, 176, 80, 0.04) 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  cursor: pointer;
-  transition: border-color .2s, background .2s;
-}
-#daily-card:active { background: rgba(232, 176, 80, 0.18); }
-.daily-left { display: flex; align-items: baseline; gap: 10px; }
-.daily-title {
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  color: var(--gold);
-}
-.daily-par { font-size: 12px; color: var(--text-dim); }
-.daily-right { display: flex; align-items: center; gap: 10px; }
-.daily-streak { font-size: 12px; color: #e8b050; }
-.daily-status {
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 10px;
-  letter-spacing: 0.05em;
-}
-.daily-status.new { background: rgba(232, 176, 80, 0.2); color: #e8b050; }
-.daily-status.cleared { background: rgba(200, 200, 200, 0.15); color: var(--text-dim); }
-.daily-status.best { background: rgba(232, 176, 80, 0.25); color: var(--gold); }
 /* A画面のデイリー報酬表示 */
 .daily-streak-result { font-size: 16px; display: block; margin-bottom: 4px; }
 .daily-reward-line { font-size: 13px; color: #e8b050; display: block; }
@@ -820,13 +784,6 @@ button:active { transform: translateY(1px); }
   cursor: pointer;
 }
 /* ライト */
-#daily-card {
-  border-color: rgba(168, 128, 31, 0.3);
-  background: linear-gradient(135deg, rgba(168, 128, 31, 0.08) 0%, rgba(168, 128, 31, 0.03) 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-.daily-streak { color: #a8801f; }
-.daily-status.new { background: rgba(168, 128, 31, 0.15); color: #a8801f; }
 .daily-reward-line { color: #a8801f; }
 #btn-share { border-color: rgba(168, 128, 31, 0.3); }
 

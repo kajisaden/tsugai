@@ -624,23 +624,9 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
   });
 });
 
-function updateDailyCard() {
-  const s = refreshDailyState();
-  const puz = getDailyPuzzle();
-  $('#daily-par').textContent = t('puzzlePar', { n: puz.solution.minMoves });
-  const status = $('#daily-status');
-  if (s.best) { status.textContent = t('dailyBest'); status.className = 'daily-status best'; }
-  else if (s.cleared) { status.textContent = t('dailyCleared'); status.className = 'daily-status cleared'; }
-  else { status.textContent = t('dailyNew'); status.className = 'daily-status new'; }
-  const streak = $('#daily-streak');
-  if (s.streak > 0) { streak.textContent = t('dailyStreak', { n: s.streak }); streak.hidden = false; }
-  else streak.hidden = true;
-}
-
 function showLevels(ch) {
   curChapter = ch;
   showView('levels');
-  updateDailyCard();
   document.querySelectorAll('.mode-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.mode === curMode);
   });
@@ -1750,7 +1736,6 @@ $('#home-daily').addEventListener('click', () => startDailyPuzzle());
 $('#home-list').addEventListener('click', () => showLevels(CHAPTERS[0]));
 $('#home-goals').addEventListener('click', openStats);
 $('#home-store').addEventListener('click', () => showToast(t('soon')));
-$('#daily-card').addEventListener('click', () => startDailyPuzzle());
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア
