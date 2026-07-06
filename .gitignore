@@ -12,3 +12,11 @@ node_modules/
 
 # デザインループの検証スクショ(devtool撮影の使い捨て。履歴に載せない)
 docs/mocks/**/*.png
+
+# Claude Codeのローカル設定
+.claude/
+
+# デザイン検証の使い捨てモックHTML（残したい場合は docs/mocks/ へ）
+web/*mock*.html
+web/trail-*.html
+web/*-compare.html
