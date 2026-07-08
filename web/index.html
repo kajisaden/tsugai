@@ -16,8 +16,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- 更新の目印: URL も画面のビルド印も同じ版番号に揃える -->
-<script>try{var V='172',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=c4c9750160">
+<script>try{var V='173',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
+<link rel="stylesheet" href="style.css?v=ef07f73151">
 <style>
 .hdr-left { grid-column: 1; justify-self: start; }
 #btn-home {
@@ -53,7 +53,7 @@ body.view-daily #btn-home { display: grid; }
     </button>
   </div>
   <div id="hdr-center">
-    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">172</span></h1>
+    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">173</span></h1>
     <div id="play-status" aria-live="polite">
       <span id="puzzle-no"></span>
       <span id="play-progress"></span>
@@ -163,7 +163,20 @@ body.view-daily #btn-home { display: grid; }
           <div class="emblem-ball eb2"></div>
           <div class="emblem-ball eb1"></div>
         </div>
-        <!-- 案2: 前面タイル(eb1・中心46.5,59.5)に目盛＋針(10:10)を重ねて「四角い時計」に -->
+        <!-- 案2(両方): 2枚のタイルそれぞれに時計を重ねる。=一対の四角い時計(つがい)。
+             背面(eb2)の時計は前面タイルの下(z-index 1)に置き、重なりは前面タイルで自然に隠す。 -->
+        <svg class="de-clock de-clock-back" viewBox="0 0 124 99" aria-hidden="true">
+          <g class="de-ticks">
+            <line x1="77.5" y1="25.5" x2="77.5" y2="28.5"></line>
+            <line x1="77.5" y1="54.5" x2="77.5" y2="57.5"></line>
+            <line x1="61.5" y1="41.5" x2="64.5" y2="41.5"></line>
+            <line x1="90.5" y1="41.5" x2="93.5" y2="41.5"></line>
+          </g>
+          <line class="de-min" x1="77.5" y1="41.5" x2="86" y2="29"></line>
+          <line class="de-hr" x1="77.5" y1="41.5" x2="69.5" y2="33.5"></line>
+          <circle class="de-hub" cx="77.5" cy="41.5" r="2.4"></circle>
+        </svg>
+        <!-- 前面(eb1・中心46.5,59.5)の時計 -->
         <svg class="de-clock" viewBox="0 0 124 99" aria-hidden="true">
           <g class="de-ticks">
             <line x1="46.5" y1="43.5" x2="46.5" y2="46.5"></line>

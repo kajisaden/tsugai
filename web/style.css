@@ -717,6 +717,8 @@ body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 4
   position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3;
   color: rgba(41, 53, 108, 0.82); overflow: visible; pointer-events: none;
 }
+/* 背面タイルの時計は前面タイル(eb1 z-index:2)の下に。重なりは前面タイルで隠れる。 */
+.de-clock-back { z-index: 1; }
 .de-clock line { stroke: currentColor; stroke-linecap: round; fill: none; }
 .de-ticks line { stroke-width: 2; }
 .de-min { stroke-width: 2.4; }
