@@ -220,8 +220,10 @@ let dailyMode = false;
 function loadDailyState() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(DAILY_KEY)); } catch (e) {}
-  if (!s) s = { date: null, cleared: false, best: false, streak: 0, lastClearDate: null, totalDays: 0, maxStreak: 0 };
+  if (!s) s = { date: null, cleared: false, best: false, streak: 0, lastClearDate: null, totalDays: 0, maxStreak: 0, timeMs: null, refBestMs: null };
   if (s.maxStreak === undefined) s.maxStreak = s.streak || 0;
+  if (s.timeMs === undefined) s.timeMs = null;       // 正式記録(初回クリアのタイム)
+  if (s.refBestMs === undefined) s.refBestMs = null; // 参考ベスト(2回目以降)
   return s;
 }
 function saveDailyState(s) { localStorage.setItem(DAILY_KEY, JSON.stringify(s)); }
@@ -239,6 +241,8 @@ function refreshDailyState() {
   s.date = today;
   s.cleared = false;
   s.best = false;
+  s.timeMs = null;    // 日替わり=新しい問題なので記録もリセット
+  s.refBestMs = null;
   saveDailyState(s);
   return s;
 }
@@ -258,6 +262,70 @@ function dailyDayNumber() {
   const now = new Date(); now.setHours(0, 0, 0, 0);
   return Math.floor((now - epoch) / 86400000) + 1;
 }
+
+// ---- デイリーの「レベル相当」推定 ----
+// デイリーは全プールから選ぶため通常レベルに直接は載らない。そこで通常200問(難易度順)のうち
+// 同じ難易度(episodes, minMoves)の問題がどのレベル帯に多いか＝中央値でレベルを推定し、10刻みで表示する。
+// カーブは章ごとにボスで跳ね次章頭で戻るノコギリ状なので、単一の推定値には±1〜2帯のブレが残る(仕様)。
+let _dailyBandMaps = null;
+function dailyBandMaps() {
+  if (_dailyBandMaps) return _dailyBandMaps;
+  const ids = window.NORMAL_LEVEL_IDS || [];
+  const byEpMv = new Map(), byMv = new Map();
+  ids.forEach((id, i) => {
+    const p = poolById.get(id);
+    if (!p) return;
+    const level = i + 1;
+    const ep = p.analysis.episodes, mv = p.solution.minMoves;
+    const k = ep + ',' + mv;
+    if (!byEpMv.has(k)) byEpMv.set(k, []);
+    byEpMv.get(k).push(level);
+    if (!byMv.has(mv)) byMv.set(mv, []);
+    byMv.get(mv).push(level);
+  });
+  const mvKeys = [...byMv.keys()].sort((a, b) => a - b);
+  _dailyBandMaps = { byEpMv, byMv, mvKeys, maxLevel: ids.length || 200 };
+  return _dailyBandMaps;
+}
+function _median(arr) {
+  const s = [...arr].sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function estimateDailyLevel(puz) {
+  const { byEpMv, byMv, mvKeys } = dailyBandMaps();
+  const ep = puz.analysis.episodes, mv = puz.solution.minMoves;
+  const k = ep + ',' + mv;
+  if (byEpMv.has(k)) return _median(byEpMv.get(k));
+  if (byMv.has(mv)) return _median(byMv.get(mv));
+  if (!mvKeys.length) return null;
+  let best = mvKeys[0];
+  for (const m of mvKeys) if (Math.abs(m - mv) < Math.abs(best - mv)) best = m;
+  return _median(byMv.get(best)) + (mv - best) * 12; // 手数レンジ外は最短手数差で外挿
+}
+// 表示用: { n: '70' | '200+' } を返す
+function dailyLevelBand(puz) {
+  const est = estimateDailyLevel(puz);
+  if (est == null) return null;
+  const { maxLevel } = dailyBandMaps();
+  let band = Math.max(10, Math.round(est / 10) * 10);
+  if (band > maxLevel) return { n: maxLevel + '+' };
+  return { n: String(band) };
+}
+
+// mm:ss 形式(1時間以上は h:mm:ss)
+function fmtTime(ms) {
+  if (ms == null) return null;
+  const total = Math.round(ms / 1000);
+  const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
+  const mm = h ? String(m).padStart(2, '0') : String(m);
+  return (h ? h + ':' : '') + mm + ':' + String(s).padStart(2, '0');
+}
+
+// ---- デイリーのタイム計測 ----
+// カウントダウン終了時に開始し、初クリアで停止。途中のリセット/ミスも含む実測。
+let dailyRunStart = null;
+function beginDailyRun() { dailyRunStart = Date.now(); }
 
 function handleDailyClear(moves, min) {
   const s = loadDailyState();
@@ -361,7 +429,7 @@ const HOME_SWIPE_MIN_X = 40;
 const HOME_SWIPE_MAX_Y_RATIO = 0.6;
 function showView(name, options = {}) {
   const animate = options.animate !== false;
-  for (const v of ['chapters', 'levels', 'play']) {
+  for (const v of ['chapters', 'levels', 'play', 'daily']) {
     $('#view-' + v).hidden = v !== name;
     document.body.classList.toggle('view-' + v, v === name);
   }
@@ -513,6 +581,7 @@ function goHomeFromHeader() {
     setHomeIndex(homeIndex == null ? defaultHomeIndex() : homeIndex);
     return;
   }
+  if (!$('#view-daily').hidden) { showChapters(); return; }
   showChapters();
 }
 
@@ -791,6 +860,56 @@ function startDailyPuzzle(entrance = true) {
   dailyMode = true;
   const puz = getDailyPuzzle();
   _initPuzzle(puz, t('dailyTitle'), entrance, false);
+}
+
+// ---- デイリー・ハブ画面(プレイ前に挟む1画面) ----
+function showDaily(options = {}) {
+  showView('daily', options);
+  renderDailyHub();
+}
+function renderDailyHub() {
+  const s = refreshDailyState();
+  const puz = getDailyPuzzle();
+  $('#daily-day').textContent = t('dailyDay', { n: dailyDayNumber() });
+  $('#daily-streak').textContent = t('dailyStreak', { n: s.streak });
+  $('#daily-streak').hidden = s.streak <= 0;
+  const band = dailyLevelBand(puz);
+  $('#daily-level').textContent = band ? t('dailyLevelBand', { n: band.n }) : '';
+  // 状態エンブレム: 未クリア=pending / クリア=win / 最短=best
+  $('#daily-emblem').dataset.state = s.best ? 'best' : (s.cleared ? 'win' : 'pending');
+  // 記録(正式タイム) と 参考ベスト
+  $('#daily-time').textContent = s.timeMs != null ? fmtTime(s.timeMs) : t('dailyNoRecord');
+  const refRow = $('#daily-refbest-row');
+  if (s.refBestMs != null) { refRow.hidden = false; $('#daily-refbest').textContent = fmtTime(s.refBestMs); }
+  else refRow.hidden = true;
+  // 報酬プレビュー(クリア報酬)
+  const rw = DAILY_REWARDS.clear;
+  let rwHtml = `${t('dailyReward')}: ${t('hintLight')} ×${rw.light}`;
+  if (rw.answer > 0) rwHtml += `　${t('hintAnswer')} ×${rw.answer}`;
+  $('#daily-reward').textContent = rwHtml;
+  // CTA: 未クリア=挑戦する / クリア済み=もう一度
+  $('#daily-cta').textContent = s.cleared ? t('retryAgain') : t('dailyNew');
+}
+
+// ---- 挑戦: 5秒カウントダウン → 計測開始 → 盤へ ----
+let countdownTimer = null;
+function startDailyWithCountdown() {
+  runCountdown(5, () => { startDailyPuzzle(true); beginDailyRun(); });
+}
+function runCountdown(from, done) {
+  clearTimeout(countdownTimer);
+  const ov = $('#overlay-countdown');
+  const num = $('#countdown-num');
+  ov.hidden = false;
+  let c = from;
+  const step = () => {
+    if (c <= 0) { ov.hidden = true; done(); return; }
+    num.textContent = c;
+    if (!REDUCED) { num.classList.remove('pop'); void num.offsetWidth; num.classList.add('pop'); }
+    c--;
+    countdownTimer = setTimeout(step, 1000);
+  };
+  step();
 }
 
 function startHomePuzzle() {
@@ -1192,6 +1311,9 @@ async function checkClear() {
   if (!G.pos.every((p, i) => p === G.puz.rooms[i].goal)) return;
   G.cleared = true;
   G.busy = true;
+  // デイリーは計測終了。dailyRunStart が無ければ未計測(null)。
+  const timeMs = (dailyMode && dailyRunStart != null) ? Date.now() - dailyRunStart : null;
+  dailyRunStart = null;
   const min = G.puz.solution.minMoves;
   const best = G.moves === min;
   let unlockIndex = null;
@@ -1201,7 +1323,7 @@ async function checkClear() {
     if (best) markBest(G.puz.id);
     unlockIndex = unlockAfterClear(curMode, curIndex, currentUnlockedBeforeClear);
   }
-  lastClear = { moves: G.moves, min, best, index: curIndex };
+  lastClear = { moves: G.moves, min, best, index: curIndex, timeMs };
 
   const finishClearPresentation = () => {
     if (dailyMode) goToGap();
@@ -1537,7 +1659,17 @@ function goToGap() {
   em.classList.add(best ? 'best' : 'win');
 
   if (dailyMode) {
+    const wasClearedBefore = loadDailyState().cleared; // handleDailyClear が cleared を立てる前に判定
     const dr = handleDailyClear(moves, min);
+    // タイム記録: 初クリア=正式記録として固定、2回目以降=参考ベストのみ更新
+    const runMs = lastClear ? lastClear.timeMs : null;
+    let isReference = wasClearedBefore;
+    if (runMs != null) {
+      const s = loadDailyState();
+      if (!wasClearedBefore) { s.timeMs = runMs; }
+      else if (s.refBestMs == null || runMs < s.refBestMs) { s.refBestMs = runMs; }
+      saveDailyState(s);
+    }
     if (dr) {
       let html = `<span class="daily-streak-result">${t('dailyStreak', { n: dr.streak })}</span>`;
       const rw = dr.reward;
@@ -1553,9 +1685,18 @@ function goToGap() {
       const ds = loadDailyState();
       $('#gap-progress').innerHTML = `<span class="daily-streak-result">${t('dailyStreak', { n: ds.streak })}</span>`;
     }
+    // タイム表示(初回=正式 / 再挑戦=参考)
+    const gt = $('#gap-time');
+    if (runMs != null) {
+      gt.hidden = false;
+      gt.innerHTML = `${fmtTime(runMs)}${isReference ? ` <span class="ref-tag">${t('dailyRefTag')}</span>` : ''}`;
+    } else {
+      gt.hidden = true;
+    }
     $('#btn-next').textContent = t('levels');
     $('#btn-share').hidden = false;
   } else {
+    $('#gap-time').hidden = true;
     const levels = chapterLevels(curChapter);
     const done = levels.filter((p) => cleared.has(p.id)).length;
     $('#gap-progress').innerHTML = `<b>${done}</b> / ${levels.length}`;
@@ -1572,7 +1713,7 @@ function goToGap() {
 
 $('#btn-next').addEventListener('click', () => {
   $('#overlay-gap').hidden = true;
-  if (dailyMode) { dailyMode = false; showLevels(curChapter || CHAPTERS[0]); return; }
+  if (dailyMode) { dailyMode = false; showDaily(); return; } // デイリーはハブへ戻って記録・ストリークを見せる
   const levels = chapterLevels(curChapter);
   if (curIndex + 1 < levels.length) startPuzzle(curChapter, curIndex + 1);
   else showLevels(curChapter);
@@ -1584,6 +1725,7 @@ $('#btn-list').addEventListener('click', () => {
 });
 $('#btn-retry').addEventListener('click', () => {
   $('#overlay-gap').hidden = true;
+  if (dailyMode) { startDailyWithCountdown(); return; } // 再挑戦もカウントダウン→計測(参考記録)
   restartCurrentPuzzle();
 });
 $('#btn-share').addEventListener('click', async () => {
@@ -1732,10 +1874,13 @@ $('#home-prev').addEventListener('click', homePrev);
 $('#home-next').addEventListener('click', homeNext);
 $('.home-hub').addEventListener('touchstart', beginHomeSwipe, { passive: true });
 $('.home-hub').addEventListener('touchend', finishHomeSwipe, { passive: true });
-$('#home-daily').addEventListener('click', () => startDailyPuzzle());
-$('#home-list').addEventListener('click', () => showLevels(CHAPTERS[0]));
+// フッターは目標(統計オーバーレイ)の前面にも出るので、他項目に移る前に統計を閉じる
+function closeStatsOverlay() { $('#stats-overlay').hidden = true; }
+$('#home-daily').addEventListener('click', () => { closeStatsOverlay(); showDaily(); });
+$('#home-list').addEventListener('click', () => { closeStatsOverlay(); showLevels(CHAPTERS[0]); });
+$('#daily-cta').addEventListener('click', startDailyWithCountdown);
 $('#home-goals').addEventListener('click', openStats);
-$('#home-store').addEventListener('click', () => showToast(t('soon')));
+$('#home-store').addEventListener('click', () => { closeStatsOverlay(); showToast(t('soon')); });
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア

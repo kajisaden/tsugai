@@ -87,6 +87,13 @@ window.NIKENZUME_STRINGS = {
     dailyShareText: ({ day, moves, best, streak }) =>
       `Tsugai デイリー #${day}\n${moves}手でクリア${best ? ' ⭐' : ''}${streak > 0 ? `\n🔥 ${streak}日連続` : ''}`,
     copied: 'コピーしました',
+    // デイリーハブ画面
+    dailyDay: ({ n }) => `DAY ${n}`,
+    dailyLevelBand: ({ n }) => `レベル ${n} 相当`,
+    dailyRecordTime: 'タイム',
+    dailyRefBest: '参考ベスト',
+    dailyRefTag: '参考',
+    dailyNoRecord: '—',
     // 統計・実績
     stats: '統計・実績',
     statCleared: 'クリア', statBest: 'ベスト',
@@ -179,6 +186,13 @@ window.NIKENZUME_STRINGS = {
     dailyShareText: ({ day, moves, best, streak }) =>
       `Tsugai Daily #${day}\nCleared in ${moves} ${moves === 1 ? 'move' : 'moves'}${best ? ' ⭐' : ''}${streak > 0 ? `\n🔥 ${streak} day streak` : ''}`,
     copied: 'Copied',
+    // Daily hub screen
+    dailyDay: ({ n }) => `DAY ${n}`,
+    dailyLevelBand: ({ n }) => `~ Level ${n}`,
+    dailyRecordTime: 'Time',
+    dailyRefBest: 'Ref. best',
+    dailyRefTag: 'ref',
+    dailyNoRecord: '—',
     // Stats & achievements
     stats: 'Stats',
     statCleared: 'Cleared', statBest: 'Best',

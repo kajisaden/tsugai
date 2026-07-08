@@ -634,6 +634,14 @@ button:active { transform: translateY(1px); }
   border-top: 1px solid rgba(43, 38, 32, 0.08);
   background: #e9edf7;
 }
+/* ゲーム画面(view-play)ではフッターを隠す。それ以外の画面では常時表示。 */
+body.view-play .home-footer { display: none; }
+/* フッターは fixed なので、下部の内容が隠れないよう非プレイ画面では下余白を確保 */
+body:not(.view-play) main { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+/* 目標(統計)画面はフルスクリーンのオーバーレイ(z-40)だが、フッターを前面に残す。 */
+body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 45; }
+/* 統計の内容がフッターに被らないよう下余白をフッター分だけ広げる */
+#stats-overlay .info-body { padding-bottom: calc(116px + env(safe-area-inset-bottom, 0px)); }
 .home-nav-btn {
   min-width: 0;
   height: 58px;
@@ -663,6 +671,110 @@ button:active { transform: translateY(1px); }
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* ---- デイリー・ハブ(プレイ前に挟む1画面) ---- */
+.daily-hub {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 14px;
+  width: 100%;
+  text-align: center;
+}
+.daily-day {
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-size: 13px; font-weight: 800; letter-spacing: 0.22em;
+  color: var(--text-dim);
+}
+.daily-streak {
+  font-size: 15px; font-weight: 800; letter-spacing: 0.04em;
+  color: var(--gold);
+}
+/* ハブのエンブレム = ホーム画面の実エンブレム(home-emblem)をそのまま流用。
+   位置(皿・タイル)はホームと同じCSSを共有するのでズレない。上に時計(案2)だけ重ねる。 */
+#daily-emblem { width: 124px; height: 99px; margin: 2px auto; }
+/* 皿は常に表示。既定=未挑戦のベージュ台座(home-emblem.pending と同色)。状態で銀/金に。 */
+#daily-emblem .emblem-disc {
+  display: block;
+  background: linear-gradient(180deg, rgba(234, 225, 209, 0.58), rgba(214, 203, 184, 0.42));
+  border: 1px solid rgba(138, 120, 92, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+/* 状態は皿の色で表す: クリア=銀 / 最短=金。A画面(result-emblem)と同じ漆金・銀のツヤ。 */
+#daily-emblem[data-state="win"] .emblem-disc {
+  background: radial-gradient(120% 150% at 40% 24%, #f8fbfe 0%, #d8e3ee 40%, #b6c6d7 72%, #8e9daf 100%);
+  border-color: transparent;
+  box-shadow: 0 6px 12px rgba(84, 92, 104, 0.14), inset 0 2px 4px rgba(255, 255, 255, 0.72), inset 0 -5px 8px rgba(110, 124, 140, 0.22);
+}
+#daily-emblem[data-state="best"] .emblem-disc {
+  background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 40%, #bd9c52 72%, #8f7032 100%);
+  border-color: transparent;
+  box-shadow: 0 6px 12px rgba(95, 76, 35, 0.14), inset 0 2px 4px rgba(255, 248, 224, 0.72), inset 0 -5px 8px rgba(115, 89, 36, 0.24);
+}
+/* 前面タイル(eb1)に重ねる時計(案2)。エンブレムと同じ座標系(viewBox 124x99)で描くのでeb1中心(46.5,59.5)に一致。 */
+.de-clock {
+  position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3;
+  color: rgba(41, 53, 108, 0.82); overflow: visible; pointer-events: none;
+}
+.de-clock line { stroke: currentColor; stroke-linecap: round; fill: none; }
+.de-ticks line { stroke-width: 2; }
+.de-min { stroke-width: 2.4; }
+.de-hr { stroke-width: 2.9; }
+.de-hub { fill: currentColor; }
+.daily-level {
+  font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.04em;
+}
+.daily-record {
+  display: grid; gap: 4px; min-width: 168px;
+  padding: 10px 16px; border-radius: 14px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(64, 56, 48, 0.08);
+}
+.daily-record-row { display: flex; justify-content: space-between; gap: 18px; align-items: baseline; }
+.daily-record-label { font-size: 12px; color: var(--text-dim); }
+.daily-record-val {
+  font-family: "Inter", "Avenir Next", sans-serif; font-size: 16px; font-weight: 800;
+  color: var(--text); font-variant-numeric: tabular-nums;
+}
+#daily-refbest-row .daily-record-val { color: var(--text-dim); font-weight: 700; font-size: 14px; }
+.daily-reward { font-size: 12px; color: var(--text-dim); letter-spacing: 0.02em; }
+.daily-cta {
+  width: min(220px, 72vw); height: 52px; margin-top: 6px;
+  display: grid; place-items: center; padding: 0; border: 0; border-radius: 999px;
+  color: #fff; background: linear-gradient(180deg, #6680ff 0%, #526df3 100%);
+  box-shadow: 0 10px 18px rgba(82, 109, 243, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  font-size: 17px; font-weight: 700; letter-spacing: 0.08em;
+}
+.daily-cta:active { transform: translateY(1px); }
+/* A画面(gap)のタイム表示 */
+.gap-time {
+  margin-top: 4px; font-family: "Inter", "Avenir Next", sans-serif;
+  font-size: 15px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums;
+}
+.gap-time .ref-tag {
+  font-size: 10px; font-weight: 700; color: var(--text-dim);
+  border: 1px solid rgba(64, 56, 48, 0.2); border-radius: 5px; padding: 1px 5px; margin-left: 4px;
+  letter-spacing: 0.06em; vertical-align: 1px;
+}
+/* デイリー挑戦の5秒カウントダウン */
+#overlay-countdown {
+  position: fixed; inset: 0; z-index: 25;
+  display: grid; place-items: center;
+  background: rgba(243, 239, 230, 0.86);
+  backdrop-filter: blur(2px);
+}
+#overlay-countdown[hidden] { display: none; }
+.countdown-num {
+  font-family: "Inter", "Avenir Next", "Yu Gothic UI", sans-serif;
+  font-size: 120px; font-weight: 800; color: #526df3; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.countdown-num.pop { animation: countdown-pop 900ms ease-out both; }
+@keyframes countdown-pop {
+  0% { opacity: 0; transform: scale(1.5); }
+  18% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.5; transform: scale(0.86); }
 }
 
 /* ---- 問題一覧 ---- */
