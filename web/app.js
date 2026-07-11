@@ -699,6 +699,9 @@ function showLevels(ch) {
   document.querySelectorAll('.mode-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.mode === curMode);
   });
+  const nextPlayableIndex = chapterLevels(ch).findIndex((p, i) =>
+    !cleared.has(p.id) && isLevelPlayable(ch.from + i)
+  );
   const grid = $('#level-grid');
   grid.replaceChildren();
   chapterLevels(ch).forEach((p, i) => {
@@ -711,6 +714,7 @@ function showLevels(ch) {
     btn.className = 'level-tile' +
       (!isLocked && isCleared ? ' cleared' : '') +
       (!isLocked && isBest ? ' best' : '') +
+      (i === nextPlayableIndex ? ' next-level' : '') +
       (isBoss ? ' boss' : '') +
       (isLocked ? ' locked' : '');
     btn.disabled = isLocked;
