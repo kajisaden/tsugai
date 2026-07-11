@@ -789,27 +789,33 @@ body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 4
 }
 #mode-tabs {
   display: flex;
-  gap: 4px;
+  gap: 12px;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
 }
 .mode-tab {
-  padding: 6px 20px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-dim);
-  font-size: 13px;
+  width: min(140px, 40vw);
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(232, 224, 208, 0.85), rgba(211, 202, 186, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  color: rgba(41, 53, 108, 0.64);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   cursor: pointer;
-  transition: background .2s, color .2s;
+  transition: background .2s, color .2s, box-shadow .2s;
 }
 .mode-tab.active {
-  background: var(--text);
-  color: var(--bg);
+  color: #fff;
+  background: linear-gradient(180deg, #6680ff 0%, #526df3 100%);
+  box-shadow: 0 10px 18px rgba(82, 109, 243, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 #level-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
 .level-tile {
@@ -885,9 +891,7 @@ body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 4
 .daily-reward-line.streak-bonus { color: var(--gold); font-weight: 600; margin-top: 4px; }
 /* シェアボタン */
 #btn-share {
-  min-width: 200px;
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-weight: 600;
+  min-width: 200px;  font-weight: 600;
   font-size: 14px;
   letter-spacing: 0.12em;
   border: 1px solid rgba(232, 217, 176, 0.25);
@@ -908,9 +912,7 @@ body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 4
   align-items: baseline;
   margin: 4px 0 14px;   /* 左右マージンを0に: ○手詰の左端=戻る / ○手の右端=トグル と揃える */
 }
-#puzzle-label {
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-size: 17px;
+#puzzle-label {  font-size: 17px;
   letter-spacing: 0.2em;
   color: var(--gold);
 }
@@ -1320,16 +1322,12 @@ body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 4
 #overlay-miss { background: rgba(8, 8, 11, 0.5); }
 
 /* 反則オーバーレイ: ゴールに非同時で入ったとき。静かに選択を促す */
-.miss-note {
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  color: var(--text);
+.miss-note {  color: var(--text);
   letter-spacing: 0.18em;
   font-size: 15px;
 }
 /* 「画面をタップ」ヒント: 控えめに(ボタンを廃しタップ操作にしたため) */
-.miss-hint {
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  color: var(--text-dim);
+.miss-hint {  color: var(--text-dim);
   letter-spacing: 0.18em;
   font-size: 12px;
 }
@@ -1360,11 +1358,9 @@ body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 4
 
 /* ---- 切れ目(広告枠) ---- */
 .gap-buttons { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-/* A画面のボタン: 壁カードから彫り出した(raised)質感＋明朝体。次の問題へ=金文字 / もう一度=平文 */
+/* A画面のボタン: 壁カードから彫り出した(raised)質感。次の問題へ=金文字 / もう一度=平文 */
 #btn-next, #btn-retry {
-  min-width: 200px;
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
-  font-weight: 600;
+  min-width: 200px;  font-weight: 600;
   font-size: 16px;
   letter-spacing: 0.12em;
   border: none;
@@ -1397,9 +1393,7 @@ body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 4
 .gap-buttons button { width: 100%; }
 .gap-result { display: flex; flex-direction: column; align-items: center; gap: 14px; }
 /* 案C入替: 手数の見出しと進捗の数字を金に / 「最短は◯手」「第1章」「/20」は平文(墨・生成り)で読みやすく */
-.gap-moves {
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-size: 17px; letter-spacing: 0.16em; color: var(--gold);
+.gap-moves {  font-size: 17px; letter-spacing: 0.16em; color: var(--gold);
 }
 .gap-moves #gap-moves-2 { font-size: 13px; color: var(--text); margin-left: 0.6em; letter-spacing: 0.12em; }
 .gap-progress { font-size: 14px; letter-spacing: 0.16em; color: var(--text); }
@@ -2225,9 +2219,7 @@ body {
 }
 #settings-drawer.open .drawer-panel { transform: translateX(0); }
 .drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.drawer-title {
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-size: 19px; letter-spacing: 0.25em; text-indent: 0.25em; color: var(--gold);
+.drawer-title {  font-size: 19px; letter-spacing: 0.25em; text-indent: 0.25em; color: var(--gold);
 }
 #btn-settings-close { font-size: 22px; line-height: 1; color: var(--text-dim); padding: 4px 6px; }
 .drawer-body { flex: 1; overflow-y: auto; overflow-x: hidden; }
@@ -2276,9 +2268,7 @@ button.set-row:active { transform: none; }
   padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 12px;
   flex-shrink: 0;
 }
-.howto-title {
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-size: 19px; letter-spacing: 0.25em; text-indent: 0.25em; color: var(--gold);
+.howto-title {  font-size: 19px; letter-spacing: 0.25em; text-indent: 0.25em; color: var(--gold);
 }
 .howto-close { font-size: 22px; line-height: 1; color: var(--text-dim); padding: 4px 6px; }
 .howto-body {
@@ -2449,9 +2439,7 @@ button.set-row:active { transform: none; }
   padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 12px;
   flex-shrink: 0;
 }
-.info-title {
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-size: 19px; letter-spacing: 0.25em; text-indent: 0.25em; color: var(--gold);
+.info-title {  font-size: 19px; letter-spacing: 0.25em; text-indent: 0.25em; color: var(--gold);
 }
 .info-close { font-size: 22px; line-height: 1; color: var(--text-dim); padding: 4px 6px; }
 .info-body {

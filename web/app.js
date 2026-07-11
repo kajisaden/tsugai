@@ -699,8 +699,6 @@ function showLevels(ch) {
   document.querySelectorAll('.mode-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.mode === curMode);
   });
-  const done = chapterLevels(ch).filter((p) => cleared.has(p.id)).length;
-  $('#levels-title').textContent = `${done} / ${chapterLevels(ch).length}`;
   const grid = $('#level-grid');
   grid.replaceChildren();
   chapterLevels(ch).forEach((p, i) => {
