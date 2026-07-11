@@ -142,8 +142,10 @@ const HINT_KEY = 'nikenzume.hints.v2';
 function loadHintCredits() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(HINT_KEY)); } catch (e) {}
-  if (!s) s = { light: 0, next: 0, answer: 0 };
+  if (!s) s = { light: 0, next: 0, answer: 0, usedLight: 0, usedAnswer: 0 };
   if (s.answer === undefined) s.answer = 0;
+  if (s.usedLight === undefined) s.usedLight = 0;
+  if (s.usedAnswer === undefined) s.usedAnswer = 0;
   return s;
 }
 let hintCredits = loadHintCredits();
@@ -173,6 +175,9 @@ function loadLoginState() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(LOGIN_KEY)); } catch (e) {}
   if (!s) s = { day: 0, lastDate: null, claimed: false, firstDone: false };
+  // 既存のログイン記録は初日として移行する。過去の連続日数は復元できないため保持しない。
+  if (s.streak === undefined) s.streak = s.firstDone ? 1 : 0;
+  if (s.maxStreak === undefined) s.maxStreak = s.streak;
   return s;
 }
 function saveLoginState(s) { localStorage.setItem(LOGIN_KEY, JSON.stringify(s)); }
@@ -186,6 +191,8 @@ function checkLoginBonus() {
     addHints(FIRST_LOGIN_BONUS.light, FIRST_LOGIN_BONUS.next, FIRST_LOGIN_BONUS.answer);
     s.firstDone = true;
     s.day = 0;
+    s.streak = 1;
+    s.maxStreak = Math.max(s.maxStreak, s.streak);
     s.lastDate = today;
     s.claimed = true;
     saveLoginState(s);
@@ -197,6 +204,8 @@ function checkLoginBonus() {
     addHints(reward.light, reward.next, reward.answer);
     const dayIndex = s.day % 7;
     s.day++;
+    s.streak = s.lastDate === yesterdayStr() ? s.streak + 1 : 1;
+    s.maxStreak = Math.max(s.maxStreak, s.streak);
     s.lastDate = today;
     s.claimed = true;
     saveLoginState(s);
@@ -394,8 +403,14 @@ function watchRewardAd(then) {
 }
 // 残数を1消費して action。0なら広告(差し込み口)。
 function spendHint(kind, action) {
-  if (hintCredits[kind] > 0) { hintCredits[kind]--; saveHintCredits(); action(); }
-  else watchRewardAd(action);
+  const use = () => {
+    action();
+    if (kind === 'light') hintCredits.usedLight++;
+    if (kind === 'answer') hintCredits.usedAnswer++;
+    saveHintCredits();
+  };
+  if (hintCredits[kind] > 0) { hintCredits[kind]--; saveHintCredits(); use(); }
+  else watchRewardAd(use);
   updateHintUI();
 }
 
@@ -573,6 +588,7 @@ function setHomeIndex(index) {
 }
 
 function goHomeFromHeader() {
+  closeStatsOverlay();
   if (!$('#view-play').hidden && curChapter) {
     setHomeIndex(curIndex);
     return;
@@ -839,6 +855,7 @@ function _initPuzzle(puz, label, entrance, isBoss = false) {
     cleared: false,
   };
   document.documentElement.dataset.boss = isBoss ? 'boss' : 'normal';
+  document.documentElement.dataset.daily = dailyMode ? 'true' : 'false';
   $('#puzzle-label').textContent = label;
   $('#puzzle-no').textContent = label;
   updateInfo();
@@ -1808,46 +1825,89 @@ function closeInfoOverlay(id) { $(`#${id}-overlay`).hidden = true; }
   $(`#set-${id}`).addEventListener('click', () => openInfoOverlay(id));
   $(`#btn-${id}-close`).addEventListener('click', () => closeInfoOverlay(id));
 });
-// 統計・実績
-const ACHIEVEMENTS = [
-  { id: 'clear1',   icon: '🎯', req: () => cleared.size >= 1 },
-  { id: 'clear10',  icon: '🎯', req: () => cleared.size >= 10 },
-  { id: 'clear50',  icon: '🎯', req: () => cleared.size >= 50 },
-  { id: 'clear100', icon: '🎯', req: () => cleared.size >= 100 },
-  { id: 'best1',    icon: '⭐', req: () => bestCleared.size >= 1 },
-  { id: 'best10',   icon: '⭐', req: () => bestCleared.size >= 10 },
-  { id: 'best50',   icon: '⭐', req: () => bestCleared.size >= 50 },
-  { id: 'daily1',   icon: '📅', req: () => loadDailyState().totalDays >= 1 },
-  { id: 'streak7',  icon: '🔥', req: () => loadDailyState().maxStreak >= 7 },
-  { id: 'streak14', icon: '🔥', req: () => loadDailyState().maxStreak >= 14 },
-  { id: 'streak30', icon: '🔥', req: () => loadDailyState().maxStreak >= 30 },
-];
+// ---- 目標: エンブレム・タイルで見せる進捗コレクション ----
+let goalClearMode = 'normal';
+let goalAchievementTab = 'normal';
+const GOAL_MILESTONES = [1, 10, 50, 100, 150, 200];
+
+function goalEmblem(state, locked = false, variant = '') {
+  const classes = `emblem home-emblem goal-emblem ${variant} ${locked ? 'locked pending' : state}`;
+  return `<div class="${classes}" aria-hidden="true">
+    <div class="emblem-halo"></div><div class="emblem-disc"></div>
+    <div class="emblem-lock-shackles"><div class="emblem-lock-shackle back"></div><div class="emblem-lock-shackle front"></div></div>
+    <div class="emblem-balls"><div class="emblem-ball eb1"></div><div class="emblem-ball eb2"></div></div>
+    <div class="emblem-lock-latches"><div class="emblem-lock-latch back"><span></span><span></span><span></span></div><div class="emblem-lock-latch front"><span></span><span></span><span></span></div></div>
+  </div>`;
+}
+function goalDailyEmblem(state, variant = '') {
+  return `<div class="emblem home-emblem daily-emblem goal-daily-emblem ${variant}" data-state="${state}" aria-hidden="true"><div class="emblem-disc"></div><div class="emblem-balls"><div class="emblem-ball eb2"></div><div class="emblem-ball eb1"></div></div><svg class="de-clock de-clock-back" viewBox="0 0 124 99"><g class="de-ticks"><line x1="77.5" y1="25.5" x2="77.5" y2="28.5"></line><line x1="77.5" y1="54.5" x2="77.5" y2="57.5"></line><line x1="61.5" y1="41.5" x2="64.5" y2="41.5"></line><line x1="90.5" y1="41.5" x2="93.5" y2="41.5"></line></g><line class="de-min" x1="77.5" y1="41.5" x2="86" y2="29"></line><line class="de-hr" x1="77.5" y1="41.5" x2="69.5" y2="33.5"></line><circle class="de-hub" cx="77.5" cy="41.5" r="2.4"></circle></svg><svg class="de-clock" viewBox="0 0 124 99"><g class="de-ticks"><line x1="46.5" y1="43.5" x2="46.5" y2="46.5"></line><line x1="46.5" y1="72.5" x2="46.5" y2="75.5"></line><line x1="30.5" y1="59.5" x2="33.5" y2="59.5"></line><line x1="59.5" y1="59.5" x2="62.5" y2="59.5"></line></g><line class="de-min" x1="46.5" y1="59.5" x2="55" y2="47"></line><line class="de-hr" x1="46.5" y1="59.5" x2="38.5" y2="51.5"></line><circle class="de-hub" cx="46.5" cy="59.5" r="2.4"></circle></svg></div>`;
+}
+function modeProgress(mode) {
+  const ids = MODES[mode].levels.map(p => p.id);
+  return { clear: ids.filter(id => cleared.has(id)).length, best: ids.filter(id => bestCleared.has(id)).length };
+}
+function goalModeTabs(active, kind) {
+  return `<div class="goal-tabs" data-goal-tabs="${kind}">
+    <button class="goal-tab${active === 'normal' ? ' active' : ''}" data-goal-mode="normal">${t('modeNormal')}</button>
+    <button class="goal-tab${active === 'advanced' ? ' active' : ''}" data-goal-mode="advanced">${t('modeAdvanced')}</button>
+    ${kind === 'achievement' ? `<button class="goal-tab${active === 'continuity' ? ' active' : ''}" data-goal-mode="continuity">${t('goalContinuity')}</button>` : ''}
+  </div>`;
+}
+function goalSummaryTile(kind, count) {
+  const isBest = kind === 'best';
+  const state = count ? (isBest ? 'best' : 'win') : 'pending';
+  return `<div class="goal-summary-tile ${isBest ? 'best' : 'clear'}">
+    <div class="goal-tile-kicker">${isBest ? 'BEST CLEAR' : 'CLEAR'}</div>
+    ${goalEmblem(state, !count)}
+    <div class="goal-tile-count">${count}</div>
+  </div>`;
+}
+function goalAchievementTile(kind, threshold, count) {
+  const isBest = kind === 'best';
+  const done = count >= threshold;
+  return `<div class="goal-achievement-tile${done ? ' done' : ''}${isBest ? ' best' : ''}">
+    <div class="goal-achievement-count">${threshold}</div>
+    ${goalEmblem(isBest ? 'best' : 'win', !done)}
+  </div>`;
+}
+function goalAchievementRow(kind, threshold, count) {
+  const isBest = kind === 'best';
+  const done = count >= threshold;
+  return `<div class="goal-achievement-row achievement${done ? ' done' : ''}${isBest ? ' best' : ''}">
+    <div class="goal-achievement-emblem">${goalEmblem(isBest ? 'best' : 'win', !done)}</div>
+    <div class="goal-achievement-title"><span class="goal-achievement-prefix">${t('goalAchievementPrefix', { n: threshold })}</span><span class="goal-achievement-action">${isBest ? 'BEST CLEAR' : 'CLEAR'}</span></div>
+  </div>`;
+}
+function goalContinuityRow(value, target, variant, textKey) {
+  const done = value >= target;
+  return `<div class="goal-achievement-row${done ? ' done' : ''}">
+    <div class="goal-achievement-emblem">${goalEmblem('win', !done, variant)}</div>
+    <div class="goal-achievement-title">${t(textKey, { n: target })}</div>
+  </div>`;
+}
 function renderStats() {
-  const total = MODES.normal.levels.length;
-  const ds = loadDailyState();
-  const unlocked = ACHIEVEMENTS.filter(a => a.req()).length;
-  let html = '<div class="stat-grid">';
-  html += `<div class="stat-box"><div class="stat-val">${cleared.size}</div><div class="stat-lbl">${t('statCleared')}</div><div class="stat-sub">/ ${total}</div></div>`;
-  html += `<div class="stat-box"><div class="stat-val">${bestCleared.size}</div><div class="stat-lbl">${t('statBest')}</div><div class="stat-sub">/ ${total}</div></div>`;
-  html += '</div>';
-  html += `<div class="stat-sec">${t('statDaily')}</div>`;
-  html += '<div class="stat-grid tri">';
-  html += `<div class="stat-box"><div class="stat-val">${ds.totalDays}</div><div class="stat-lbl">${t('statDaysPlayed')}</div></div>`;
-  html += `<div class="stat-box"><div class="stat-val">${ds.streak}</div><div class="stat-lbl">${t('statCurrentStreak')}</div></div>`;
-  html += `<div class="stat-box"><div class="stat-val">${ds.maxStreak || 0}</div><div class="stat-lbl">${t('statMaxStreak')}</div></div>`;
-  html += '</div>';
-  html += `<div class="stat-sec">${t('statAchievements')} <span class="stat-dim">${unlocked} / ${ACHIEVEMENTS.length}</span></div>`;
-  html += '<div class="ach-list">';
-  for (const a of ACHIEVEMENTS) {
-    const done = a.req();
-    html += `<div class="ach-row${done ? ' done' : ''}"><span class="ach-icon">${done ? a.icon : '🔒'}</span><span class="ach-name">${t('ach_' + a.id)}</span></div>`;
-  }
-  html += '</div>';
+  const progress = modeProgress(goalClearMode);
+  const login = loadLoginState();
+  const daily = loadDailyState();
+  let html = `<section class="goal-card goal-clear-card"><div class="goal-card-head"><span>${t('goalClear')}</span>${goalModeTabs(goalClearMode, 'clear')}</div><div class="goal-summary-grid">${goalSummaryTile('clear', progress.clear)}${goalSummaryTile('best', progress.best)}</div></section>`;
+  html += `<section class="goal-card goal-login-card"><div class="goal-card-head"><span>${t('goalLogin')}</span></div><div class="goal-login-grid"><div class="goal-login-tile"><div>${t('goalLoginStreak')}</div>${goalDailyEmblem('win')}<div class="goal-login-count">${login.streak}</div></div><div class="goal-login-tile"><div>${t('goalDailyStreak')}</div>${goalDailyEmblem('best', 'teal')}<div class="goal-login-count">${daily.streak}</div></div></div></section>`;
+  html += `<section class="goal-card goal-achievement-card"><div class="goal-card-head"><span>${t('goalAchievements')}</span>${goalModeTabs(goalAchievementTab, 'achievement')}</div><div id="goal-achievement-body">${renderGoalAchievementBody()}</div></section>`;
   $('#stats-content').innerHTML = html;
+  document.querySelectorAll('[data-goal-tabs="clear"] [data-goal-mode]').forEach(btn => btn.addEventListener('click', () => { goalClearMode = btn.dataset.goalMode; renderStats(); }));
+  document.querySelectorAll('[data-goal-tabs="achievement"] [data-goal-mode]').forEach(btn => btn.addEventListener('click', () => { goalAchievementTab = btn.dataset.goalMode; renderStats(); }));
+}
+function renderGoalAchievementBody() {
+  if (goalAchievementTab === 'continuity') {
+    const login = loadLoginState(); const daily = loadDailyState();
+    const hints = loadHintCredits();
+    const items = [[login.maxStreak, 7, '', 'goalLoginStreakAchievement'], [login.maxStreak, 14, '', 'goalLoginStreakAchievement'], [login.maxStreak, 30, '', 'goalLoginStreakAchievement'], [daily.maxStreak, 7, 'daily', 'goalDailyStreakAchievement'], [daily.maxStreak, 14, 'daily', 'goalDailyStreakAchievement'], [daily.maxStreak, 30, 'daily', 'goalDailyStreakAchievement'], [daily.totalDays, 1, 'daily', 'goalDailyClearAchievement'], [daily.totalDays, 10, 'daily', 'goalDailyClearAchievement'], [daily.totalDays, 50, 'daily', 'goalDailyClearAchievement'], [hints.usedLight, 1, '', 'goalHintUseAchievement'], [hints.usedLight, 10, '', 'goalHintUseAchievement'], [hints.usedLight, 50, '', 'goalHintUseAchievement'], [hints.usedLight, 100, '', 'goalHintUseAchievement'], [hints.usedAnswer, 1, '', 'goalAnswerUseAchievement'], [hints.usedAnswer, 10, '', 'goalAnswerUseAchievement'], [hints.usedAnswer, 50, '', 'goalAnswerUseAchievement'], [hints.usedAnswer, 100, '', 'goalAnswerUseAchievement']];
+    return `<div class="goal-achievement-list">${items.map(([value, target, variant, textKey]) => goalContinuityRow(value, target, variant, textKey)).join('')}</div>`;
+  }
+  const progress = modeProgress(goalAchievementTab);
+  return `<div class="goal-achievement-list">${GOAL_MILESTONES.map(n => goalAchievementRow('clear', n, progress.clear)).join('')}${GOAL_MILESTONES.map(n => goalAchievementRow('best', n, progress.best)).join('')}</div>`;
 }
 function openStats() { closeSettings(); renderStats(); $('#stats-overlay').hidden = false; }
 $('#set-stats').addEventListener('click', openStats);
-$('#btn-stats-close').addEventListener('click', () => { $('#stats-overlay').hidden = true; });
 // お問い合わせ: Googleフォームへ外部遷移(TODO: URL差し替え)
 $('#set-contact').addEventListener('click', () => {
   window.open('https://forms.gle/PLACEHOLDER', '_blank', 'noopener');

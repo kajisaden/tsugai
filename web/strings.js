@@ -103,6 +103,11 @@ window.NIKENZUME_STRINGS = {
     ach_clear1: '初クリア', ach_clear10: '10問クリア', ach_clear50: '50問クリア', ach_clear100: '100問クリア',
     ach_best1: '初ベスト', ach_best10: 'ベスト10達成', ach_best50: 'ベスト50達成',
     ach_daily1: 'デイリー初クリア', ach_streak7: '7日連続', ach_streak14: '14日連続', ach_streak30: '30日連続',
+    goalClear: 'クリア', goalLogin: 'ログイン', goalAchievements: '実績', goalContinuity: '継続', goalLoginStreak: '連続ログイン', goalDailyStreak: '連続デイリー',
+    goalAchievementClear: ({ n }) => `レベル${n}をCLEAR`, goalAchievementBest: ({ n }) => `レベル${n}をBEST CLEAR`,
+    goalAchievementPrefix: ({ n }) => `レベル${n}を`,
+    goalLoginStreakAchievement: ({ n }) => `${n}日連続ログイン`, goalDailyStreakAchievement: ({ n }) => `${n}日連続デイリー`, goalDailyClearAchievement: ({ n }) => `デイリー${n}問クリア`,
+    goalHintUseAchievement: ({ n }) => `ヒント${n}回使用`, goalAnswerUseAchievement: ({ n }) => `答え${n}回使用`,
   },
   en: {
     title: 'Tsugai',
@@ -202,5 +207,10 @@ window.NIKENZUME_STRINGS = {
     ach_clear1: 'First clear', ach_clear10: '10 puzzles cleared', ach_clear50: '50 puzzles cleared', ach_clear100: '100 puzzles cleared',
     ach_best1: 'First best', ach_best10: '10 bests', ach_best50: '50 bests',
     ach_daily1: 'First daily clear', ach_streak7: '7-day streak', ach_streak14: '14-day streak', ach_streak30: '30-day streak',
+    goalClear: 'Clear', goalLogin: 'Login', goalAchievements: 'Achievements', goalContinuity: 'Streaks', goalLoginStreak: 'Login streak', goalDailyStreak: 'Daily streak',
+    goalAchievementClear: ({ n }) => `Clear Level ${n}`, goalAchievementBest: ({ n }) => `Best-clear Level ${n}`,
+    goalAchievementPrefix: ({ n }) => `Level ${n} `,
+    goalLoginStreakAchievement: ({ n }) => `${n}-day login streak`, goalDailyStreakAchievement: ({ n }) => `${n}-day daily streak`, goalDailyClearAchievement: ({ n }) => `Clear ${n} daily ${n === 1 ? 'puzzle' : 'puzzles'}`,
+    goalHintUseAchievement: ({ n }) => `Use hints ${n} ${n === 1 ? 'time' : 'times'}`, goalAnswerUseAchievement: ({ n }) => `Use answers ${n} ${n === 1 ? 'time' : 'times'}`,
   },
 };

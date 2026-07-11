@@ -642,6 +642,15 @@ body:not(.view-play) main { padding-bottom: calc(84px + env(safe-area-inset-bott
 body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 45; }
 /* 統計の内容がフッターに被らないよう下余白をフッター分だけ広げる */
 #stats-overlay .info-body { padding-bottom: calc(116px + env(safe-area-inset-bottom, 0px)); }
+/* 目標画面は共通ヘッダを残す。専用のタイトル／閉じる操作は不要。 */
+#stats-overlay {
+  top: calc(60px + env(safe-area-inset-top, 0px));
+  background: #fbf7ed;
+}
+body:has(#stats-overlay:not([hidden])) #app-header { background: #fbf7ed; }
+#stats-overlay .info-body { padding-top: 8px; }
+body:has(#stats-overlay:not([hidden])) #btn-home { display: grid; }
+body:has(#stats-overlay:not([hidden])) #settings-drawer { z-index: 50; }
 .home-nav-btn {
   min-width: 0;
   height: 58px;
@@ -694,6 +703,8 @@ body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 4
 /* ハブのエンブレム = ホーム画面の実エンブレム(home-emblem)をそのまま流用。
    位置(皿・タイル)はホームと同じCSSを共有するのでズレない。上に時計(案2)だけ重ねる。 */
 #daily-emblem { width: 124px; height: 99px; margin: 2px auto; }
+#daily-emblem .emblem-ball { background: linear-gradient(145deg, #fff9f2 0%, #f5bd79 52%, #d97b35 100%); }
+#daily-emblem .emblem-ball::before { border-color: rgba(175, 88, 29, 0.5); }
 /* 皿は常に表示。既定=未挑戦のベージュ台座(home-emblem.pending と同色)。状態で銀/金に。 */
 #daily-emblem .emblem-disc {
   display: block;
@@ -1651,6 +1662,30 @@ body {
   background: radial-gradient(circle at 50% 45%, rgba(248, 222, 219, 0.92) 0%, rgba(198, 91, 82, 0.42) 55%, transparent 78%);
   box-shadow: 0 0 14px 3px rgba(198, 91, 82, 0.24);
 }
+:root[data-daily="true"] .ball {
+  background: linear-gradient(145deg, #fff9f2 0%, #f5bd79 52%, #d97b35 100%);
+}
+:root[data-daily="true"] .ball::before { border-color: rgba(175, 88, 29, 0.5); }
+:root[data-daily="true"] .ball-flash {
+  background: radial-gradient(circle at 50% 45%, rgba(255, 238, 215, 0.92) 0%, rgba(217, 123, 53, 0.45) 55%, transparent 78%);
+  box-shadow: 0 0 14px 3px rgba(217, 123, 53, 0.28);
+}
+:root[data-daily="true"] .goal::before,
+:root[data-daily="true"] .goal.on::before,
+:root[data-daily="true"] .goal.filled::before {
+  border-color: #d97b35;
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.50), 0 0 12px rgba(217, 123, 53, 0.32);
+}
+:root[data-daily="true"] .goal.on::before { box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.54), 0 0 14px rgba(217, 123, 53, 0.36); }
+:root[data-daily="true"] .bump-glow { background: #e8a15b; box-shadow: 0 0 8px 2px rgba(217, 123, 53, 0.46), 0 0 15px 4px rgba(217, 123, 53, 0.20); }
+:root[data-daily="true"] .bump-glow.show { animation-name: bump-glow-light-daily; }
+:root[data-daily="true"] .bump-ripple { border-color: rgba(217, 123, 53, 0.50); box-shadow: 0 0 5px 1px rgba(217, 123, 53, 0.20); }
+@keyframes bump-glow-light-daily {
+  0%   { opacity: 0;    background: #ffe2bf; box-shadow: 0 0 5px 1px rgba(217, 123, 53, 0.30); }
+  9%   { opacity: 1;    background: #fff0dc; box-shadow: 0 0 13px 4px rgba(217, 123, 53, 0.52), calc(var(--bloom-x, 0px) * 0.76) calc(var(--bloom-y, 0px) * 0.76) 28px 8px rgba(217, 123, 53, 0.22); }
+  30%  { opacity: .92; background: #e8a15b; box-shadow: 0 0 9px 3px rgba(217, 123, 53, 0.42), calc(var(--bloom-x, 0px) * 0.46) calc(var(--bloom-y, 0px) * 0.46) 18px 5px rgba(217, 123, 53, 0.18); }
+  100% { opacity: 0;    background: #e8a15b; box-shadow: 0 0 8px 2px rgba(217, 123, 53, 0.46), 0 0 15px 4px rgba(217, 123, 53, 0.20); }
+}
 :root[data-boss="boss"] #gap-emblem .emblem-ball {
   background: linear-gradient(145deg, #fff8f7 0%, #e79e98 52%, #c65b52 100%);
 }
@@ -2542,4 +2577,45 @@ button.set-row:active { transform: none; }
   font-size: 13px; color: var(--text-dim); line-height: 1.6;
 }
 .pp-ul li::before { content: "·"; position: absolute; left: 4px; color: var(--gold); font-weight: 700; }
+
+/* ---- 目標: ホームのエンブレムを使う3カード構成 ---- */
+#stats-overlay .info-body { padding: 8px 16px calc(116px + env(safe-area-inset-bottom, 0px)); max-width: 560px; }
+.goal-card { margin: 0 0 16px; padding: 14px; border: 1px solid rgba(95, 75, 56, 0.10); border-radius: 20px; background: rgba(255,255,255,0.30); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55); }
+.goal-card-head { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:30px; color:var(--text); font-size:14px; font-weight:700; letter-spacing:.08em; }
+.goal-tabs { display:flex; gap:4px; }
+.goal-tab { border:0; border-radius:999px; padding:6px 10px; background:transparent; color:var(--text-dim); font-size:11px; font-weight:700; }
+.goal-tab.active { background:linear-gradient(180deg,#6680ff,#526df3); color:#fff; box-shadow:0 3px 8px rgba(82,109,243,.18); }
+.goal-summary-grid,.goal-login-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:10px; }
+.goal-summary-tile,.goal-login-tile { min-height:156px; display:grid; justify-items:center; align-content:center; border-radius:16px; background:linear-gradient(160deg,#f8f4eb,#e8dfcf); border:1px solid rgba(43,38,32,.10); box-shadow:inset 0 1px 0 rgba(255,255,255,.64),0 3px 8px rgba(83,67,43,.10); }
+.goal-tile-kicker,.goal-group-label { color:var(--gold); font-size:11px; font-weight:800; letter-spacing:.14em; }
+.goal-summary-tile.clear .goal-tile-kicker { color:#8e9daf; }
+.goal-summary-tile .goal-emblem { width:124px; height:99px; margin:-10px 0 -14px; transform:scale(.72); transform-origin:center; }
+.goal-tile-count { margin-top:12px; color:#5874f0; font-size:22px; font-weight:700; line-height:1; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
+.goal-login-tile { min-height:156px; box-sizing:border-box; padding-top:8px; color:var(--text-dim); font-size:12px; letter-spacing:.04em; }
+.goal-login-tile .goal-daily-emblem { width:124px; height:99px; margin:-10px 0 -14px; transform:scale(.72); transform-origin:center; }
+.goal-daily-emblem .emblem-disc { display:block; background:linear-gradient(180deg,rgba(234,225,209,.58),rgba(214,203,184,.42)); border:1px solid rgba(138,120,92,.10); box-shadow:inset 0 1px 0 rgba(255,255,255,.34); }
+.goal-daily-emblem.teal .emblem-ball { background:linear-gradient(145deg,#fff9f2 0%,#f5bd79 52%,#d97b35 100%); }
+.goal-daily-emblem.teal .emblem-ball::before { border-color:rgba(175,88,29,.5); }
+.goal-login-count { margin:12px 0 0; color:#5874f0; font-size:25px; font-weight:800; font-variant-numeric:tabular-nums; }
+.goal-achievement-card { padding-bottom:16px; }.goal-achievement-groups { display:grid; gap:16px; margin-top:10px; }
+.goal-achievement-group { display:grid; gap:7px; }.goal-achievement-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.goal-achievement-tile { min-height:104px; position:relative; display:grid; justify-items:center; align-content:center; border-radius:14px; background:linear-gradient(160deg,#f1ece2,#e1d8c9); border:1px solid rgba(43,38,32,.09); overflow:hidden; }
+.goal-achievement-tile.done { background:rgba(168,128,31,.05); }.goal-achievement-count { position:absolute; top:7px; left:9px; color:var(--text-dim); font-size:12px; font-weight:800; }
+.goal-achievement-tile .goal-emblem { width:124px; height:99px; margin:-19px 0 -25px; transform:scale(.58); transform-origin:center; }
+.goal-achievement-caption { color:var(--text-dim); font-size:8px; font-weight:800; letter-spacing:.08em; }.goal-achievement-tile.best .goal-achievement-caption { color:var(--gold); }
+.goal-achievement-list { display:grid; gap:8px; margin-top:10px; }
+.goal-achievement-row { min-height:66px; display:flex; align-items:center; gap:4px; padding:6px 12px 6px 7px; border:1px solid rgba(43,38,32,.10); border-radius:14px; background:linear-gradient(160deg,#f8f4eb,#e8dfcf); box-shadow:inset 0 1px 0 rgba(255,255,255,.64),0 3px 8px rgba(83,67,43,.10); }
+.goal-achievement-emblem { position:relative; width:36px; height:30px; flex:0 0 36px; }
+.goal-achievement-emblem .goal-emblem { position:absolute; left:50%; top:50%; width:124px; height:99px; transform:translate(-50%,-50%) scale(.25); transform-origin:center; }
+.goal-achievement-title { color:var(--text); font-size:12px; font-weight:700; letter-spacing:.04em; }
+.goal-achievement-row:not(.done) .goal-achievement-title { color:var(--text-dim); }
+.goal-achievement-row.achievement:not(.best) .goal-achievement-action { color:#8e9daf; }
+.goal-achievement-row.achievement.best .goal-achievement-action { color:var(--gold); }
+.goal-achievement-action { margin-inline-start:.35em; }
+.goal-continuity-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:10px; }
+.goal-continuity-tile { min-height:132px; display:grid; align-content:center; justify-items:center; border:1px solid rgba(43,38,32,.10); border-radius:14px; background:linear-gradient(160deg,#f8f4eb,#e8dfcf); box-shadow:inset 0 1px 0 rgba(255,255,255,.64),0 3px 8px rgba(83,67,43,.10); }
+.goal-continuity-tile .goal-emblem { width:124px; height:99px; margin:-18px 0 -14px; transform:scale(.65); transform-origin:center; }
+.goal-continuity-count { margin-top:9px; text-align:center; color:#5874f0; font-size:22px; font-weight:700; line-height:1; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
+.goal-emblem.daily:not(.locked) .emblem-ball { background:linear-gradient(145deg,#fff9f2 0%,#f5bd79 52%,#d97b35 100%); }
+.goal-emblem.daily:not(.locked) .emblem-ball::before { border-color:rgba(175,88,29,.5); }
 
