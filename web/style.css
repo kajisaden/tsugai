@@ -646,6 +646,7 @@ body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 4
 #stats-overlay {
   top: calc(60px + env(safe-area-inset-top, 0px));
   background: #fbf7ed;
+  --text: #29356c;
 }
 body:has(#stats-overlay:not([hidden])) #app-header { background: #fbf7ed; }
 #stats-overlay .info-body { padding-top: 8px; }
@@ -2592,6 +2593,7 @@ button.set-row:active { transform: none; }
 .goal-summary-tile .goal-emblem { width:124px; height:99px; margin:-10px 0 -14px; transform:scale(.72); transform-origin:center; }
 .goal-tile-count { margin-top:12px; color:#5874f0; font-size:22px; font-weight:700; line-height:1; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
 .goal-login-tile { min-height:156px; box-sizing:border-box; padding-top:8px; color:var(--text-dim); font-size:12px; letter-spacing:.04em; }
+.goal-login-label { font-size:12px; font-weight:700; letter-spacing:.04em; }
 .goal-login-tile .goal-daily-emblem { width:124px; height:99px; margin:-10px 0 -14px; transform:scale(.72); transform-origin:center; }
 .goal-daily-emblem .emblem-disc { display:block; background:linear-gradient(180deg,rgba(234,225,209,.58),rgba(214,203,184,.42)); border:1px solid rgba(138,120,92,.10); box-shadow:inset 0 1px 0 rgba(255,255,255,.34); }
 .goal-daily-emblem.teal .emblem-ball { background:linear-gradient(145deg,#fff9f2 0%,#f5bd79 52%,#d97b35 100%); }
