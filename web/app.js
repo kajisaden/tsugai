@@ -84,6 +84,7 @@ const cleared = new Set(JSON.parse(localStorage.getItem(STORE_KEY) ?? '[]'));
 function markCleared(puzId) {
   cleared.add(puzId);
   localStorage.setItem(STORE_KEY, JSON.stringify([...cleared]));
+  updateGoalNotice(); // 実績到達をフッタの「!」へ即時反映(目標画面を開くまで点かない問題の対策)
 }
 
 // 最短達成記録(金星)。クリア記録とは別枠
@@ -92,6 +93,7 @@ const bestCleared = new Set(JSON.parse(localStorage.getItem(BEST_KEY) ?? '[]'));
 function markBest(puzId) {
   bestCleared.add(puzId);
   localStorage.setItem(BEST_KEY, JSON.stringify([...bestCleared]));
+  updateGoalNotice();
 }
 
 // ---- レベルロック ----
@@ -137,6 +139,27 @@ function unlockAfterClear(mode, index, currentOverride = null) {
     return next;
   }
   return null;
+}
+
+// ---- 購入状態(IAP) ----
+// StoreKit/Play Billing 接続後は購入完了時にここへ書き込み、updateThreeTabLock() を呼ぶ。
+// 開発確認は ?dev=1 で一時解除(保存しない。実購入とデバッグ状態を混ぜないため)。
+const PURCHASE_KEY = 'nikenzume.purchases.v1';
+function loadPurchases() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(PURCHASE_KEY)); } catch (e) {}
+  if (!s || typeof s !== 'object') s = {};
+  if (s.threePack === undefined) s.threePack = false; // 3面拡張パック(広告除去込み)
+  if (s.adFree === undefined) s.adFree = false;       // 単独の広告除去
+  return s;
+}
+let purchases = loadPurchases();
+function savePurchases() { localStorage.setItem(PURCHASE_KEY, JSON.stringify(purchases)); }
+const DEV_UNLOCK = new URLSearchParams(location.search).get('dev') === '1';
+function hasThreePack() { return DEV_UNLOCK || purchases.threePack; }
+function updateThreeTabLock() {
+  const tab = document.querySelector('.mode-tab[data-mode="three"]');
+  if (tab) tab.classList.toggle('locked', !hasThreePack());
 }
 
 // ヒント設定(問題ごと)。違う問題に移ると必ずオフから始める(同じ問題の初形/答え再生では保持)。
@@ -276,6 +299,7 @@ function recordDailyVisit() {
   s.maxVisitStreak = Math.max(s.maxVisitStreak || 0, s.visitStreak);
   s.lastVisitDate = today;
   saveDailyState(s);
+  updateGoalNotice();
   return s;
 }
 
@@ -385,6 +409,7 @@ function handleDailyClear(moves, min) {
   if (isBest) s.best = true;
   saveDailyState(s);
   addHints(reward.light, reward.next, reward.answer);
+  updateGoalNotice();
   return { reward, best: isBest, streak: s.streak, streakReward, isFirst };
 }
 
@@ -431,6 +456,7 @@ function spendHint(kind, action) {
     if (kind === 'light') hintCredits.usedLight++;
     if (kind === 'answer') hintCredits.usedAnswer++;
     saveHintCredits();
+    updateGoalNotice();
   };
   if (hintCredits[kind] > 0) { hintCredits[kind]--; saveHintCredits(); use(); }
   else watchRewardAd(use);
@@ -725,6 +751,7 @@ function showHomeClearFeedback(clearIndex, unlockIndex = null) {
 document.querySelectorAll('.mode-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     const mode = tab.dataset.mode;
+    if (mode === 'three' && !hasThreePack()) { openStore(); return; } // 未購入はストアで案内
     if (mode === curMode) return;
     document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
@@ -1962,10 +1989,11 @@ function updateGoalNotice() {
 }
 function openStats() { closeSettings(); $('#store-overlay').hidden = true; renderStats(); $('#stats-overlay').hidden = false; }
 function renderStore() {
-  $('#store-content').innerHTML = `<section class="goal-card store-card"><div class="goal-card-head"><span>ストア</span></div><div class="store-list">
-    <button class="store-item supporter" type="button" data-soon><div class="store-emblem">${goalEmblem('best')}</div><div class="store-copy"><b>3面拡張パック</b><span>広告除去と3面ステージを解放します</span></div><strong>¥800</strong></button>
-    <button class="store-item" type="button" data-soon><div class="store-emblem">${goalEmblem('win')}</div><div class="store-copy"><b>広告除去</b><span>広告なしで、ヒントと答えをすぐに使えます</span></div><strong>¥500</strong></button>
-    <div class="store-item coming"><div class="store-emblem">${goalEmblem('win', true)}</div><div class="store-copy"><b>スキンパック</b><span>新しい配色テーマを準備中です</span></div><em>Coming soon</em></div>
+  // 価格(¥800/¥500)は仮置き。StoreKit/Billing接続後はプロダクト情報の表示価格へ差し替える
+  $('#store-content').innerHTML = `<section class="goal-card store-card"><div class="goal-card-head"><span>${t('store')}</span></div><div class="store-list">
+    <button class="store-item supporter" type="button" data-soon><div class="store-emblem">${goalEmblem('best')}</div><div class="store-copy"><b>${t('storeThreePack')}</b><span>${t('storeThreePackDesc')}</span></div><strong>¥800</strong></button>
+    <button class="store-item" type="button" data-soon><div class="store-emblem">${goalEmblem('win')}</div><div class="store-copy"><b>${t('storeAdFree')}</b><span>${t('storeAdFreeDesc')}</span></div><strong>¥500</strong></button>
+    <div class="store-item coming"><div class="store-emblem">${goalEmblem('win', true)}</div><div class="store-copy"><b>${t('storeSkinPack')}</b><span>${t('storeSkinPackDesc')}</span></div><em>${t('storeComingSoon')}</em></div>
   </div></section>`;
   document.querySelectorAll('#store-content [data-soon]').forEach(btn => btn.addEventListener('click', () => showToast(t('soon'))));
 }
@@ -2174,3 +2202,4 @@ showChapters();
 const loginResult = checkLoginBonus();
 if (loginResult) showLoginModal(loginResult);
 updateGoalNotice();
+updateThreeTabLock();

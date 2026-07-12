@@ -108,6 +108,12 @@ window.NIKENZUME_STRINGS = {
     goalAchievementPrefix: ({ n }) => `レベル${n}を`,
     goalLoginStreakAchievement: ({ n }) => `${n}日連続ログイン`, goalDailyStreakAchievement: ({ n }) => `${n}日連続デイリー`, goalDailyClearAchievement: ({ n }) => `デイリー${n}問クリア`,
     goalHintUseAchievement: ({ n }) => `ヒント${n}回使用`, goalAnswerUseAchievement: ({ n }) => `答え${n}回使用`,
+    // ストア
+    store: 'ストア',
+    storeThreePack: '3面拡張パック', storeThreePackDesc: '広告除去と3面ステージを解放します',
+    storeAdFree: '広告除去', storeAdFreeDesc: '広告なしで、ヒントと答えをすぐに使えます',
+    storeSkinPack: 'スキンパック', storeSkinPackDesc: '新しい配色テーマを準備中です',
+    storeComingSoon: 'Coming soon',
   },
   en: {
     title: 'Tsugai',
@@ -212,5 +218,11 @@ window.NIKENZUME_STRINGS = {
     goalAchievementPrefix: ({ n }) => `Level ${n} `,
     goalLoginStreakAchievement: ({ n }) => `${n}-day login streak`, goalDailyStreakAchievement: ({ n }) => `${n}-day daily streak`, goalDailyClearAchievement: ({ n }) => `Clear ${n} daily ${n === 1 ? 'puzzle' : 'puzzles'}`,
     goalHintUseAchievement: ({ n }) => `Use hints ${n} ${n === 1 ? 'time' : 'times'}`, goalAnswerUseAchievement: ({ n }) => `Use answers ${n} ${n === 1 ? 'time' : 'times'}`,
+    // Store
+    store: 'Store',
+    storeThreePack: 'Three-Board Pack', storeThreePackDesc: 'Removes ads and unlocks the three-board stages',
+    storeAdFree: 'Remove Ads', storeAdFreeDesc: 'Play ad-free — use hints and answers instantly',
+    storeSkinPack: 'Skin Pack', storeSkinPackDesc: 'New color themes are in the works',
+    storeComingSoon: 'Coming soon',
   },
 };

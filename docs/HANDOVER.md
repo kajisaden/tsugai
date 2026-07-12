@@ -38,11 +38,16 @@
 ### 次にClaude Codeで行うこと
 
 1. 新しい3面Lv1〜20を実際にプレイし、主役交代が体感できるか評価する。特にLv11以降の難度上昇を確認。
-2. 390x844、375x667、standalone相当で5x3盤3枚がスクロールせず収まるか確認し、`#boards.three-boards` の高さを調整。
-3. 3面タブの購入ロックを実装する。現在は開発確認用に常時表示・進入可能。
+2. ~~390x844、375x667、standalone相当で5x3盤3枚が収まるか確認~~ → **2026-07-12 完了**。3面はCodexのCSSのまま両サイズで収まる(390x844=盤310px / 375x667=228px、スクロール無し)。むしろ**2面**が Blue Ring 改修(`fc63b10`)の `.board { width: min(260px, 70vw) }` で画面高の式(line 950)を後勝ち上書きされ、375x667で76pxあふれていた。幅上限を `min(260px, 70vw, calc(画面高の式))` に併合して修正(390x844は260pxのまま不変)。
+3. ~~3面タブの購入ロックを実装する~~ → **2026-07-12 完了**。購入状態は `nikenzume.purchases.v1`(`{threePack, adFree}`)。未購入は3面タブに錠アイコン(`.mode-tab.locked .tab-lock`)を出し、タップでストアを開いて案内。開発確認は `?dev=1` で一時解除(保存しない)。StoreKit/Billing接続後は購入完了時に `purchases.threePack=true`→`savePurchases()`→`updateThreeTabLock()` を呼ぶ。
 4. StoreKit/Google Play Billing接続後、3面拡張パック購入で広告除去と3面解放を永続化。単独広告除去との重複購入設計も決める。
-5. ストア内の日本語直書きを `strings.js` へ移し、英語表示を整える。
+5. ~~ストア内の日本語直書きを `strings.js` へ移し、英語表示を整える~~ → **2026-07-12 完了**。`store*` キーを ja/en に追加し `renderStore()` を `t()` 経由に。価格(¥800/¥500)はプロダクト情報接続までの仮置きで直書きのまま。
 6. 必要なら目標画面へ3面CLEAR/BEST CLEAR実績を追加する。
+
+### 2026-07-12 追補(Claude Code)
+
+- **実績通知の即時反映**: `updateGoalNotice()` が目標画面を開くまで呼ばれず、プレイ中に実績へ到達してもフッタの `!` がリロードまで点かなかった。`markCleared`/`markBest`/`recordDailyVisit`/`handleDailyClear`/`spendHint` の末尾に呼び出しを追加。
+- 3面タブのラベルは span に分離(`fillI18n` が textContent を書くと錠SVGが消えるため)。
 
 ### 注意
 
