@@ -231,6 +231,10 @@ function loadDailyState() {
   try { s = JSON.parse(localStorage.getItem(DAILY_KEY)); } catch (e) {}
   if (!s) s = { date: null, cleared: false, best: false, streak: 0, lastClearDate: null, totalDays: 0, maxStreak: 0, timeMs: null, refBestMs: null };
   if (s.maxStreak === undefined) s.maxStreak = s.streak || 0;
+  // 旧データのクリア連続は、初回のみデイリー訪問連続の初期値として引き継ぐ。
+  if (s.visitStreak === undefined) s.visitStreak = s.streak || 0;
+  if (s.maxVisitStreak === undefined) s.maxVisitStreak = s.maxStreak || s.visitStreak;
+  if (s.lastVisitDate === undefined) s.lastVisitDate = s.lastClearDate || null;
   if (s.timeMs === undefined) s.timeMs = null;       // 正式記録(初回クリアのタイム)
   if (s.refBestMs === undefined) s.refBestMs = null; // 参考ベスト(2回目以降)
   return s;
@@ -252,6 +256,18 @@ function refreshDailyState() {
   s.best = false;
   s.timeMs = null;    // 日替わり=新しい問題なので記録もリセット
   s.refBestMs = null;
+  saveDailyState(s);
+  return s;
+}
+
+// デイリーを開いた日を記録する。クリア連続・報酬とは独立した、目標用の訪問連続記録。
+function recordDailyVisit() {
+  const s = refreshDailyState();
+  const today = loginToday();
+  if (s.lastVisitDate === today) return s;
+  s.visitStreak = s.lastVisitDate === yesterdayStr() ? s.visitStreak + 1 : 1;
+  s.maxVisitStreak = Math.max(s.maxVisitStreak || 0, s.visitStreak);
+  s.lastVisitDate = today;
   saveDailyState(s);
   return s;
 }
@@ -887,7 +903,7 @@ function showDaily(options = {}) {
   renderDailyHub();
 }
 function renderDailyHub() {
-  const s = refreshDailyState();
+  const s = recordDailyVisit();
   const puz = getDailyPuzzle();
   $('#daily-day').textContent = t('dailyDay', { n: dailyDayNumber() });
   $('#daily-streak').textContent = t('dailyStreak', { n: s.streak });
@@ -1829,6 +1845,12 @@ function closeInfoOverlay(id) { $(`#${id}-overlay`).hidden = true; }
 let goalClearMode = 'normal';
 let goalAchievementTab = 'normal';
 const GOAL_MILESTONES = [1, 10, 50, 100, 150, 200];
+const ACHIEVEMENT_SEEN_KEY = 'nikenzume.achievement-seen.v1';
+function loadSeenAchievements() { try { return new Set(JSON.parse(localStorage.getItem(ACHIEVEMENT_SEEN_KEY)) || []); } catch (e) { return new Set(); } }
+let seenAchievements = loadSeenAchievements();
+function achievementSeen(id) { return seenAchievements.has(id); }
+function claimAchievement(id) { seenAchievements.add(id); localStorage.setItem(ACHIEVEMENT_SEEN_KEY, JSON.stringify([...seenAchievements])); }
+function noticeHtml(unseen) { return unseen ? '<span class="achievement-notice">!</span>' : ''; }
 
 function goalEmblem(state, locked = false, variant = '') {
   const classes = `emblem home-emblem goal-emblem ${variant} ${locked ? 'locked pending' : state}`;
@@ -1839,8 +1861,8 @@ function goalEmblem(state, locked = false, variant = '') {
     <div class="emblem-lock-latches"><div class="emblem-lock-latch back"><span></span><span></span><span></span></div><div class="emblem-lock-latch front"><span></span><span></span><span></span></div></div>
   </div>`;
 }
-function goalDailyEmblem(state, variant = '') {
-  return `<div class="emblem home-emblem daily-emblem goal-daily-emblem ${variant}" data-state="${state}" aria-hidden="true"><div class="emblem-disc"></div><div class="emblem-balls"><div class="emblem-ball eb2"></div><div class="emblem-ball eb1"></div></div><svg class="de-clock de-clock-back" viewBox="0 0 124 99"><g class="de-ticks"><line x1="77.5" y1="25.5" x2="77.5" y2="28.5"></line><line x1="77.5" y1="54.5" x2="77.5" y2="57.5"></line><line x1="61.5" y1="41.5" x2="64.5" y2="41.5"></line><line x1="90.5" y1="41.5" x2="93.5" y2="41.5"></line></g><line class="de-min" x1="77.5" y1="41.5" x2="86" y2="29"></line><line class="de-hr" x1="77.5" y1="41.5" x2="69.5" y2="33.5"></line><circle class="de-hub" cx="77.5" cy="41.5" r="2.4"></circle></svg><svg class="de-clock" viewBox="0 0 124 99"><g class="de-ticks"><line x1="46.5" y1="43.5" x2="46.5" y2="46.5"></line><line x1="46.5" y1="72.5" x2="46.5" y2="75.5"></line><line x1="30.5" y1="59.5" x2="33.5" y2="59.5"></line><line x1="59.5" y1="59.5" x2="62.5" y2="59.5"></line></g><line class="de-min" x1="46.5" y1="59.5" x2="55" y2="47"></line><line class="de-hr" x1="46.5" y1="59.5" x2="38.5" y2="51.5"></line><circle class="de-hub" cx="46.5" cy="59.5" r="2.4"></circle></svg></div>`;
+function goalDailyEmblem(state, variant = '', locked = false) {
+  return `<div class="emblem home-emblem daily-emblem goal-daily-emblem ${variant} ${locked ? 'locked pending' : ''}" data-state="${state}" aria-hidden="true"><div class="emblem-disc"></div><div class="emblem-balls"><div class="emblem-ball eb2"></div><div class="emblem-ball eb1"></div></div><div class="emblem-lock-shackles"><div class="emblem-lock-shackle back"></div><div class="emblem-lock-shackle front"></div></div><div class="emblem-lock-latches"><div class="emblem-lock-latch back"><span></span><span></span><span></span></div><div class="emblem-lock-latch front"><span></span><span></span><span></span></div></div><svg class="de-clock de-clock-back" viewBox="0 0 124 99"><g class="de-ticks"><line x1="77.5" y1="25.5" x2="77.5" y2="28.5"></line><line x1="77.5" y1="54.5" x2="77.5" y2="57.5"></line><line x1="61.5" y1="41.5" x2="64.5" y2="41.5"></line><line x1="90.5" y1="41.5" x2="93.5" y2="41.5"></line></g><line class="de-min" x1="77.5" y1="41.5" x2="86" y2="29"></line><line class="de-hr" x1="77.5" y1="41.5" x2="69.5" y2="33.5"></line><circle class="de-hub" cx="77.5" cy="41.5" r="2.4"></circle></svg><svg class="de-clock" viewBox="0 0 124 99"><g class="de-ticks"><line x1="46.5" y1="43.5" x2="46.5" y2="46.5"></line><line x1="46.5" y1="72.5" x2="46.5" y2="75.5"></line><line x1="30.5" y1="59.5" x2="33.5" y2="59.5"></line><line x1="59.5" y1="59.5" x2="62.5" y2="59.5"></line></g><line class="de-min" x1="46.5" y1="59.5" x2="55" y2="47"></line><line class="de-hr" x1="46.5" y1="59.5" x2="38.5" y2="51.5"></line><circle class="de-hub" cx="46.5" cy="59.5" r="2.4"></circle></svg></div>`;
 }
 function modeProgress(mode) {
   const ids = MODES[mode].levels.map(p => p.id);
@@ -1870,41 +1892,65 @@ function goalAchievementTile(kind, threshold, count) {
     ${goalEmblem(isBest ? 'best' : 'win', !done)}
   </div>`;
 }
-function goalAchievementRow(kind, threshold, count) {
+function goalAchievementRow(kind, threshold, count, id) {
   const isBest = kind === 'best';
   const done = count >= threshold;
-  return `<div class="goal-achievement-row achievement${done ? ' done' : ''}${isBest ? ' best' : ''}">
-    <div class="goal-achievement-emblem">${goalEmblem(isBest ? 'best' : 'win', !done)}</div>
+  const unseen = done && !achievementSeen(id);
+  const revealed = done && !unseen;
+  return `<button type="button" class="goal-achievement-row achievement${revealed ? ' done' : ''}${isBest ? ' best' : ''}${unseen ? ' claimable' : ''}" data-achievement-id="${id}">
+    <div class="goal-achievement-emblem">${goalEmblem(isBest ? 'best' : 'win', !revealed)}</div>
     <div class="goal-achievement-title"><span class="goal-achievement-prefix">${t('goalAchievementPrefix', { n: threshold })}</span><span class="goal-achievement-action">${isBest ? 'BEST CLEAR' : 'CLEAR'}</span></div>
-  </div>`;
+    ${noticeHtml(unseen)}</button>`;
 }
-function goalContinuityRow(value, target, variant, textKey) {
+function goalContinuityRow(value, target, variant, textKey, id) {
   const done = value >= target;
-  return `<div class="goal-achievement-row${done ? ' done' : ''}">
-    <div class="goal-achievement-emblem">${goalEmblem('win', !done, variant)}</div>
+  const unseen = done && !achievementSeen(id);
+  const revealed = done && !unseen;
+  const emblem = !revealed ? goalEmblem('win', true) : (variant === 'daily' ? goalDailyEmblem('win', 'teal') : (variant === 'login' ? goalDailyEmblem('win') : goalEmblem('win')));
+  return `<button type="button" class="goal-achievement-row continuity-${variant || 'standard'}${revealed ? ' done' : ''}${unseen ? ' claimable' : ''}" data-achievement-id="${id}">
+    <div class="goal-achievement-emblem">${emblem}</div>
     <div class="goal-achievement-title">${t(textKey, { n: target })}</div>
-  </div>`;
+    ${noticeHtml(unseen)}</button>`;
 }
 function renderStats() {
   const progress = modeProgress(goalClearMode);
   const login = loadLoginState();
   const daily = loadDailyState();
   let html = `<section class="goal-card goal-clear-card"><div class="goal-card-head"><span>${t('goalClear')}</span>${goalModeTabs(goalClearMode, 'clear')}</div><div class="goal-summary-grid">${goalSummaryTile('clear', progress.clear)}${goalSummaryTile('best', progress.best)}</div></section>`;
-  html += `<section class="goal-card goal-login-card"><div class="goal-card-head"><span>${t('goalLogin')}</span></div><div class="goal-login-grid"><div class="goal-login-tile"><div class="goal-login-label">${t('goalLoginStreak')}</div>${goalDailyEmblem('win')}<div class="goal-login-count">${login.streak}</div></div><div class="goal-login-tile"><div class="goal-login-label">${t('goalDailyStreak')}</div>${goalDailyEmblem('best', 'teal')}<div class="goal-login-count">${daily.streak}</div></div></div></section>`;
+  html += `<section class="goal-card goal-login-card"><div class="goal-card-head"><span>${t('goalLogin')}</span></div><div class="goal-login-grid"><div class="goal-login-tile"><div class="goal-login-label">${t('goalLoginStreak')}</div>${goalDailyEmblem('win')}<div class="goal-login-count">${login.streak}</div></div><div class="goal-login-tile"><div class="goal-login-label">${t('goalDailyStreak')}</div>${goalDailyEmblem('best', 'teal')}<div class="goal-login-count">${daily.visitStreak}</div></div></div></section>`;
   html += `<section class="goal-card goal-achievement-card"><div class="goal-card-head"><span>${t('goalAchievements')}</span>${goalModeTabs(goalAchievementTab, 'achievement')}</div><div id="goal-achievement-body">${renderGoalAchievementBody()}</div></section>`;
   $('#stats-content').innerHTML = html;
   document.querySelectorAll('[data-goal-tabs="clear"] [data-goal-mode]').forEach(btn => btn.addEventListener('click', () => { goalClearMode = btn.dataset.goalMode; renderStats(); }));
   document.querySelectorAll('[data-goal-tabs="achievement"] [data-goal-mode]').forEach(btn => btn.addEventListener('click', () => { goalAchievementTab = btn.dataset.goalMode; renderStats(); }));
+  document.querySelectorAll('[data-achievement-id].claimable').forEach(row => row.addEventListener('click', () => {
+    const emblem = row.querySelector('.goal-emblem');
+    if (emblem) emblem.classList.add('unlocking');
+    setTimeout(() => { claimAchievement(row.dataset.achievementId); renderStats(); updateGoalNotice(); }, REDUCED ? 0 : 700);
+  }));
+  updateGoalNotice();
 }
 function renderGoalAchievementBody() {
   if (goalAchievementTab === 'continuity') {
     const login = loadLoginState(); const daily = loadDailyState();
     const hints = loadHintCredits();
-    const items = [[login.maxStreak, 7, '', 'goalLoginStreakAchievement'], [login.maxStreak, 14, '', 'goalLoginStreakAchievement'], [login.maxStreak, 30, '', 'goalLoginStreakAchievement'], [daily.maxStreak, 7, 'daily', 'goalDailyStreakAchievement'], [daily.maxStreak, 14, 'daily', 'goalDailyStreakAchievement'], [daily.maxStreak, 30, 'daily', 'goalDailyStreakAchievement'], [daily.totalDays, 1, 'daily', 'goalDailyClearAchievement'], [daily.totalDays, 10, 'daily', 'goalDailyClearAchievement'], [daily.totalDays, 50, 'daily', 'goalDailyClearAchievement'], [hints.usedLight, 1, '', 'goalHintUseAchievement'], [hints.usedLight, 10, '', 'goalHintUseAchievement'], [hints.usedLight, 50, '', 'goalHintUseAchievement'], [hints.usedLight, 100, '', 'goalHintUseAchievement'], [hints.usedAnswer, 1, '', 'goalAnswerUseAchievement'], [hints.usedAnswer, 10, '', 'goalAnswerUseAchievement'], [hints.usedAnswer, 50, '', 'goalAnswerUseAchievement'], [hints.usedAnswer, 100, '', 'goalAnswerUseAchievement']];
-    return `<div class="goal-achievement-list">${items.map(([value, target, variant, textKey]) => goalContinuityRow(value, target, variant, textKey)).join('')}</div>`;
+    const items = [[login.maxStreak, 7, 'login', 'goalLoginStreakAchievement'], [login.maxStreak, 14, 'login', 'goalLoginStreakAchievement'], [login.maxStreak, 30, 'login', 'goalLoginStreakAchievement'], [daily.maxVisitStreak, 7, 'daily', 'goalDailyStreakAchievement'], [daily.maxVisitStreak, 14, 'daily', 'goalDailyStreakAchievement'], [daily.maxVisitStreak, 30, 'daily', 'goalDailyStreakAchievement'], [daily.totalDays, 1, 'daily', 'goalDailyClearAchievement'], [daily.totalDays, 10, 'daily', 'goalDailyClearAchievement'], [daily.totalDays, 50, 'daily', 'goalDailyClearAchievement'], [hints.usedLight, 1, '', 'goalHintUseAchievement'], [hints.usedLight, 10, '', 'goalHintUseAchievement'], [hints.usedLight, 50, '', 'goalHintUseAchievement'], [hints.usedLight, 100, '', 'goalHintUseAchievement'], [hints.usedAnswer, 1, '', 'goalAnswerUseAchievement'], [hints.usedAnswer, 10, '', 'goalAnswerUseAchievement'], [hints.usedAnswer, 50, '', 'goalAnswerUseAchievement'], [hints.usedAnswer, 100, '', 'goalAnswerUseAchievement']];
+    return `<div class="goal-achievement-list">${items.map(([value, target, variant, textKey]) => goalContinuityRow(value, target, variant, textKey, `continuity-${textKey}-${target}`)).join('')}</div>`;
   }
   const progress = modeProgress(goalAchievementTab);
-  return `<div class="goal-achievement-list">${GOAL_MILESTONES.map(n => goalAchievementRow('clear', n, progress.clear)).join('')}${GOAL_MILESTONES.map(n => goalAchievementRow('best', n, progress.best)).join('')}</div>`;
+  return `<div class="goal-achievement-list">${GOAL_MILESTONES.map(n => goalAchievementRow('clear', n, progress.clear, `${goalAchievementTab}-clear-${n}`)).join('')}${GOAL_MILESTONES.map(n => goalAchievementRow('best', n, progress.best, `${goalAchievementTab}-best-${n}`)).join('')}</div>`;
+}
+function updateGoalNotice() {
+  const badge = $('#goal-notice');
+  if (!badge) return;
+  const normal = modeProgress('normal'), advanced = modeProgress('advanced');
+  const daily = loadDailyState(), login = loadLoginState(), hints = loadHintCredits();
+  const levelPending = ['normal', 'advanced'].some(mode => GOAL_MILESTONES.some(n => {
+    const p = mode === 'normal' ? normal : advanced;
+    return (p.clear >= n && !achievementSeen(`${mode}-clear-${n}`)) || (p.best >= n && !achievementSeen(`${mode}-best-${n}`));
+  }));
+  const streaks = [[login.maxStreak, [7, 14, 30], 'goalLoginStreakAchievement'], [daily.maxVisitStreak, [7, 14, 30], 'goalDailyStreakAchievement'], [daily.totalDays, [1, 10, 50], 'goalDailyClearAchievement'], [hints.usedLight, [1, 10, 50, 100], 'goalHintUseAchievement'], [hints.usedAnswer, [1, 10, 50, 100], 'goalAnswerUseAchievement']];
+  const continuityPending = streaks.some(([value, targets, key]) => targets.some(n => value >= n && !achievementSeen(`continuity-${key}-${n}`)));
+  badge.hidden = !(levelPending || continuityPending);
 }
 function openStats() { closeSettings(); renderStats(); $('#stats-overlay').hidden = false; }
 $('#set-stats').addEventListener('click', openStats);
@@ -2106,3 +2152,4 @@ showChapters();
 
 const loginResult = checkLoginBonus();
 if (loginResult) showLoginModal(loginResult);
+updateGoalNotice();
