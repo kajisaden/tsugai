@@ -2153,6 +2153,13 @@ $('#boards').addEventListener('pointerup', (e) => {
 });
 
 // ---- ログインボーナス表示 ----
+// 報酬タイル: 光ヒントはボタンと同じ電球アイコン(金)、答えは答えボタンと同じ文字ピル(赤橙)で見せる
+function loginRewardTile(kind, count) {
+  const icon = kind === 'light'
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg>'
+    : `<span class="login-reward-answer">${t('hintAnswer')}</span>`;
+  return `<div class="login-reward-item ${kind}"><span class="login-reward-icon">${icon}</span><span class="login-reward-count">×${count}</span></div>`;
+}
 function showLoginModal(result) {
   const overlay = $('#overlay-login');
   const daysEl = $('#login-days');
@@ -2162,25 +2169,24 @@ function showLoginModal(result) {
   if (result.type === 'first') {
     for (let i = 0; i < 7; i++) {
       const d = el('login-day');
-      d.textContent = `Day ${i + 1}`;
+      d.textContent = `${i + 1}`;
       daysEl.appendChild(d);
     }
-    rewardEl.innerHTML = `<span class="reward-line">${t('hintLight')} ×${result.reward.light}</span>`
-      + `<span class="reward-line">${t('hintAnswer')} ×${result.reward.answer}</span>`;
+    rewardEl.innerHTML = loginRewardTile('light', result.reward.light) + loginRewardTile('answer', result.reward.answer);
   } else {
     const s = loadLoginState();
     const cycleDay = (s.day - 1) % 7;
     for (let i = 0; i < 7; i++) {
       const d = el('login-day');
-      d.textContent = `Day ${i + 1}`;
+      d.textContent = `${i + 1}`;
       if (i < cycleDay) d.classList.add('done');
       if (i === cycleDay) d.classList.add('today');
       daysEl.appendChild(d);
     }
     const rw = result.reward;
-    let lines = `<span class="reward-line">${t('hintLight')} ×${rw.light}</span>`;
-    if (rw.answer > 0) lines += `<span class="reward-line">${t('hintAnswer')} ×${rw.answer}</span>`;
-    rewardEl.innerHTML = lines;
+    let tiles = loginRewardTile('light', rw.light);
+    if (rw.answer > 0) tiles += loginRewardTile('answer', rw.answer);
+    rewardEl.innerHTML = tiles;
   }
 
   overlay.hidden = false;

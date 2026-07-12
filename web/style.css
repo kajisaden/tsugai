@@ -1323,76 +1323,122 @@ body:not(.view-play):has(#settings-overlay:not([hidden])) .home-footer { z-index
 #answer-bar button:disabled { opacity: 0.3; }
 
 /* ---- 「詰」オーバーレイ: 静けさで演出する ---- */
-/* ---- ログインボーナス ---- */
+/* ---- ログインボーナス: 目標・ストアと同じクリームのタイル+青CTAに統一(かつては暗色カードの取り残し) ---- */
 #overlay-login {
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 8, 11, 0.88);
+  padding: 24px;
+  background: rgba(43, 38, 32, 0.40);
   z-index: 20;
 }
 .login-card {
-  background: var(--card-bg, #1a1a22);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px 20px 20px;
+  position: relative;
   width: min(340px, 88vw);
+  padding: 40px 24px 28px;
+  border-radius: 24px;
   text-align: center;
+  background: linear-gradient(165deg, #fffaf1 0%, #f3ead9 100%);
+  border: 1px solid rgba(43, 38, 32, 0.10);
+  box-shadow: 0 20px 45px rgba(83, 67, 43, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+/* 光ヒントボタンと同じ電球を、実績の金コインと同じ質感の記章に載せてカード上端に突き出す */
+.login-emblem {
+  position: absolute; left: 50%; top: 0; transform: translate(-50%, -50%);
+  width: 60px; height: 60px; display: grid; place-items: center; border-radius: 50%;
+  background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 45%, #bd9c52 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 248, 224, 0.7), 0 6px 14px rgba(80, 58, 18, 0.28);
+}
+.login-emblem svg {
+  width: 26px; height: 26px; fill: none; stroke: #4a3a12; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
 }
 .login-title {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  margin: 0 0 16px;
-  color: var(--text);
+  margin: 8px 0 18px;
+  font-size: 15px; font-weight: 700; letter-spacing: 0.22em; text-indent: 0.22em;
+  color: var(--gold);
 }
 .login-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 16px;
+  gap: 5px;
+  margin-bottom: 18px;
 }
 .login-day {
-  padding: 8px 2px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
   font-size: 11px;
+  font-weight: 700;
   color: var(--text-dim);
-  background: transparent;
+  background: rgba(43, 38, 32, 0.05);
+  border: 1px solid rgba(43, 38, 32, 0.08);
 }
 .login-day.done {
-  background: rgba(232, 176, 80, 0.15);
-  border-color: rgba(232, 176, 80, 0.3);
-  color: rgba(232, 176, 80, 0.6);
+  color: #a8801f;
+  background: rgba(232, 197, 133, 0.30);
+  border-color: rgba(168, 128, 31, 0.28);
 }
 .login-day.today {
-  background: rgba(232, 176, 80, 0.3);
-  border-color: rgba(232, 176, 80, 0.7);
-  color: #e8b050;
-  font-weight: 700;
+  color: #fff;
+  background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 45%, #bd9c52 100%);
+  border-color: transparent;
+  box-shadow: inset 0 1px 1px rgba(255, 248, 224, 0.7), 0 3px 8px rgba(80, 58, 18, 0.28);
 }
+/* 報酬タイル: ストア/設定と同じクリームのタイル。答えは答えボタンと同じ赤橙の文字ピルで見せる */
 .login-reward {
   display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.login-reward-item {
+  display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 16px;
+  align-items: center;
+  gap: 5px;
+  min-width: 68px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #f8f4eb, #e8dfcf);
+  border: 1px solid rgba(43, 38, 32, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.64), 0 3px 8px rgba(83, 67, 43, 0.10);
 }
-.reward-line {
-  font-size: 14px;
-  color: #e8b050;
+.login-reward-icon { display: grid; place-items: center; height: 22px; color: var(--gold); }
+.login-reward-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.login-reward-answer {
+  display: grid; place-items: center; min-width: 30px; height: 18px; padding: 0 5px;
+  border-radius: 7px; border: 1px solid color-mix(in srgb, #d75c51, transparent 68%);
+  background: rgba(255, 248, 235, 0.9); font-size: 10px; font-weight: 700; color: #d75c51;
 }
-#btn-login-close {
-  padding: 10px 32px;
-  border-radius: 20px;
-  border: none;
-  background: #e8b050;
-  color: #0a0a0e;
-  font-size: 14px;
+.login-reward-count {
+  font-size: 15px;
   font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+/* CTA: ホーム「プレイ」・デイリー「挑戦する」と同じ青グラデのピル(アプリ全体で唯一のアクション色) */
+.login-cta {
+  width: 100%;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(180deg, #6680ff 0%, #526df3 100%);
+  box-shadow: 0 10px 18px rgba(82, 109, 243, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   cursor: pointer;
 }
+.login-cta:active { transform: translateY(1px); }
 
 #overlay-gap, #overlay-miss {
   position: fixed;
@@ -2269,16 +2315,6 @@ body {
 #overlay-miss {
   background: rgba(243, 239, 230, 0.56);
 }
-#overlay-login {
-  background: rgba(243, 239, 230, 0.92);
-}
-.login-card {
-  background: #fff;
-  border-color: #d6d0c4;
-}
-.login-day { border-color: #d6d0c4; color: #887856; }
-#btn-login-close { color: #fff; background: #b88630; }
-
 /* クリアの弾み(ライト): スケールでなく translateY で跳ねる。接地影は別要素(.ball-glow)で床に残し、
    球が上がると影は縮んで薄く・落ちると大きく濃く=視差で「跳ねている」ように見せる。
    接地影は球から外して別要素に持たせるので、弾み中の .ball からはドロップシャドウを抜く。

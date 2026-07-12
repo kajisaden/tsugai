@@ -16,8 +16,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- 更新の目印: URL も画面のビルド印も同じ版番号に揃える -->
-<script>try{var V='249',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=7ce4859807">
+<script>try{var V='250',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
+<link rel="stylesheet" href="style.css?v=b1bcd55ef8">
 <style>
 .hdr-left { grid-column: 1; justify-self: start; }
 /* ホームはフッターのナビと同じ言葉遣い: 面なし・アイコン+小ラベルの縦積み(設定と対) */
@@ -60,7 +60,7 @@ body.view-daily #btn-home { display: grid; }
     </button>
   </div>
   <div id="hdr-center">
-    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">249</span></h1>
+    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">250</span></h1>
     <div id="play-status" aria-live="polite">
       <span id="puzzle-no"></span>
       <span id="play-progress"></span>
@@ -291,13 +291,16 @@ body.view-daily #btn-home { display: grid; }
   </button>
 </nav>
 
-<!-- ログインボーナス: 7日サイクルカレンダー -->
+<!-- ログインボーナス: 7日サイクルカレンダー。カード/CTAは目標・ストア・デイリーと同じ言葉遣い -->
 <div id="overlay-login" hidden>
   <div class="login-card">
+    <div class="login-emblem" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg>
+    </div>
     <p class="login-title" data-i18n="loginTitle">ログインボーナス</p>
     <div class="login-days" id="login-days"></div>
     <div class="login-reward" id="login-reward"></div>
-    <button id="btn-login-close" data-i18n="loginClaim">受け取る</button>
+    <button id="btn-login-close" class="login-cta" data-i18n="loginClaim">受け取る</button>
   </div>
 </div>
 
@@ -621,6 +624,6 @@ body.view-daily #btn-home { display: grid; }
 <script src="advanced-levels.js?v=40916070ee"></script>
 <script src="three-levels.js?v=fc3252ff51"></script>
 <script src="strings.js?v=fa2cddeb0b"></script>
-<script src="app.js?v=e3ceafa11e"></script>
+<script src="app.js?v=076d4009eb"></script>
 </body>
 </html>
