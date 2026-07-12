@@ -111,6 +111,10 @@ window.NIKENZUME_STRINGS = {
     storeAdFree: '広告除去', storeAdFreeDesc: '広告なしで、ヒントと答えをすぐに使えます',
     storeSkinPack: 'スキンパック', storeSkinPackDesc: '新しい配色テーマを準備中です',
     storeComingSoon: 'Coming soon',
+    storeOwned: '購入済み', storeIncluded: 'パックに含まれます',
+    storeThanks: '購入ありがとうございます!',
+    storeRestored: '購入を復元しました', storeNothingToRestore: '復元できる購入はありません',
+    storeError: '購入を完了できませんでした',
   },
   en: {
     title: 'Tsugai',
@@ -218,5 +222,9 @@ window.NIKENZUME_STRINGS = {
     storeAdFree: 'Remove Ads', storeAdFreeDesc: 'Play ad-free — use hints and answers instantly',
     storeSkinPack: 'Skin Pack', storeSkinPackDesc: 'New color themes are in the works',
     storeComingSoon: 'Coming soon',
+    storeOwned: 'Purchased', storeIncluded: 'Included in the pack',
+    storeThanks: 'Thank you for your purchase!',
+    storeRestored: 'Purchases restored', storeNothingToRestore: 'No purchases to restore',
+    storeError: 'Purchase could not be completed',
   },
 };

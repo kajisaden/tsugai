@@ -2750,4 +2750,7 @@ button.set-item:active { transform: translateY(1px); }
 .store-item:active { transform:translateY(1px); }.store-item.supporter { border-color:rgba(168,128,31,.24); }
 .store-emblem { position:relative; width:48px; height:42px; flex:0 0 48px; }.store-emblem .goal-emblem { position:absolute; left:50%; top:50%; width:124px; height:99px; transform:translate(-50%,-50%) scale(.34); }
 .store-copy { min-width:0; display:grid; gap:3px; flex:1; }.store-copy b { font-size:13px; letter-spacing:.05em; }.store-copy span { color:var(--text-dim); font-size:10px; line-height:1.35; }.store-item strong { color:#5874f0; font-size:14px; }.store-item.supporter strong { color:var(--gold); }.store-item.coming { opacity:.66; }.store-item em { color:var(--text-dim); font-size:10px; font-style:normal; white-space:nowrap; }
+/* 購入済み/パック内包: 押下不可(divで描画)。うっすら沈めて状態ラベル(em)で示す */
+.store-item.owned { opacity:.74; }
+.store-item.owned em { color:#a8801f; }
 

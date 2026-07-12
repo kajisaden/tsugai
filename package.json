@@ -25,6 +25,7 @@
     "@capacitor-community/admob": "^8.0.0",
     "@capacitor/cli": "^8.4.1",
     "@capacitor/core": "^8.4.1",
-    "@capacitor/haptics": "^8.0.2"
+    "@capacitor/haptics": "^8.0.2",
+    "@revenuecat/purchases-capacitor": "^13.2.2"
   }
 }

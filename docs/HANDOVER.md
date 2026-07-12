@@ -40,9 +40,28 @@
 1. 新しい3面Lv1〜20を実際にプレイし、主役交代が体感できるか評価する。特にLv11以降の難度上昇を確認。
 2. ~~390x844、375x667、standalone相当で5x3盤3枚が収まるか確認~~ → **2026-07-12 完了**。3面はCodexのCSSのまま両サイズで収まる(390x844=盤310px / 375x667=228px、スクロール無し)。むしろ**2面**が Blue Ring 改修(`fc63b10`)の `.board { width: min(260px, 70vw) }` で画面高の式(line 950)を後勝ち上書きされ、375x667で76pxあふれていた。幅上限を `min(260px, 70vw, calc(画面高の式))` に併合して修正(390x844は260pxのまま不変)。
 3. ~~3面タブの購入ロックを実装する~~ → **2026-07-12 完了**。購入状態は `nikenzume.purchases.v1`(`{threePack, adFree}`)。未購入は3面タブに錠アイコン(`.mode-tab.locked .tab-lock`)を出し、タップでストアを開いて案内。開発確認は `?dev=1` で一時解除(保存しない)。StoreKit/Billing接続後は購入完了時に `purchases.threePack=true`→`savePurchases()`→`updateThreeTabLock()` を呼ぶ。
-4. StoreKit/Google Play Billing接続後、3面拡張パック購入で広告除去と3面解放を永続化。単独広告除去との重複購入設計も決める。
+4. ~~StoreKit/Google Play Billing接続後、3面拡張パック購入で広告除去と3面解放を永続化。単独広告除去との重複購入設計も決める~~ → **2026-07-13 クライアント側実装完了(下の「課金(RevenueCat)」参照)**。重複購入設計は決定: 3面パック(広告除去込み)所有中は広告除去タイルを「パックに含まれます」表示で押下不可。逆(広告除去→後から3面パック)は購入可のまま。残りはRevenueCat/App Store Connectのダッシュボード設定とAPIキー差し替え。
 5. ~~ストア内の日本語直書きを `strings.js` へ移し、英語表示を整える~~ → **2026-07-12 完了**。`store*` キーを ja/en に追加し `renderStore()` を `t()` 経由に。価格(¥800/¥500)はプロダクト情報接続までの仮置きで直書きのまま。
 6. 必要なら目標画面へ3面CLEAR/BEST CLEAR実績を追加する。
+
+### 2026-07-13 課金(RevenueCat)クライアント実装(Claude Code)
+
+方針決定: **RevenueCat**(`@revenuecat/purchases-capacitor` v13、依存導入済み)。iOS先行、Androidは後日(RevenueCatなら追加はキーとストア設定のみ)。Apple Developer Programは加入済み。
+
+- **権利モデル**: RevenueCatのentitlementが正、`nikenzume.purchases.v1` はオフラインキャッシュ。起動時 `getCustomerInfo()` で同期(再インストール/別端末も復元される)。
+  - entitlement `three_pack` = 3面解放+広告除去 / `ad_free` = 広告除去のみ。**3面パックの商品には両entitlementを付ける**(ダッシュボード側設定)。
+  - current offering に package `three_pack` / `ad_free`(識別子は app.js の `RC_PACKAGE`)。
+- **重複購入防止**: 3面パック所有中は広告除去タイルをdiv化(押下不可)+「パックに含まれます」。単独広告除去所有は「購入済み」。広告除去→3面パックの後追い購入は許可。
+- **広告ゲート**: `hasAdFree()`(=adFree || threePack || ?dev=1)で `showInterstitial()` を抑止、`watchRewardAd()` は視聴なしで即実行。ヒント残数0のバッジは ▶ でなく ∞。
+- **価格表示**: RevenueCatの `priceString` を表示、未接続時は仮置き(¥800/¥500)。
+- **復元**: ストア末尾「購入を復元」→ `restorePurchases()`。結果をトーストで通知。
+- **PWA/ブラウザ**: `rcReady=false` のまま=購入/復元タップは「準備中」トースト(従来挙動を維持)。
+
+**残作業(コード外)**:
+1. RevenueCatダッシュボード: プロジェクト作成 → iOSアプリ登録 → entitlement/offering/packageを上記IDで作成
+2. App Store Connect: In-App Purchase 2商品(非消耗型)作成・価格設定(¥800/¥500)、審査用メタデータ
+3. `app.js` の `RC_API_KEY_IOS` に公開SDKキー(appl_...)を設定
+4. `npx cap add ios` → `npx cap sync` → Codemagicビルド → TestFlight実機でサンドボックス購入テスト(購入/復元/パック所有時の押下不可/広告消滅/∞バッジ)
 
 ### 2026-07-12 追補(Claude Code)
 

@@ -158,6 +158,8 @@ let purchases = loadPurchases();
 function savePurchases() { localStorage.setItem(PURCHASE_KEY, JSON.stringify(purchases)); }
 const DEV_UNLOCK = new URLSearchParams(location.search).get('dev') === '1';
 function hasThreePack() { return DEV_UNLOCK || purchases.threePack; }
+// 広告除去の権利: 単独購入 or 3面拡張パック(広告除去込み)。ストアでは重複購入できない(renderStore参照)
+function hasAdFree() { return DEV_UNLOCK || purchases.adFree || purchases.threePack; }
 function hasAdvancedMode() {
   const required = MODES.normal.levels[19];
   return Boolean(required && cleared.has(required.id));
@@ -442,12 +444,12 @@ async function prepareInterstitial() {
   try { await AdMob.prepareInterstitial({ adId: AD_IDS.interstitial }); } catch (e) {}
 }
 async function showInterstitial() {
-  if (!adReady) return;
+  if (!adReady || hasAdFree()) return; // 広告除去(単独 or 3面パック)購入済みなら出さない
   try { await AdMob.showInterstitial(); } catch (e) {}
   prepareInterstitial();
 }
 function watchRewardAd(then) {
-  if (!adReady) { then(); return; }
+  if (!adReady || hasAdFree()) { then(); return; } // 広告除去済み=視聴なしで即実行(ストア文言と一致)
   (async () => {
     try {
       await AdMob.prepareRewardVideoAd({ adId: AD_IDS.reward });
@@ -456,6 +458,66 @@ function watchRewardAd(then) {
     } catch (e) { then(); }
   })();
 }
+// ---- 課金(RevenueCat via Capacitor) ----
+// ネイティブでのみ動く。PWA/ブラウザや APIキー未設定時は rcReady=false のまま(ストアは「準備中」トースト)。
+// 権利はRevenueCatのentitlementが正で、purchases(localStorage)はそのオフラインキャッシュ。
+// ダッシュボード側の前提: entitlement `three_pack`(3面+広告除去) / `ad_free`(広告除去のみ)、
+// current offering に package `three_pack` / `ad_free` を置く。3面パックの商品には両entitlementを付ける。
+const RCPurchases = window.Capacitor?.Plugins?.Purchases;
+const RC_API_KEY_IOS = ''; // TODO: RevenueCatのiOS公開SDKキー(appl_...)。ダッシュボード作成後に設定
+const RC_ENTITLEMENT = { threePack: 'three_pack', adFree: 'ad_free' };
+const RC_PACKAGE = { threePack: 'three_pack', adFree: 'ad_free' };
+let rcReady = false;
+const rcPackages = {}; // kind -> RevenueCatパッケージ(実価格 priceString の供給元)
+function applyEntitlements(customerInfo) {
+  const active = customerInfo?.entitlements?.active || {};
+  purchases.threePack = Boolean(active[RC_ENTITLEMENT.threePack]);
+  purchases.adFree = Boolean(active[RC_ENTITLEMENT.adFree]);
+  savePurchases();
+  updateModeTabLocks();
+  updateHintUI();
+}
+(async function initRevenueCat() {
+  if (!RCPurchases || !RC_API_KEY_IOS) return;
+  try {
+    await RCPurchases.configure({ apiKey: RC_API_KEY_IOS });
+    rcReady = true;
+    // 起動時同期: 再インストール/別端末でもentitlementから復元される
+    applyEntitlements((await RCPurchases.getCustomerInfo()).customerInfo);
+    const offering = (await RCPurchases.getOfferings()).current;
+    for (const pkg of offering?.availablePackages || []) {
+      if (pkg.identifier === RC_PACKAGE.threePack) rcPackages.threePack = pkg;
+      if (pkg.identifier === RC_PACKAGE.adFree) rcPackages.adFree = pkg;
+    }
+    if (!$('#store-overlay').hidden) renderStore(); // 表示中に初期化が終わったら実価格へ描き直す
+  } catch (e) { /* オフライン等。purchasesキャッシュのまま動かす */ }
+})();
+function rcErrorCancelled(e) {
+  return e?.userCancelled === true || /cancel/i.test(String(e?.message ?? '') + String(e?.code ?? ''));
+}
+async function purchaseProduct(kind) {
+  if (!rcReady || !rcPackages[kind]) { showToast(t('soon')); return; }
+  try {
+    const res = await RCPurchases.purchasePackage({ aPackage: rcPackages[kind] });
+    applyEntitlements(res.customerInfo);
+    renderStore();
+    showToast(t('storeThanks'));
+  } catch (e) {
+    if (!rcErrorCancelled(e)) showToast(t('storeError'));
+  }
+}
+async function restorePurchasesRC() {
+  if (!rcReady) { showToast(t('soon')); return; }
+  try {
+    const res = await RCPurchases.restorePurchases();
+    applyEntitlements(res.customerInfo);
+    renderStore();
+    showToast(purchases.threePack || purchases.adFree ? t('storeRestored') : t('storeNothingToRestore'));
+  } catch (e) {
+    if (!rcErrorCancelled(e)) showToast(t('storeError'));
+  }
+}
+
 // 残数を1消費して action。0なら広告(差し込み口)。
 function spendHint(kind, action) {
   const use = () => {
@@ -1520,11 +1582,12 @@ function updateHintUI() {
     setHintBadge(lightBtn, hintCredits.light);
   }
 }
-// 残数バッジ: 1以上は数字 / 0は ▶(広告)
+// 残数バッジ: 1以上は数字 / 0は ▶(広告)。広告除去済みなら0でも∞(視聴なしで使える)
 function setHintBadge(btn, n) {
   const b = btn && btn.querySelector('.hint-badge');
   if (!b) return;
   if (n > 0) { b.textContent = String(n); b.classList.remove('ad'); }
+  else if (hasAdFree()) { b.textContent = '∞'; b.classList.remove('ad'); }
   else { b.textContent = '▶'; b.classList.add('ad'); }
 }
 // 光ヒントONなら現局面のぶつかり面を出し直す。OFFなら消す
@@ -1994,15 +2057,25 @@ function updateGoalNotice() {
   badge.hidden = !(levelPending || continuityPending);
 }
 function openStats() { closeSettings(); $('#store-overlay').hidden = true; renderStats(); $('#stats-overlay').hidden = false; }
+// 商品タイル1枚分。未購入=価格付きボタン / 購入済み・パック内包=押下不可の状態表示
+function storeTile(kind, emblem, extraClass, stateLabel) {
+  const copy = `<div class="store-emblem">${emblem}</div><div class="store-copy"><b>${t(kind === 'threePack' ? 'storeThreePack' : 'storeAdFree')}</b><span>${t(kind === 'threePack' ? 'storeThreePackDesc' : 'storeAdFreeDesc')}</span></div>`;
+  if (stateLabel) return `<div class="store-item ${extraClass} owned">${copy}<em>${stateLabel}</em></div>`;
+  const price = rcPackages[kind]?.product?.priceString || (kind === 'threePack' ? '¥800' : '¥500'); // RevenueCat接続前は仮価格
+  return `<button class="store-item ${extraClass}" type="button" data-buy="${kind}">${copy}<strong>${price}</strong></button>`;
+}
 function renderStore() {
-  // 価格(¥800/¥500)は仮置き。StoreKit/Billing接続後はプロダクト情報の表示価格へ差し替える
+  // 重複購入防止: 3面パック(広告除去込み)所有中は広告除去を「パックに含まれます」で押下不可にする
+  const threeState = purchases.threePack ? t('storeOwned') : null;
+  const adFreeState = purchases.threePack ? t('storeIncluded') : (purchases.adFree ? t('storeOwned') : null);
   $('#store-content').innerHTML = `<section class="goal-card store-card"><div class="goal-card-head"><span>${t('store')}</span></div><div class="store-list">
-    <button class="store-item supporter" type="button" data-soon><div class="store-emblem">${goalEmblem('best')}</div><div class="store-copy"><b>${t('storeThreePack')}</b><span>${t('storeThreePackDesc')}</span></div><strong>¥800</strong></button>
-    <button class="store-item" type="button" data-soon><div class="store-emblem">${goalEmblem('win')}</div><div class="store-copy"><b>${t('storeAdFree')}</b><span>${t('storeAdFreeDesc')}</span></div><strong>¥500</strong></button>
+    ${storeTile('threePack', goalEmblem('best'), 'supporter', threeState)}
+    ${storeTile('adFree', goalEmblem('win'), '', adFreeState)}
     <div class="store-item coming"><div class="store-emblem">${goalEmblem('win', true)}</div><div class="store-copy"><b>${t('storeSkinPack')}</b><span>${t('storeSkinPackDesc')}</span></div><em>${t('storeComingSoon')}</em></div>
   </div></section>
-  <button class="store-restore" type="button" data-soon>${t('restore')}</button>`;
-  document.querySelectorAll('#store-content [data-soon]').forEach(btn => btn.addEventListener('click', () => showToast(t('soon'))));
+  <button class="store-restore" type="button">${t('restore')}</button>`;
+  document.querySelectorAll('#store-content [data-buy]').forEach(btn => btn.addEventListener('click', () => purchaseProduct(btn.dataset.buy)));
+  document.querySelector('#store-content .store-restore').addEventListener('click', restorePurchasesRC);
 }
 function openStore() { closeSettings(); $('#stats-overlay').hidden = true; renderStore(); $('#store-overlay').hidden = false; }
 // お問い合わせ: Googleフォームへ外部遷移
