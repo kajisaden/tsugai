@@ -84,6 +84,7 @@ const cleared = new Set(JSON.parse(localStorage.getItem(STORE_KEY) ?? '[]'));
 function markCleared(puzId) {
   cleared.add(puzId);
   localStorage.setItem(STORE_KEY, JSON.stringify([...cleared]));
+  updateModeTabLocks();
   updateGoalNotice(); // 実績到達をフッタの「!」へ即時反映(目標画面を開くまで点かない問題の対策)
 }
 
@@ -142,7 +143,7 @@ function unlockAfterClear(mode, index, currentOverride = null) {
 }
 
 // ---- 購入状態(IAP) ----
-// StoreKit/Play Billing 接続後は購入完了時にここへ書き込み、updateThreeTabLock() を呼ぶ。
+// StoreKit/Play Billing 接続後は購入完了時にここへ書き込み、updateModeTabLocks() を呼ぶ。
 // 開発確認は ?dev=1 で一時解除(保存しない。実購入とデバッグ状態を混ぜないため)。
 const PURCHASE_KEY = 'nikenzume.purchases.v1';
 function loadPurchases() {
@@ -157,9 +158,15 @@ let purchases = loadPurchases();
 function savePurchases() { localStorage.setItem(PURCHASE_KEY, JSON.stringify(purchases)); }
 const DEV_UNLOCK = new URLSearchParams(location.search).get('dev') === '1';
 function hasThreePack() { return DEV_UNLOCK || purchases.threePack; }
-function updateThreeTabLock() {
-  const tab = document.querySelector('.mode-tab[data-mode="three"]');
-  if (tab) tab.classList.toggle('locked', !hasThreePack());
+function hasAdvancedMode() {
+  const required = MODES.normal.levels[19];
+  return Boolean(required && cleared.has(required.id));
+}
+function updateModeTabLocks() {
+  const advanced = document.querySelector('.mode-tab[data-mode="advanced"]');
+  const three = document.querySelector('.mode-tab[data-mode="three"]');
+  if (advanced) advanced.classList.toggle('locked', !hasAdvancedMode());
+  if (three) three.classList.toggle('locked', !hasThreePack());
 }
 
 // ヒント設定(問題ごと)。違う問題に移ると必ずオフから始める(同じ問題の初形/答え再生では保持)。
@@ -751,6 +758,7 @@ function showHomeClearFeedback(clearIndex, unlockIndex = null) {
 document.querySelectorAll('.mode-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     const mode = tab.dataset.mode;
+    if (mode === 'advanced' && !hasAdvancedMode()) { showToast(t('unlockAdvancedByClear')); return; }
     if (mode === 'three' && !hasThreePack()) { openStore(); return; } // 未購入はストアで案内
     if (mode === curMode) return;
     document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
@@ -1847,6 +1855,7 @@ function resetProgress() {
   unlockedState = {};
   localStorage.removeItem(UNLOCKED_KEY);
   localStorage.removeItem(DAILY_KEY);
+  updateModeTabLocks();
   if (!$('#view-chapters').hidden) showChapters();
   else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
   closeSettings();
@@ -1996,9 +2005,9 @@ function renderStore() {
   document.querySelectorAll('#store-content [data-soon]').forEach(btn => btn.addEventListener('click', () => showToast(t('soon'))));
 }
 function openStore() { closeSettings(); $('#stats-overlay').hidden = true; renderStore(); $('#store-overlay').hidden = false; }
-// お問い合わせ: Googleフォームへ外部遷移(TODO: URL差し替え)
+// お問い合わせ: Googleフォームへ外部遷移
 $('#set-contact').addEventListener('click', () => {
-  window.open('https://forms.gle/PLACEHOLDER', '_blank', 'noopener');
+  window.open('https://docs.google.com/forms/d/e/1FAIpQLScYY6LslirKCd3dq_1in33V68IG7MGiPZRFneTxSYPesJxbkg/viewform?usp=publish-editor', '_blank', 'noopener');
 });
 $('#sw-se').addEventListener('click', () => { seOn = !seOn; localStorage.setItem(SE_KEY, seOn ? '1' : '0'); updateSettingsUI(); });
 $('#sw-haptics').addEventListener('click', () => { hapticsOn = !hapticsOn; localStorage.setItem(HAPTICS_KEY, hapticsOn ? '1' : '0'); updateSettingsUI(); });
@@ -2189,4 +2198,4 @@ showChapters();
 const loginResult = checkLoginBonus();
 if (loginResult) showLoginModal(loginResult);
 updateGoalNotice();
-updateThreeTabLock();
+updateModeTabLocks();
