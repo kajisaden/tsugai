@@ -640,6 +640,7 @@ body.view-play .home-footer { display: none; }
 body:not(.view-play) main { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 /* 目標(統計)画面はフルスクリーンのオーバーレイ(z-40)だが、フッターを前面に残す。 */
 body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 45; }
+body:not(.view-play):has(#store-overlay:not([hidden])) .home-footer { z-index: 45; }
 /* 統計の内容がフッターに被らないよう下余白をフッター分だけ広げる */
 #stats-overlay .info-body { padding-bottom: calc(116px + env(safe-area-inset-bottom, 0px)); }
 /* 目標画面は共通ヘッダを残す。専用のタイトル／閉じる操作は不要。 */
@@ -652,6 +653,11 @@ body:has(#stats-overlay:not([hidden])) #app-header { background: #fbf7ed; }
 #stats-overlay .info-body { padding-top: 8px; }
 body:has(#stats-overlay:not([hidden])) #btn-home { display: grid; }
 body:has(#stats-overlay:not([hidden])) #settings-drawer { z-index: 50; }
+#store-overlay { top:calc(60px + env(safe-area-inset-top, 0px)); background:#fbf7ed; --text:#29356c; }
+#store-overlay .info-body { padding:8px 16px calc(116px + env(safe-area-inset-bottom, 0px)); max-width:560px; }
+body:has(#store-overlay:not([hidden])) #app-header { background:#fbf7ed; }
+body:has(#store-overlay:not([hidden])) #btn-home { display:grid; }
+body:has(#store-overlay:not([hidden])) #settings-drawer { z-index:50; }
 .home-nav-btn {
   min-width: 0;
   height: 58px;
@@ -955,6 +961,12 @@ body:has(#stats-overlay:not([hidden])) #settings-drawer { z-index: 50; }
   border-radius: 12px;
   box-shadow: inset 0 2px 9px rgba(0, 0, 0, 0.55);
   overflow: hidden;
+}
+#boards.three-boards { gap:clamp(8px, 1.4dvh, 14px); }
+#boards.three-boards .board {
+  aspect-ratio:5 / 3;
+  width:min(100%, calc((100vh - var(--play-chrome) - (2 * clamp(8px, 1.4dvh, 14px))) / 3 * 5 / 3));
+  width:min(100%, calc((100dvh - var(--play-chrome) - (2 * clamp(8px, 1.4dvh, 14px)) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) / 3 * 5 / 3));
 }
 /* C: 反則(おてつき)の一拍。盤に淡い赤みが一瞬差す(JSで .foul を一時付与)。overflow:hidden で角丸にクリップ */
 .board::after {
@@ -2626,4 +2638,9 @@ button.set-row:active { transform: none; }
 .goal-continuity-count { margin-top:9px; text-align:center; color:#5874f0; font-size:22px; font-weight:700; line-height:1; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
 .goal-emblem.daily:not(.locked) .emblem-ball { background:linear-gradient(145deg,#fff9f2 0%,#f5bd79 52%,#d97b35 100%); }
 .goal-emblem.daily:not(.locked) .emblem-ball::before { border-color:rgba(175,88,29,.5); }
+.store-list { display:grid; gap:10px; margin-top:10px; }
+.store-item { width:100%; min-height:76px; display:flex; align-items:center; gap:6px; padding:7px 12px 7px 8px; text-align:left; font:inherit; color:var(--text); border:1px solid rgba(43,38,32,.10); border-radius:14px; background:linear-gradient(160deg,#f8f4eb,#e8dfcf); box-shadow:inset 0 1px 0 rgba(255,255,255,.64),0 3px 8px rgba(83,67,43,.10); }
+.store-item:active { transform:translateY(1px); }.store-item.supporter { border-color:rgba(168,128,31,.24); }
+.store-emblem { position:relative; width:48px; height:42px; flex:0 0 48px; }.store-emblem .goal-emblem { position:absolute; left:50%; top:50%; width:124px; height:99px; transform:translate(-50%,-50%) scale(.34); }
+.store-copy { min-width:0; display:grid; gap:3px; flex:1; }.store-copy b { font-size:13px; letter-spacing:.05em; }.store-copy span { color:var(--text-dim); font-size:10px; line-height:1.35; }.store-item strong { color:#5874f0; font-size:14px; }.store-item.supporter strong { color:var(--gold); }.store-item.coming { opacity:.66; }.store-item em { color:var(--text-dim); font-size:10px; font-style:normal; white-space:nowrap; }
 

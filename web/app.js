@@ -49,6 +49,8 @@ const GOAL_SUCK_HOLD_MS = REDUCED ? 0 : 200;
 const ep = (p) => p.analysis.episodes;
 // モード別レベルリスト（select-normal/advanced.mjs が生成した ID 配列から構築）
 const poolById = new Map(POOL.puzzles.map(p => [p.id, p]));
+const THREE_POOL = window.NIKENZUME_POOL_3ROOM;
+const threePoolById = new Map(THREE_POOL.puzzles.map(p => [p.id, p]));
 const MODES = {
   normal: {
     levels: window.NORMAL_LEVEL_IDS.map(id => poolById.get(id)),
@@ -57,6 +59,11 @@ const MODES = {
   advanced: {
     levels: window.ADVANCED_LEVEL_IDS.map(id => poolById.get(id)),
     boss: window.ADVANCED_BOSS_FLAGS,
+  },
+  three: {
+    // 2面プールとIDが重なるため、進捗キーだけ3面専用の文字列に分離する。
+    levels: window.THREE_LEVEL_IDS.map(id => ({ ...threePoolById.get(id), id: `three-${id}` })),
+    boss: window.THREE_BOSS_FLAGS,
   },
 };
 let curMode = 'normal';
@@ -862,6 +869,7 @@ function _initPuzzle(puz, label, entrance, isBoss = false) {
     boardsEl.append(b.ripple);
     return b;
   });
+  boardsEl.classList.toggle('three-boards', rooms.length === 3);
   G = {
     puz, w, h, rooms,
     pos: puz.rooms.map((r) => r.start),
@@ -1952,7 +1960,16 @@ function updateGoalNotice() {
   const continuityPending = streaks.some(([value, targets, key]) => targets.some(n => value >= n && !achievementSeen(`continuity-${key}-${n}`)));
   badge.hidden = !(levelPending || continuityPending);
 }
-function openStats() { closeSettings(); renderStats(); $('#stats-overlay').hidden = false; }
+function openStats() { closeSettings(); $('#store-overlay').hidden = true; renderStats(); $('#stats-overlay').hidden = false; }
+function renderStore() {
+  $('#store-content').innerHTML = `<section class="goal-card store-card"><div class="goal-card-head"><span>ストア</span></div><div class="store-list">
+    <button class="store-item supporter" type="button" data-soon><div class="store-emblem">${goalEmblem('best')}</div><div class="store-copy"><b>3面拡張パック</b><span>広告除去と3面ステージを解放します</span></div><strong>¥800</strong></button>
+    <button class="store-item" type="button" data-soon><div class="store-emblem">${goalEmblem('win')}</div><div class="store-copy"><b>広告除去</b><span>広告なしで、ヒントと答えをすぐに使えます</span></div><strong>¥500</strong></button>
+    <div class="store-item coming"><div class="store-emblem">${goalEmblem('win', true)}</div><div class="store-copy"><b>スキンパック</b><span>新しい配色テーマを準備中です</span></div><em>Coming soon</em></div>
+  </div></section>`;
+  document.querySelectorAll('#store-content [data-soon]').forEach(btn => btn.addEventListener('click', () => showToast(t('soon'))));
+}
+function openStore() { closeSettings(); $('#stats-overlay').hidden = true; renderStore(); $('#store-overlay').hidden = false; }
 $('#set-stats').addEventListener('click', openStats);
 // お問い合わせ: Googleフォームへ外部遷移(TODO: URL差し替え)
 $('#set-contact').addEventListener('click', () => {
@@ -1983,12 +2000,12 @@ $('#home-next').addEventListener('click', homeNext);
 $('.home-hub').addEventListener('touchstart', beginHomeSwipe, { passive: true });
 $('.home-hub').addEventListener('touchend', finishHomeSwipe, { passive: true });
 // フッターは目標(統計オーバーレイ)の前面にも出るので、他項目に移る前に統計を閉じる
-function closeStatsOverlay() { $('#stats-overlay').hidden = true; }
+function closeStatsOverlay() { $('#stats-overlay').hidden = true; $('#store-overlay').hidden = true; }
 $('#home-daily').addEventListener('click', () => { closeStatsOverlay(); showDaily(); });
 $('#home-list').addEventListener('click', () => { closeStatsOverlay(); showLevels(CHAPTERS[0]); });
 $('#daily-cta').addEventListener('click', startDailyWithCountdown);
 $('#home-goals').addEventListener('click', openStats);
-$('#home-store').addEventListener('click', () => { closeStatsOverlay(); showToast(t('soon')); });
+$('#home-store').addEventListener('click', openStore);
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア
@@ -2020,6 +2037,10 @@ document.addEventListener('keydown', (e) => {
   }
   if (!$('#stats-overlay').hidden) {
     if (e.key === 'Escape') $('#stats-overlay').hidden = true;
+    return;
+  }
+  if (!$('#store-overlay').hidden) {
+    if (e.key === 'Escape') $('#store-overlay').hidden = true;
     return;
   }
   for (const id of ['version', 'privacy']) {

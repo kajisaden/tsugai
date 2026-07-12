@@ -6,7 +6,7 @@ window.NIKENZUME_STRINGS = {
     title: 'Tsugai',
     tagline: 'ふたつの部屋、ひとつの操作。',
     chapter: ({ n }) => `第${n}章`,
-    modeNormal: '通常', modeAdvanced: '上級',
+    modeNormal: '通常', modeAdvanced: '上級', modeThree: '3面',
     // ボタン
     back: '戻る', reset: '最初から', answer: '答え', settings: '設定',
     homePlay: 'プレイ',
@@ -113,7 +113,7 @@ window.NIKENZUME_STRINGS = {
     title: 'Tsugai',
     tagline: 'Two rooms, one move.',
     chapter: ({ n }) => `Chapter ${n}`,
-    modeNormal: 'Normal', modeAdvanced: 'Advanced',
+    modeNormal: 'Normal', modeAdvanced: 'Advanced', modeThree: 'Three',
     back: 'Back', reset: 'Restart', answer: 'Answer', settings: 'Settings',
     homePlay: 'Play',
     light: 'Light hint', nextMove: 'Next move',
