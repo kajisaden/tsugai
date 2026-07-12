@@ -1808,12 +1808,10 @@ $('#btn-share').addEventListener('click', async () => {
   } catch (e) {}
 });
 
-// 設定ドロワー(右サイドシート): 歯車で開く / ×・スクリム・Esc で閉じる
-function openSettings() { $('#settings-drawer').classList.add('open'); }
-function closeSettings() { $('#settings-drawer').classList.remove('open'); }
-$('#btn-settings').addEventListener('click', openSettings);
-$('#btn-settings-close').addEventListener('click', closeSettings);
-$('#settings-drawer').querySelector('.drawer-scrim').addEventListener('click', closeSettings);
+// 設定: 目標・ストアと同型の全画面オーバーレイ。歯車でトグル / ホーム・フッタ遷移・Esc で閉じる
+function openSettings() { $('#stats-overlay').hidden = true; $('#store-overlay').hidden = true; $('#settings-overlay').hidden = false; }
+function closeSettings() { $('#settings-overlay').hidden = true; }
+$('#btn-settings').addEventListener('click', () => { $('#settings-overlay').hidden ? openSettings() : closeSettings(); });
 
 // ---- 設定の中身 ----
 // 音/触覚: 本体は実装済み(seOn=playMove/Bump/Clear/Foul/Tap、hapticsOn=haptic())。ここは設定値の保存/トグルのみ。既定ON
@@ -1824,7 +1822,6 @@ function updateSettingsUI() {
   const lv = $('#lang-value'); if (lv) lv.textContent = locale === 'ja' ? '日本語' : 'English';
   const se = $('#sw-se'); if (se) se.setAttribute('aria-pressed', String(seOn));
   const hp = $('#sw-haptics'); if (hp) hp.setAttribute('aria-pressed', String(hapticsOn));
-  const ll = $('#sw-level-lock'); if (ll) ll.setAttribute('aria-pressed', String(levelLockOn));
 }
 // 言語切替: ロケール変更→保存→静的文言再翻訳→表示中ビューの動的文言を再描画
 function relocalize(newLocale) {
@@ -1869,10 +1866,10 @@ function openHowto() { closeSettings(); $('#howto-overlay').hidden = false; }
 function closeHowto() { $('#howto-overlay').hidden = true; }
 $('#set-howto').addEventListener('click', openHowto);
 $('#btn-howto-close').addEventListener('click', closeHowto);
-// 情報オーバーレイ(バージョン/PP/お問い合わせ)
+// 情報オーバーレイ(PP/お問い合わせ)
 function openInfoOverlay(id) { closeSettings(); $(`#${id}-overlay`).hidden = false; }
 function closeInfoOverlay(id) { $(`#${id}-overlay`).hidden = true; }
-['version', 'privacy'].forEach(id => {
+['privacy'].forEach(id => {
   $(`#set-${id}`).addEventListener('click', () => openInfoOverlay(id));
   $(`#btn-${id}-close`).addEventListener('click', () => closeInfoOverlay(id));
 });
@@ -1994,30 +1991,20 @@ function renderStore() {
     <button class="store-item supporter" type="button" data-soon><div class="store-emblem">${goalEmblem('best')}</div><div class="store-copy"><b>${t('storeThreePack')}</b><span>${t('storeThreePackDesc')}</span></div><strong>¥800</strong></button>
     <button class="store-item" type="button" data-soon><div class="store-emblem">${goalEmblem('win')}</div><div class="store-copy"><b>${t('storeAdFree')}</b><span>${t('storeAdFreeDesc')}</span></div><strong>¥500</strong></button>
     <div class="store-item coming"><div class="store-emblem">${goalEmblem('win', true)}</div><div class="store-copy"><b>${t('storeSkinPack')}</b><span>${t('storeSkinPackDesc')}</span></div><em>${t('storeComingSoon')}</em></div>
-  </div></section>`;
+  </div></section>
+  <button class="store-restore" type="button" data-soon>${t('restore')}</button>`;
   document.querySelectorAll('#store-content [data-soon]').forEach(btn => btn.addEventListener('click', () => showToast(t('soon'))));
 }
 function openStore() { closeSettings(); $('#stats-overlay').hidden = true; renderStore(); $('#store-overlay').hidden = false; }
-$('#set-stats').addEventListener('click', openStats);
 // お問い合わせ: Googleフォームへ外部遷移(TODO: URL差し替え)
 $('#set-contact').addEventListener('click', () => {
   window.open('https://forms.gle/PLACEHOLDER', '_blank', 'noopener');
 });
 $('#sw-se').addEventListener('click', () => { seOn = !seOn; localStorage.setItem(SE_KEY, seOn ? '1' : '0'); updateSettingsUI(); });
 $('#sw-haptics').addEventListener('click', () => { hapticsOn = !hapticsOn; localStorage.setItem(HAPTICS_KEY, hapticsOn ? '1' : '0'); updateSettingsUI(); });
-$('#sw-level-lock').addEventListener('click', () => {
-  levelLockOn = !levelLockOn;
-  localStorage.setItem(LEVEL_LOCK_KEY, levelLockOn ? '1' : '0');
-  if (!$('#view-chapters').hidden) {
-    homeIndex = defaultHomeIndex();
-    showChapters();
-  } else if (!$('#view-levels').hidden && curChapter) {
-    showLevels(curChapter);
-  }
-  updateSettingsUI();
-});
+// レベルロックの設定トグルは開発用だったため廃止(levelLockOn は既定ON、localStorage 直編集でのみ解除可)
 // 未実装項目(data-soon)タップ → 「準備中」
-$('#settings-drawer').addEventListener('click', (e) => {
+$('#settings-overlay').addEventListener('click', (e) => {
   if (e.target.closest('[data-soon]')) showToast(t('soon'));
 });
 
@@ -2028,7 +2015,7 @@ $('#home-next').addEventListener('click', homeNext);
 $('.home-hub').addEventListener('touchstart', beginHomeSwipe, { passive: true });
 $('.home-hub').addEventListener('touchend', finishHomeSwipe, { passive: true });
 // フッターは目標(統計オーバーレイ)の前面にも出るので、他項目に移る前に統計を閉じる
-function closeStatsOverlay() { $('#stats-overlay').hidden = true; $('#store-overlay').hidden = true; }
+function closeStatsOverlay() { $('#stats-overlay').hidden = true; $('#store-overlay').hidden = true; closeSettings(); }
 $('#home-daily').addEventListener('click', () => { closeStatsOverlay(); showDaily(); });
 $('#home-list').addEventListener('click', () => { closeStatsOverlay(); showLevels(CHAPTERS[0]); });
 $('#daily-cta').addEventListener('click', startDailyWithCountdown);
@@ -2071,13 +2058,13 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') $('#store-overlay').hidden = true;
     return;
   }
-  for (const id of ['version', 'privacy']) {
+  for (const id of ['privacy']) {
     if (!$(`#${id}-overlay`).hidden) {
       if (e.key === 'Escape') closeInfoOverlay(id);
       return;
     }
   }
-  if ($('#settings-drawer').classList.contains('open')) {
+  if (!$('#settings-overlay').hidden) {
     if (e.key === 'Escape') closeSettings();
     return; // 設定表示中は盤操作を受けない
   }

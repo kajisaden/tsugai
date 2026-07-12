@@ -16,28 +16,34 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- 更新の目印: URL も画面のビルド印も同じ版番号に揃える -->
-<script>try{var V='233',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=3ad4b91cc0">
+<script>try{var V='234',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
+<link rel="stylesheet" href="style.css?v=874b6d29e3">
 <style>
 .hdr-left { grid-column: 1; justify-self: start; }
+/* ホームはフッターのナビと同じ言葉遣い: 面なし・アイコン+小ラベルの縦積み(設定と対) */
 #btn-home {
-  width: 32px;
-  height: 32px;
-  padding: 0;
+  min-width: 44px;
+  padding: 2px 4px;
   display: none;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--text-dim);
+  grid-template-rows: 22px 12px;
+  justify-items: center;
+  align-items: center;
+  gap: 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+  color: #4d587a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   text-decoration: none;
-  background: linear-gradient(160deg, #fff8eb 0%, #e8d8c4 100%);
-  border: 1px solid rgba(64, 56, 48, 0.13);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), 0 2px 4px rgba(88, 66, 45, 0.08);
 }
 body.view-play #btn-home,
 body.view-levels #btn-home,
 body.view-daily #btn-home { display: grid; }
-#btn-home svg { width: 19px; height: 19px; display: block; }
-#btn-home:active { transform: translateY(1px); }
+#btn-home svg { width: 22px; height: 22px; display: block; stroke-width: 2; }
+#btn-home:active { transform: none; color: #5874f0; }
 </style>
 </head>
 <body>
@@ -50,10 +56,11 @@ body.view-daily #btn-home { display: grid; }
         <path d="M4 11 12 4l8 7"/>
         <path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"/>
       </svg>
+      <span data-i18n="navHome">ホーム</span>
     </button>
   </div>
   <div id="hdr-center">
-    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">233</span></h1>
+    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">234</span></h1>
     <div id="play-status" aria-live="polite">
       <span id="puzzle-no"></span>
       <span id="play-progress"></span>
@@ -66,6 +73,7 @@ body.view-daily #btn-home { display: grid; }
   <div class="hdr-right">
     <button id="btn-settings" data-i18n-aria="settings" aria-label="設定">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span data-i18n="settings">設定</span>
     </button>
   </div>
 </header>
@@ -335,53 +343,47 @@ body.view-daily #btn-home { display: grid; }
   <div class="countdown-num" id="countdown-num">5</div>
 </div>
 
-<!-- 設定: 右サイドシート(歯車で開く)。 -->
-<div id="settings-drawer">
-  <div class="drawer-scrim"></div>
-  <div class="drawer-panel" role="dialog" aria-modal="true" data-i18n-aria="settings" aria-label="設定">
-    <div class="drawer-head">
-      <span class="drawer-title" data-i18n="settings">設定</span>
-      <button id="btn-settings-close" class="ghost" data-i18n-aria="close" aria-label="とじる">✕</button>
-    </div>
-    <div class="drawer-body">
-      <div class="set-sec" data-i18n="secDisplay">表示</div>
-      <button class="set-row set-act" id="set-lang">
-        <span class="set-lbl" data-i18n="language">言語</span>
-        <span class="set-r"><span id="lang-value">日本語</span><span class="chev">›</span></span>
-      </button>
-
-      <div class="set-sec" data-i18n="secSound">音・操作感</div>
-      <div class="set-row">
-        <span class="set-lbl" data-i18n="se">効果音</span>
-        <button class="sw" id="sw-se" role="switch" aria-pressed="true"><span class="k"></span></button>
+<!-- 設定: 目標・ストアと同型の全画面オーバーレイ(歯車でトグル、ホーム/フッタ遷移で閉じる)。
+     統計・実績/購入は目標・ストアタブと重複するため持たない。レベルロックは開発用トグルだったため廃止(挙動は既定=ロックON)。 -->
+<div id="settings-overlay" class="info-overlay" hidden>
+  <div class="info-body">
+    <!-- 目標・ストアと同じ「カード見出し(goal-card-head)+浮き上がったタイル行」で組む -->
+    <section class="goal-card set-card">
+      <div class="goal-card-head"><span data-i18n="setSecBasic">基本</span></div>
+      <div class="set-list">
+        <div class="set-item">
+          <span class="set-lbl" data-i18n="se">効果音</span>
+          <button class="sw" id="sw-se" role="switch" aria-pressed="true"><span class="k"></span></button>
+        </div>
+        <div class="set-item">
+          <span class="set-lbl" data-i18n="haptics">触覚フィードバック</span>
+          <button class="sw" id="sw-haptics" role="switch" aria-pressed="true"><span class="k"></span></button>
+        </div>
+        <button class="set-item" id="set-lang">
+          <span class="set-lbl" data-i18n="language">言語</span>
+          <span class="set-r"><span id="lang-value">日本語</span><span class="chev">›</span></span>
+        </button>
       </div>
-      <div class="set-row">
-        <span class="set-lbl" data-i18n="haptics">触覚フィードバック</span>
-        <button class="sw" id="sw-haptics" role="switch" aria-pressed="true"><span class="k"></span></button>
+    </section>
+    <section class="goal-card set-card">
+      <div class="goal-card-head"><span data-i18n="setSecSupport">サポート</span></div>
+      <div class="set-list">
+        <button class="set-item" id="set-howto"><span class="set-lbl" data-i18n="howto">遊び方</span><span class="set-r"><span class="chev">›</span></span></button>
+        <button class="set-item" id="set-contact"><span class="set-lbl" data-i18n="contact">お問い合わせ</span><span class="set-r"><span class="ext">↗</span></span></button>
+        <button class="set-item" id="set-privacy"><span class="set-lbl" data-i18n="privacy">プライバシーポリシー</span><span class="set-r"><span class="chev">›</span></span></button>
+        <button class="set-item" data-soon><span class="set-lbl" data-i18n="review">レビューする</span><span class="set-r"><span class="ext">↗</span></span></button>
       </div>
-      <div class="set-row">
-        <span class="set-lbl" data-i18n="levelLock">レベルロック</span>
-        <button class="sw" id="sw-level-lock" role="switch" aria-pressed="true"><span class="k"></span></button>
+    </section>
+    <section class="goal-card set-card">
+      <div class="goal-card-head"><span data-i18n="setSecData">データ</span></div>
+      <div class="set-list">
+        <button class="set-item set-danger" id="set-reset">
+          <span class="set-lbl" data-i18n="resetProgress">進捗をリセット</span>
+          <span class="set-r"><span class="chev">›</span></span>
+        </button>
       </div>
-
-      <div class="set-sec" data-i18n="secData">データ</div>
-      <button class="set-row set-act" id="set-reset">
-        <span class="set-lbl" data-i18n="resetProgress">進捗をリセット</span>
-        <span class="set-r"><span class="chev">›</span></span>
-      </button>
-
-      <div class="set-sec" data-i18n="secInfo">情報</div>
-      <button class="set-row set-act" id="set-stats"><span class="set-lbl" data-i18n="stats">統計・実績</span><span class="set-r"><span class="chev">›</span></span></button>
-      <button class="set-row set-act" id="set-howto"><span class="set-lbl" data-i18n="howto">遊び方</span><span class="set-r"><span class="chev">›</span></span></button>
-      <button class="set-row set-act" id="set-version"><span class="set-lbl" data-i18n="version">バージョン履歴</span><span class="set-r">v1.0.0 <span class="chev">›</span></span></button>
-      <button class="set-row set-act" id="set-privacy"><span class="set-lbl" data-i18n="privacy">プライバシーポリシー</span><span class="set-r"><span class="chev">›</span></span></button>
-      <button class="set-row set-act" id="set-contact"><span class="set-lbl" data-i18n="contact">お問い合わせ</span><span class="set-r"><span class="ext">↗</span></span></button>
-      <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="review">レビューする</span><span class="set-r"><span class="ext">↗</span></span></button>
-
-      <div class="set-sec" data-i18n="secPurchase">購入</div>
-      <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="removeAds">広告を消す</span><span class="set-r"><span class="chev">›</span></span></button>
-      <button class="set-row set-act" data-soon><span class="set-lbl" data-i18n="restore">購入を復元</span><span class="set-r"><span class="chev">›</span></span></button>
-    </div>
+    </section>
+    <div class="set-version">Tsugai v1.0.0</div>
   </div>
 </div>
 
@@ -530,30 +532,6 @@ body.view-daily #btn-home { display: grid; }
   </div>
 </div>
 
-<!-- バージョン履歴 -->
-<div id="version-overlay" class="info-overlay" hidden>
-  <div class="info-head">
-    <span class="info-title" data-i18n="version">バージョン履歴</span>
-    <button id="btn-version-close" class="ghost info-close" data-i18n-aria="close" aria-label="とじる">✕</button>
-  </div>
-  <div class="info-body">
-    <div class="ver-entry">
-      <div class="ver-head">
-        <span class="ver-num">1.0.0</span>
-        <span class="ver-date">2026年6月</span>
-        <span class="ver-tag" data-i18n="verCurrent">現在</span>
-      </div>
-      <ul class="ver-list">
-        <li data-i18n="ver100a">初回リリース</li>
-        <li data-i18n="ver100b">第1章〜第3章（全30問）</li>
-        <li data-i18n="ver100c">光ヒント・答え再生</li>
-        <li data-i18n="ver100d">ライトモード専用デザイン</li>
-        <li data-i18n="ver100e">日本語・英語対応</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
 <!-- プライバシーポリシー -->
 <div id="privacy-overlay" class="info-overlay" hidden>
   <div class="info-head">
@@ -609,7 +587,7 @@ body.view-daily #btn-home { display: grid; }
 <script src="normal-levels.js?v=7366b4f2fb"></script>
 <script src="advanced-levels.js?v=40916070ee"></script>
 <script src="three-levels.js?v=fc3252ff51"></script>
-<script src="strings.js?v=8cdaddb3c7"></script>
-<script src="app.js?v=1b0352f209"></script>
+<script src="strings.js?v=6c2e5e7aed"></script>
+<script src="app.js?v=769216ae8b"></script>
 </body>
 </html>
