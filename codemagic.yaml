@@ -1,0 +1,38 @@
+workflows:
+  ios-testflight:
+    name: iOS TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      # Codemagic UI (Teams > Integrations > Developer Portal) で登録した
+      # App Store Connect APIキーの名前に合わせる
+      app_store_connect: codemagic
+    environment:
+      node: 22
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.kajisaden.tsugai
+      vars:
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        XCODE_SCHEME: App
+    scripts:
+      - name: 依存インストール
+        script: npm ci
+      - name: Capacitor同期 (web assets + プラグイン)
+        script: npx cap sync ios
+      - name: 署名プロファイル適用
+        script: xcode-project use-profiles
+      - name: ビルド番号を更新
+        script: |
+          cd ios/App
+          agvtool new-version -all $BUILD_NUMBER
+      - name: ipaビルド
+        script: xcode-project build-ipa --project "$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integrations
+        submit_to_testflight: true

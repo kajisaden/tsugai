@@ -58,10 +58,11 @@
 - **PWA/ブラウザ**: `rcReady=false` のまま=購入/復元タップは「準備中」トースト(従来挙動を維持)。
 
 **残作業(コード外)**:
-1. RevenueCatダッシュボード: プロジェクト作成 → iOSアプリ登録 → entitlement/offering/packageを上記IDで作成
-2. App Store Connect: In-App Purchase 2商品(非消耗型)作成・価格設定(¥800/¥500)、審査用メタデータ
-3. `app.js` の `RC_API_KEY_IOS` に公開SDKキー(appl_...)を設定
-4. `npx cap add ios` → `npx cap sync` → Codemagicビルド → TestFlight実機でサンドボックス購入テスト(購入/復元/パック所有時の押下不可/広告消滅/∞バッジ)
+1. ~~RevenueCatダッシュボード設定~~ → **2026-07-19 完了**(プロジェクト/iOSアプリ/In-App Purchase Key検証済み/entitlement `three_pack`・`ad_free`/offering `default` に package `three_pack`・`ad_free`)。手順書はObsidian `30_開発/手順書/RevenueCat_初期設定手順`(赤枠スクショ付き)
+2. ~~App Store Connect: IAP 2商品作成~~ → **2026-07-14 完了**(`tsugai_three_pack` ¥800 / `tsugai_ad_free` ¥500、非消耗型・日英・全国配信・提出準備中)。有料App契約+銀行(ゆうちょ)+W-8BENも提出済み。手順書は同 `AppStoreConnect_アプリ内課金作成手順`
+3. ~~`RC_API_KEY_IOS` 設定~~ → **2026-07-19 完了**(公開SDKキー設定済み)
+4. ~~`npx cap add ios` → `npx cap sync`~~ → **2026-07-19 完了**(`ios/` 生成・SPM構成・プラグイン3種反映。Info.plistにAdMobテストApp ID+SKAdNetwork+縦画面固定を追加。`codemagic.yaml` 新設)。残=Codemagicアカウント設定+ASC APIキー連携 → ビルド → TestFlight実機でサンドボックス購入テスト(購入/復元/パック所有時の押下不可/広告消滅/∞バッジ)
+5. 審査提出時: IAPの審査用スクリーンショット添付+アプリバージョンと同時提出。EU DSAトレーダー申告(またはEU除外)も提出時に判断
 
 ### 2026-07-12 追補(Claude Code)
 
