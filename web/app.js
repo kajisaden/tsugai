@@ -464,7 +464,7 @@ function watchRewardAd(then) {
 // ダッシュボード側の前提: entitlement `three_pack`(3面+広告除去) / `ad_free`(広告除去のみ)、
 // current offering に package `three_pack` / `ad_free` を置く。3面パックの商品には両entitlementを付ける。
 const RCPurchases = window.Capacitor?.Plugins?.Purchases;
-const RC_API_KEY_IOS = ''; // TODO: RevenueCatのiOS公開SDKキー(appl_...)。ダッシュボード作成後に設定
+const RC_API_KEY_IOS = 'appl_WRMxsjUEGXhjFgCUxlIyiPQqhsg'; // RevenueCatのiOS公開SDKキー(アプリ埋め込み前提の公開値)
 const RC_ENTITLEMENT = { threePack: 'three_pack', adFree: 'ad_free' };
 const RC_PACKAGE = { threePack: 'three_pack', adFree: 'ad_free' };
 let rcReady = false;
