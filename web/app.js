@@ -451,6 +451,13 @@ function adFail(tag, e) {
   try {
     await AdMob.initialize({ initializeForTesting: true });
     adReady = true;
+    // 読み込み/表示失敗の本当の理由(GADErrorのcode/message)はイベント側にしか来ないため、
+    // デバッグ用に全失敗イベントを購読して adLastError に残す
+    for (const ev of ['interstitialAdFailedToLoad', 'interstitialAdFailedToShow',
+                      'bannerAdFailedToLoad',
+                      'onRewardedVideoAdFailedToLoad', 'onRewardedVideoAdFailedToShow']) {
+      try { AdMob.addListener(ev, (info) => adFail(ev, JSON.stringify(info))); } catch (e2) {}
+    }
     prepareInterstitial();
   } catch (e) { adFail('init', e); }
 })();
