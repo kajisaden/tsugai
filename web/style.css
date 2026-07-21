@@ -26,6 +26,9 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body { height: 100%; }
+/* 壁当ての盤ゆらし(±2px)や駒のめり込みが画面幅いっぱいの端末で一瞬の横はみ出しを作り、
+   iOS実機でページ全体が横パンできてしまう(右壁バンプ直後の左スワイプで画面ごと動く)のを遮断 */
+html, body { overflow-x: clip; }
 /* 根要素にも地色を敷く: body のグラデは body の箱だけを塗るため、実機 standalone の
    オーバースクロール/下端セーフエリアで html の白地が透ける(特にライトで目立つ)のを防ぐ */
 html { background-color: var(--bg); }
@@ -65,6 +68,12 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
 
 /* ---- ヘッダ ---- */
 #app-header {
+  /* 一覧などページ自体がスクロールする画面でもヘッダを上端に固定する。
+     sticky なのでレイアウト(main の高さ計算)は従来のまま。地色は body グラデの上端色と同じ */
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #fbf7ed;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -640,6 +649,13 @@ button:active { transform: translateY(1px); }
 body.view-play .home-footer { display: none; }
 /* フッターは fixed なので、下部の内容が隠れないよう非プレイ画面では下余白を確保 */
 body:not(.view-play) main { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+/* オーバーレイ(目標/ストア/設定/遊び方)表示中は背後のページを固定する。
+   iOS実機ではオーバーレイ内のスクロールが端に達すると背後(一覧など)に連鎖し、
+   ヘッダ領域に背後の内容が透けて見えるため(実機バグ報告 2026-07-21) */
+body:has(#stats-overlay:not([hidden])),
+body:has(#store-overlay:not([hidden])),
+body:has(#settings-overlay:not([hidden])),
+body:has(#howto-overlay:not([hidden])) { overflow: hidden; }
 /* 目標(統計)画面はフルスクリーンのオーバーレイ(z-40)だが、フッターを前面に残す。 */
 body:not(.view-play):has(#stats-overlay:not([hidden])) .home-footer { z-index: 45; }
 body:not(.view-play):has(#store-overlay:not([hidden])) .home-footer { z-index: 45; }
@@ -2424,6 +2440,7 @@ button.set-item:active { transform: translateY(1px); }
 .howto-close { font-size: 22px; line-height: 1; color: var(--text-dim); padding: 4px 6px; }
 .howto-body {
   flex: 1; overflow-y: auto; overflow-x: hidden;
+  overscroll-behavior: contain;
   max-width: 480px; margin: 0 auto; width: 100%;
   padding: 0 24px calc(32px + env(safe-area-inset-bottom, 0px));
 }
@@ -2630,6 +2647,7 @@ button.set-item:active { transform: translateY(1px); }
 .info-close { font-size: 22px; line-height: 1; color: var(--text-dim); padding: 4px 6px; }
 .info-body {
   flex: 1; overflow-y: auto; overflow-x: hidden;
+  overscroll-behavior: contain; /* 端まで達したスクロールが背後のページへ連鎖するのを遮断 */
   max-width: 480px; margin: 0 auto; width: 100%;
   padding: 0 24px calc(32px + env(safe-area-inset-bottom, 0px));
 }
