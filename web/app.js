@@ -429,6 +429,7 @@ const AdMob = window.Capacitor?.Plugins?.AdMob;
 const AD_IDS = {
   interstitial: 'ca-app-pub-3940256099942544/1033173712',  // テストID
   reward:       'ca-app-pub-3940256099942544/5224354917',  // テストID
+  banner:       'ca-app-pub-3940256099942544/2934735716',  // テストID(バナー)
 };
 let adReady = false;
 (async function initAdMob() {
@@ -447,6 +448,44 @@ async function showInterstitial() {
   if (!adReady || hasAdFree()) return; // 広告除去(単独 or 3面パック)購入済みなら出さない
   try { await AdMob.showInterstitial(); } catch (e) {}
   prepareInterstitial();
+}
+// ゲーム画面下部のバナー。ネイティブビューとして最前面に重なるため、WebView側の
+// プレースホルダ #ad-slot の位置(画面下端からの距離)を margin に渡して枠に重ねる。
+// 2部屋プレイのみ(3面はパック購入者専用=広告なし)。広告除去購入済みなら出さない。
+let bannerShown = false;
+async function showPlayBanner() {
+  if (!adReady || hasAdFree() || bannerShown) return;
+  const slot = document.getElementById('ad-slot');
+  const boards = document.getElementById('boards');
+  if (!slot || document.body.classList.contains('view-play') === false) return;
+  if (boards && boards.classList.contains('three-boards')) return;
+  try {
+    const rect = slot.getBoundingClientRect();
+    const margin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
+    await AdMob.showBanner({
+      adId: AD_IDS.banner,
+      adSize: 'ADAPTIVE_BANNER',
+      position: 'BOTTOM_CENTER',
+      margin,
+    });
+    bannerShown = true;
+  } catch (e) {}
+}
+async function hidePlayBanner() {
+  if (!bannerShown) return;
+  bannerShown = false;
+  try { await AdMob.removeBanner(); } catch (e) {}
+}
+function updatePlayBanner() {
+  if (!adReady) return;
+  const inPlay = document.body.classList.contains('view-play');
+  const three = document.getElementById('boards')?.classList.contains('three-boards');
+  if (inPlay && !three && !hasAdFree()) {
+    // 画面切替アニメの後にレイアウトが確定してから位置を測る
+    setTimeout(showPlayBanner, 350);
+  } else {
+    hidePlayBanner();
+  }
 }
 function watchRewardAd(then) {
   if (!adReady || hasAdFree()) { then(); return; } // 広告除去済み=視聴なしで即実行(ストア文言と一致)
@@ -476,6 +515,7 @@ function applyEntitlements(customerInfo) {
   savePurchases();
   updateModeTabLocks();
   updateHintUI();
+  updatePlayBanner(); // 購入直後にプレイ中バナーを消す
 }
 (async function initRevenueCat() {
   if (!RCPurchases || !RC_API_KEY_IOS) return;
@@ -572,6 +612,7 @@ function showView(name, options = {}) {
   if (animate && !REDUCED && cur && name !== 'play') { cur.classList.remove('view-enter'); void cur.offsetWidth; cur.classList.add('view-enter'); }
   $('#app-title').hidden = name === 'play';
   $('#play-status').hidden = name !== 'play';
+  updatePlayBanner();
 }
 
 function nextHomeIndex() {
@@ -967,6 +1008,7 @@ function _initPuzzle(puz, label, entrance, isBoss = false) {
     return b;
   });
   boardsEl.classList.toggle('three-boards', rooms.length === 3);
+  updatePlayBanner();
   G = {
     puz, w, h, rooms,
     pos: puz.rooms.map((r) => r.start),
