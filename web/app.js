@@ -439,21 +439,28 @@ const AD_IDS = {
   banner:       'ca-app-pub-3940256099942544/2934735716',  // テストID(バナー)
 };
 let adReady = false;
+// 直近の広告エラー。通常は静かに握りつぶす(広告なしで続行)が、
+// 隠しデバッグON中はトーストで見せて実機での原因究明に使う
+let adLastError = '';
+function adFail(tag, e) {
+  adLastError = tag + ': ' + (e?.message || e?.code || String(e));
+  if (adDebugNoFree) showToast('広告エラー ' + adLastError);
+}
 (async function initAdMob() {
   if (!AdMob) return;
   try {
     await AdMob.initialize({ initializeForTesting: true });
     adReady = true;
     prepareInterstitial();
-  } catch (e) { /* PWA では無視 */ }
+  } catch (e) { adFail('init', e); }
 })();
 async function prepareInterstitial() {
   if (!adReady) return;
-  try { await AdMob.prepareInterstitial({ adId: AD_IDS.interstitial }); } catch (e) {}
+  try { await AdMob.prepareInterstitial({ adId: AD_IDS.interstitial }); } catch (e) { adFail('prepInt', e); }
 }
 async function showInterstitial() {
   if (!adReady || hasAdFree()) return; // 広告除去(単独 or 3面パック)購入済みなら出さない
-  try { await AdMob.showInterstitial(); } catch (e) {}
+  try { await AdMob.showInterstitial(); } catch (e) { adFail('showInt', e); }
   prepareInterstitial();
 }
 // ゲーム画面下部のバナー。ネイティブビューとして最前面に重なるため、WebView側の
@@ -476,7 +483,7 @@ async function showPlayBanner() {
       margin,
     });
     bannerShown = true;
-  } catch (e) {}
+  } catch (e) { adFail('banner', e); }
 }
 async function hidePlayBanner() {
   if (!bannerShown) return;
@@ -501,7 +508,7 @@ function watchRewardAd(then) {
       await AdMob.prepareRewardVideoAd({ adId: AD_IDS.reward });
       const result = await AdMob.showRewardVideoAd();
       if (result) then();
-    } catch (e) { then(); }
+    } catch (e) { adFail('reward', e); then(); }
   })();
 }
 // ---- 課金(RevenueCat via Capacitor) ----
@@ -2006,7 +2013,9 @@ $('#set-reset').addEventListener('click', resetProgress);
       taps = 0;
       adDebugNoFree = !adDebugNoFree;
       localStorage.setItem(AD_DEBUG_KEY, adDebugNoFree ? '1' : '0');
-      showToast(adDebugNoFree ? '広告デバッグON: 未購入として扱います' : '広告デバッグOFF');
+      showToast(adDebugNoFree
+        ? `広告デバッグON: 未購入として扱います (adReady=${adReady}${adLastError ? ' / ' + adLastError : ''})`
+        : '広告デバッグOFF');
       updateHintUI(); updateModeTabLocks(); updatePlayBanner();
     }
   });
@@ -2234,6 +2243,7 @@ document.addEventListener('keydown', (e) => {
   }
   if (!$('#overlay-gap').hidden) return;
   if ($('#view-play').hidden) return;
+  if (inputBlockedByOverlay()) return;
   if (AV) {
     // 答えビューア中: ←/→ で一手ずつ、Space で再生/一時停止、Esc で終了
     if (e.key === 'ArrowLeft') { e.preventDefault(); answerBack(); }
@@ -2251,6 +2261,12 @@ document.addEventListener('keydown', (e) => {
 
 let touchStart = null;
 const playView = $('#view-play');
+// 設定/ストア/目標/遊び方などのオーバーレイがプレイ画面の上に開いている間は、
+// スワイプ/クリックをゲーム操作に流さない(裏で盤が動く実機バグの対策)
+function inputBlockedByOverlay() {
+  return ['#settings-overlay', '#store-overlay', '#stats-overlay', '#howto-overlay', '#overlay-login']
+    .some((sel) => { const el = $(sel); return el && !el.hidden; });
+}
 // スワイプは画面全体で受ける(盤の外・下の余白でも効く)。プレイ中のみ・オーバーレイ表示中は無視。
 document.addEventListener('touchstart', (e) => {
   touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -2264,6 +2280,7 @@ document.addEventListener('touchend', (e) => {
   if (playView.hidden) return; // プレイ画面以外(章/問題一覧)はスクロールを妨げない
   // クリア/反則/切れ目オーバーレイ表示中はスワイプ操作しない
   if (!$('#overlay-gap').hidden || !$('#overlay-miss').hidden) return;
+  if (inputBlockedByOverlay()) return; // 設定などを開いている間は裏の盤を動かさない
   if (AV) {
     // 答えビューア中: 左右スワイプで一手ずつ進む/戻る
     if (Math.abs(dx) > Math.abs(dy)) {
@@ -2285,6 +2302,7 @@ $('#boards').addEventListener('pointerup', (e) => {
   if (!G || G.busy || G.cleared) return;
   if ($('#view-play').hidden) return;
   if (!$('#overlay-gap').hidden || !$('#overlay-miss').hidden) return;
+  if (inputBlockedByOverlay()) return;
   if (AV) return; // 答えビューア中はクリック操作しない
   const board = e.target.closest('.board');
   if (!board) return;
