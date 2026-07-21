@@ -157,9 +157,16 @@ function loadPurchases() {
 let purchases = loadPurchases();
 function savePurchases() { localStorage.setItem(PURCHASE_KEY, JSON.stringify(purchases)); }
 const DEV_UNLOCK = new URLSearchParams(location.search).get('dev') === '1';
+// 隠しデバッグ(設定のバージョン7回タップ): 広告除去を持っていても「未購入」として扱い、
+// 広告(リワード/バナー)の動作を実機確認できるようにする。広告判定にだけ効かせ、3面解放には影響させない
+const AD_DEBUG_KEY = 'nikenzume.adDebug.v1';
+let adDebugNoFree = localStorage.getItem(AD_DEBUG_KEY) === '1';
 function hasThreePack() { return DEV_UNLOCK || purchases.threePack; }
 // 広告除去の権利: 単独購入 or 3面拡張パック(広告除去込み)。ストアでは重複購入できない(renderStore参照)
-function hasAdFree() { return DEV_UNLOCK || purchases.adFree || purchases.threePack; }
+function hasAdFree() {
+  if (adDebugNoFree) return false;
+  return DEV_UNLOCK || purchases.adFree || purchases.threePack;
+}
 function hasAdvancedMode() {
   const required = MODES.normal.levels[19];
   return Boolean(required && cleared.has(required.id));
@@ -523,7 +530,16 @@ function applyEntitlements(customerInfo) {
     await RCPurchases.configure({ apiKey: RC_API_KEY_IOS });
     rcReady = true;
     // 起動時同期: 再インストール/別端末でもentitlementから復元される
-    applyEntitlements((await RCPurchases.getCustomerInfo()).customerInfo);
+    let info = (await RCPurchases.getCustomerInfo()).customerInfo;
+    // 再インストールで匿名IDが変わると未購入に見えるため、権利ゼロなら端末のストア取引を
+    // 静かに同期して自動復元を試みる(「購入を復元」を押さなくても済むように)
+    if (!Object.keys(info?.entitlements?.active || {}).length) {
+      try {
+        await RCPurchases.syncPurchases();
+        info = (await RCPurchases.getCustomerInfo()).customerInfo;
+      } catch (e) { /* 取引なし/オフラインは無視 */ }
+    }
+    applyEntitlements(info);
     const offering = (await RCPurchases.getOfferings()).current;
     for (const pkg of offering?.availablePackages || []) {
       if (pkg.identifier === RC_PACKAGE.threePack) rcPackages.threePack = pkg;
@@ -567,7 +583,8 @@ function spendHint(kind, action) {
     saveHintCredits();
     updateGoalNotice();
   };
-  if (hintCredits[kind] > 0) { hintCredits[kind]--; saveHintCredits(); use(); }
+  if (hasAdFree()) { use(); } // 広告除去済み=常に無限。スタックは消費せず温存
+  else if (hintCredits[kind] > 0) { hintCredits[kind]--; saveHintCredits(); use(); }
   else watchRewardAd(use);
   updateHintUI();
 }
@@ -1628,8 +1645,8 @@ function updateHintUI() {
 function setHintBadge(btn, n) {
   const b = btn && btn.querySelector('.hint-badge');
   if (!b) return;
-  if (n > 0) { b.textContent = String(n); b.classList.remove('ad'); }
-  else if (hasAdFree()) { b.textContent = '∞'; b.classList.remove('ad'); }
+  if (hasAdFree()) { b.textContent = '∞'; b.classList.remove('ad'); } // 残数があっても常に∞(消費しない)
+  else if (n > 0) { b.textContent = String(n); b.classList.remove('ad'); }
   else { b.textContent = '▶'; b.classList.add('ad'); }
 }
 // 光ヒントONなら現局面のぶつかり面を出し直す。OFFなら消す
@@ -1975,6 +1992,25 @@ function showToast(msg) {
 }
 $('#set-lang').addEventListener('click', () => relocalize(locale === 'ja' ? 'en' : 'ja'));
 $('#set-reset').addEventListener('click', resetProgress);
+// 隠しデバッグ: 設定のバージョン表記を7回タップで「未購入として扱う」を切替。
+// 広告除去を持ったままリワード/バナー広告の動作を実機確認するための開発用スイッチ。
+(() => {
+  const el = document.querySelector('.set-version');
+  if (!el) return;
+  let taps = 0, timer = 0;
+  el.addEventListener('click', () => {
+    taps++;
+    clearTimeout(timer);
+    timer = setTimeout(() => { taps = 0; }, 1500);
+    if (taps >= 7) {
+      taps = 0;
+      adDebugNoFree = !adDebugNoFree;
+      localStorage.setItem(AD_DEBUG_KEY, adDebugNoFree ? '1' : '0');
+      showToast(adDebugNoFree ? '広告デバッグON: 未購入として扱います' : '広告デバッグOFF');
+      updateHintUI(); updateModeTabLocks(); updatePlayBanner();
+    }
+  });
+})();
 // 遊び方
 function openHowto() { closeSettings(); $('#howto-overlay').hidden = false; }
 function closeHowto() { $('#howto-overlay').hidden = true; }
