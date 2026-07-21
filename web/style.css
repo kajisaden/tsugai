@@ -31,10 +31,10 @@ html, body { height: 100%; }
 html, body { overflow-x: clip; }
 /* 根要素にも地色を敷く: body のグラデは body の箱だけを塗るため、実機 standalone の
    オーバースクロール/下端セーフエリアで html の白地が透ける(特にライトで目立つ)のを防ぐ */
-html { background-color: var(--bg); }
+html { background-color: #fbf7ed; } /* body と同色(オーバースクロール時に色差が透けないよう) */
 
 body {
-  background: radial-gradient(120% 100% at 50% 0%, #fbf7ed 0%, var(--bg) 60%);
+  background: #fbf7ed; /* 2026-07-22 グラデ廃止: ヘッダsticky化で画面端の色差が出たため単色に統一 */
   color: var(--text);
   font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -73,7 +73,7 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
   position: sticky;
   top: 0;
   z-index: 30;
-  background: #fbf7ed;
+  background: #fbf7ed; /* 背景と同じ単色(グラデ廃止に伴い完全一致) */
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -1672,7 +1672,7 @@ body:not(.view-play):has(#settings-overlay:not([hidden])) .home-footer { z-index
   --b-bump-hot: #e28f86;
 }
 body {
-  background: radial-gradient(120% 100% at 50% 0%, #fbf7ed 0%, var(--bg) 60%);
+  background: #fbf7ed; /* 2026-07-22 グラデ廃止: ヘッダsticky化で画面端の色差が出たため単色に統一 */
 }
 
 /* ライト盤: Threes風のクリーム紙タイル。盤は静かに、青い駒/ゴールだけを読みやすくする */
