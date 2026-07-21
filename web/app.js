@@ -433,10 +433,11 @@ function handleDailyClear(moves, min) {
 // ネイティブ(Capacitor)なら @capacitor-community/admob を使う。PWA/ブラウザでは広告なし(即時実行)。
 // テスト用 adId は Google 公式テストID。本番リリース前に実IDへ差し替える。
 const AdMob = window.Capacitor?.Plugins?.AdMob;
+// テストIDはプラットフォーム別(以前はAndroid用を使っており iOS で "No ad to show" になっていた)
 const AD_IDS = {
-  interstitial: 'ca-app-pub-3940256099942544/1033173712',  // テストID
-  reward:       'ca-app-pub-3940256099942544/5224354917',  // テストID
-  banner:       'ca-app-pub-3940256099942544/2934735716',  // テストID(バナー)
+  interstitial: 'ca-app-pub-3940256099942544/4411468910',  // iOSテストID
+  reward:       'ca-app-pub-3940256099942544/1712485313',  // iOSテストID
+  banner:       'ca-app-pub-3940256099942544/2934735716',  // iOSテストID(バナー)
 };
 let adReady = false;
 // 直近の広告エラー。通常は静かに握りつぶす(広告なしで続行)が、
@@ -449,6 +450,9 @@ function adFail(tag, e) {
 (async function initAdMob() {
   if (!AdMob) return;
   try {
+    // iOS: ATT(トラッキング許可)ダイアログ。未回答のままだと実機で広告が
+    // 配信されない(No ad to show)事例があるため、初期化前に一度だけ聞く
+    try { await AdMob.requestTrackingAuthorization(); } catch (e2) {}
     await AdMob.initialize({ initializeForTesting: true });
     adReady = true;
     // 読み込み/表示失敗の本当の理由(GADErrorのcode/message)はイベント側にしか来ないため、
