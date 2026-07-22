@@ -433,11 +433,13 @@ function handleDailyClear(moves, min) {
 // ネイティブ(Capacitor)なら @capacitor-community/admob を使う。PWA/ブラウザでは広告なし(即時実行)。
 // テスト用 adId は Google 公式テストID。本番リリース前に実IDへ差し替える。
 const AdMob = window.Capacitor?.Plugins?.AdMob;
-// テストIDはプラットフォーム別(以前はAndroid用を使っており iOS で "No ad to show" になっていた)
+// 実ID(AdMobコンソール 2026-07-22作成、アプリ=Tsugai iOS ~6882461908)。
+// GoogleのサンプルID(デモ配信)がiOS実機で "No ad to show" を返し続けたため実IDへ移行。
+// 新規ユニットは配信開始まで最大1時間+アプリ審査完了までは配信制限がある点に注意
 const AD_IDS = {
-  interstitial: 'ca-app-pub-3940256099942544/4411468910',  // iOSテストID
-  reward:       'ca-app-pub-3940256099942544/1712485313',  // iOSテストID
-  banner:       'ca-app-pub-3940256099942544/2934735716',  // iOSテストID(バナー)
+  interstitial: 'ca-app-pub-9870222937107755/9041601242',
+  reward:       'ca-app-pub-9870222937107755/2943216891',
+  banner:       'ca-app-pub-9870222937107755/5569380236',
 };
 let adReady = false;
 // 直近の広告エラー。通常は静かに握りつぶす(広告なしで続行)が、
