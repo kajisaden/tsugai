@@ -786,6 +786,7 @@ function setHomeIndex(index) {
 }
 
 function goHomeFromHeader() {
+  invalidateGameSession();
   cancelClearTimer();
   if (typeof closeAnswer === 'function' && AV) closeAnswer(false);
   closeStatsOverlay();
@@ -961,12 +962,18 @@ function showLevels(ch) {
 
 // ---- プレイ ----
 let G = null; // ゲーム状態
+let gameEpoch = 0; // 画面遷移で古い非同期手続きを無効化する世代番号
 let lastClear = null; // 直近クリアの結果(A画面用): { moves, min, best }
 let tsumiTimer = null; // クリア演出(2秒) → A画面 への自動遷移タイマー
 
 function cancelClearTimer() {
   clearTimeout(tsumiTimer);
   tsumiTimer = null;
+}
+
+function invalidateGameSession() {
+  gameEpoch++;
+  if (G) G.busy = false;
 }
 
 function setCellPos(node, p, w, h) {
@@ -1032,6 +1039,7 @@ function animatePuzzleEntrance() {
 }
 
 function _initPuzzle(puz, label, entrance, isBoss = false) {
+  gameEpoch++;
   cancelClearTimer();
   hintGlows = [];
   AV = null;
@@ -1456,6 +1464,8 @@ function showTrail(rm, from, to, d) {
 
 async function doMove(d) {
   if (!G || G.busy || G.cleared) return;
+  const session = G;
+  const epoch = gameEpoch;
   clearWallHints(); // 局面が動くと壁ヒントの位置がずれるので消す
   const next = G.pos.map((p, i) => step(p, d, G.rooms[i].wallSet, G.w, G.h));
   const anyMoved = next.some((np, i) => np !== G.pos[i]);
@@ -1481,6 +1491,7 @@ async function doMove(d) {
   if (!anyMoved) {
     // 全員スキップ=無意味手。状態も手数も変えず、壁当てbumpだけ見せる(SPEC.md 3-1)
     await sleep(anyBumped ? BUMP_MS : 0);
+    if (G !== session || gameEpoch !== epoch) return;
     G.busy = false;
     refreshWallHints(); // 局面は不変だが光ヒントを出し直す
     return;
@@ -1501,6 +1512,7 @@ async function doMove(d) {
   updateInfo();
 
   await sleep(Math.max(MOVE_MS, anyBumped ? BUMP_MS : 0));
+  if (G !== session || gameEpoch !== epoch) return;
   updateGoals();
 
   // 同時でないのにゴールへ入った=反則。行って見せてから → 初形へ戻す
@@ -1514,7 +1526,9 @@ async function doMove(d) {
     // 反則の局面(＋赤み)を一拍見せてから、履歴を逆再生して初形まで巻き戻す。メッセージは出さない。
     if (REDUCED) { restartCurrentPuzzle(); return; }
     await sleep(MISS_HOLD_MS);
+    if (G !== session || gameEpoch !== epoch) return;
     await slideToStart();
+    if (G !== session || gameEpoch !== epoch) return;
     restartCurrentPuzzle(false);
     return;
   }
