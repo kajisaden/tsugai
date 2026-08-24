@@ -638,6 +638,7 @@ const HOME_AUTO_ADVANCE_REDUCED_DELAY_MS = 500;
 const HOME_SWIPE_MIN_X = 40;
 const HOME_SWIPE_MAX_Y_RATIO = 0.6;
 function showView(name, options = {}) {
+  if (name !== 'daily' && typeof cancelCountdown === 'function') cancelCountdown();
   if (name !== 'play' && typeof closeAnswer === 'function' && AV) closeAnswer(false);
   const animate = options.animate !== false;
   for (const v of ['chapters', 'levels', 'play', 'daily']) {
@@ -785,6 +786,7 @@ function setHomeIndex(index) {
 }
 
 function goHomeFromHeader() {
+  cancelClearTimer();
   if (typeof closeAnswer === 'function' && AV) closeAnswer(false);
   closeStatsOverlay();
   if (!$('#view-play').hidden && curChapter) {
@@ -962,6 +964,11 @@ let G = null; // ゲーム状態
 let lastClear = null; // 直近クリアの結果(A画面用): { moves, min, best }
 let tsumiTimer = null; // クリア演出(2秒) → A画面 への自動遷移タイマー
 
+function cancelClearTimer() {
+  clearTimeout(tsumiTimer);
+  tsumiTimer = null;
+}
+
 function setCellPos(node, p, w, h) {
   node.style.width = 100 / w + '%';
   node.style.height = 100 / h + '%';
@@ -1025,6 +1032,7 @@ function animatePuzzleEntrance() {
 }
 
 function _initPuzzle(puz, label, entrance, isBoss = false) {
+  cancelClearTimer();
   hintGlows = [];
   AV = null;
   $('#answer-bar').hidden = true;
@@ -1114,17 +1122,23 @@ function renderDailyHub() {
 
 // ---- 挑戦: 5秒カウントダウン → 計測開始 → 盤へ ----
 let countdownTimer = null;
+function cancelCountdown() {
+  clearTimeout(countdownTimer);
+  countdownTimer = null;
+  const ov = $('#overlay-countdown');
+  if (ov) ov.hidden = true;
+}
 function startDailyWithCountdown() {
   runCountdown(5, () => { startDailyPuzzle(true); beginDailyRun(); });
 }
 function runCountdown(from, done) {
-  clearTimeout(countdownTimer);
+  cancelCountdown();
   const ov = $('#overlay-countdown');
   const num = $('#countdown-num');
   ov.hidden = false;
   let c = from;
   const step = () => {
-    if (c <= 0) { ov.hidden = true; done(); return; }
+    if (c <= 0) { ov.hidden = true; countdownTimer = null; done(); return; }
     num.textContent = c;
     if (!REDUCED) { num.classList.remove('pop'); void num.offsetWidth; num.classList.add('pop'); }
     c--;
@@ -1974,7 +1988,7 @@ $('#btn-share').addEventListener('click', async () => {
 });
 
 // 設定: 目標・ストアと同型の全画面オーバーレイ。歯車でトグル / ホーム・フッタ遷移・Esc で閉じる
-function openSettings() { $('#stats-overlay').hidden = true; $('#store-overlay').hidden = true; $('#settings-overlay').hidden = false; }
+function openSettings() { cancelCountdown(); $('#stats-overlay').hidden = true; $('#store-overlay').hidden = true; $('#settings-overlay').hidden = false; }
 function closeSettings() { $('#settings-overlay').hidden = true; }
 $('#btn-settings').addEventListener('click', () => { $('#settings-overlay').hidden ? openSettings() : closeSettings(); });
 
@@ -2055,12 +2069,12 @@ $('#set-reset').addEventListener('click', resetProgress);
   });
 })();
 // 遊び方
-function openHowto() { closeSettings(); $('#howto-overlay').hidden = false; }
+function openHowto() { cancelCountdown(); closeSettings(); $('#howto-overlay').hidden = false; }
 function closeHowto() { $('#howto-overlay').hidden = true; }
 $('#set-howto').addEventListener('click', openHowto);
 $('#btn-howto-close').addEventListener('click', closeHowto);
 // 情報オーバーレイ(PP/お問い合わせ)
-function openInfoOverlay(id) { closeSettings(); $(`#${id}-overlay`).hidden = false; }
+function openInfoOverlay(id) { cancelCountdown(); closeSettings(); $(`#${id}-overlay`).hidden = false; }
 function closeInfoOverlay(id) { $(`#${id}-overlay`).hidden = true; }
 ['privacy'].forEach(id => {
   $(`#set-${id}`).addEventListener('click', () => openInfoOverlay(id));
@@ -2177,7 +2191,7 @@ function updateGoalNotice() {
   const continuityPending = streaks.some(([value, targets, key]) => targets.some(n => value >= n && !achievementSeen(`continuity-${key}-${n}`)));
   badge.hidden = !(levelPending || continuityPending);
 }
-function openStats() { closeSettings(); $('#store-overlay').hidden = true; renderStats(); $('#stats-overlay').hidden = false; }
+function openStats() { cancelCountdown(); closeSettings(); $('#store-overlay').hidden = true; renderStats(); $('#stats-overlay').hidden = false; }
 // 商品タイル1枚分。未購入=価格付きボタン / 購入済み・パック内包=押下不可の状態表示
 function storeTile(kind, emblem, extraClass, stateLabel) {
   const copy = `<div class="store-emblem">${emblem}</div><div class="store-copy"><b>${t(kind === 'threePack' ? 'storeThreePack' : 'storeAdFree')}</b><span>${t(kind === 'threePack' ? 'storeThreePackDesc' : 'storeAdFreeDesc')}</span></div>`;
@@ -2198,7 +2212,7 @@ function renderStore() {
   document.querySelectorAll('#store-content [data-buy]').forEach(btn => btn.addEventListener('click', () => purchaseProduct(btn.dataset.buy)));
   document.querySelector('#store-content .store-restore').addEventListener('click', restorePurchasesRC);
 }
-function openStore() { closeSettings(); $('#stats-overlay').hidden = true; renderStore(); $('#store-overlay').hidden = false; }
+function openStore() { cancelCountdown(); closeSettings(); $('#stats-overlay').hidden = true; renderStore(); $('#store-overlay').hidden = false; }
 // お問い合わせ: Googleフォームへ外部遷移
 $('#set-contact').addEventListener('click', () => {
   window.open('https://docs.google.com/forms/d/e/1FAIpQLScYY6LslirKCd3dq_1in33V68IG7MGiPZRFneTxSYPesJxbkg/viewform?usp=publish-editor', '_blank', 'noopener');
