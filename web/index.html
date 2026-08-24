@@ -16,7 +16,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- 更新の目印: URL も画面のビルド印も同じ版番号に揃える -->
-<script>try{var V='262',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
+<script>try{var V='265',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
 <link rel="stylesheet" href="style.css?v=35dba95b76">
 <style>
 .hdr-left { grid-column: 1; justify-self: start; }
@@ -51,7 +51,7 @@ body.view-daily #btn-home { display: grid; }
 <header id="app-header">
   <!-- 左スロット: プレイ/一覧画面から現在の文脈を保ってホームへ戻る導線 -->
   <div class="hdr-left">
-    <button id="btn-home" type="button" aria-label="ホーム">
+    <button id="btn-home" type="button" data-i18n-aria="navHome" aria-label="ホーム">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M4 11 12 4l8 7"/>
         <path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"/>
@@ -60,7 +60,7 @@ body.view-daily #btn-home { display: grid; }
     </button>
   </div>
   <div id="hdr-center">
-    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">262</span></h1>
+    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">265</span></h1>
     <div id="play-status" aria-live="polite">
       <span id="puzzle-no"></span>
       <span id="play-progress"></span>
@@ -84,7 +84,7 @@ body.view-daily #btn-home { display: grid; }
     <div class="home-hub">
       <div class="home-center">
         <div class="home-stage">
-          <button class="home-step home-prev" id="home-prev" type="button" aria-label="前の問題">
+          <button class="home-step home-prev" id="home-prev" type="button" data-i18n-aria="prevPuzzle" aria-label="前の問題">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M14.2 6.2 8.4 12l5.8 5.8"></path>
             </svg>
@@ -131,14 +131,14 @@ body.view-daily #btn-home { display: grid; }
               </div>
             </div>
           </div>
-          <button class="home-step home-next" id="home-next" type="button" aria-label="次の問題">
+          <button class="home-step home-next" id="home-next" type="button" data-i18n-aria="nextPuzzleNav" aria-label="次の問題">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="m9.8 6.2 5.8 5.8-5.8 5.8"></path>
             </svg>
           </button>
         </div>
         <div class="home-level">
-          <span>レベル</span>
+          <span data-i18n="level">レベル</span>
           <span class="home-level-num-box">
             <span class="home-level-num current" id="home-level-no">18</span>
             <span class="home-level-num next" id="home-level-next-no" aria-hidden="true">19</span>
@@ -256,38 +256,38 @@ body.view-daily #btn-home { display: grid; }
 </main>
 
 <!-- 下部ナビ: ゲーム画面(view-play)以外で常時表示。fixed 配置なので body 直下に置く -->
-<nav class="home-footer" aria-label="ホームメニュー">
-  <button id="home-daily" class="home-nav-btn" type="button" aria-label="デイリー">
+<nav class="home-footer" data-i18n-aria="navMenu" aria-label="ホームメニュー">
+  <button id="home-daily" class="home-nav-btn" type="button" data-i18n-aria="navDaily" aria-label="デイリー">
     <svg class="home-nav-icon" viewBox="0 0 24 24" aria-hidden="true">
       <rect x="4" y="4" width="16" height="16" rx="4"></rect>
       <path d="M12 7v5l3.5 2"></path>
     </svg>
-    <span>デイリー</span>
+    <span data-i18n="navDaily">デイリー</span>
   </button>
-  <button id="home-list" class="home-nav-btn" type="button" aria-label="一覧">
+  <button id="home-list" class="home-nav-btn" type="button" data-i18n-aria="navLevels" aria-label="一覧">
     <svg class="home-nav-icon" viewBox="0 0 24 24" aria-hidden="true">
       <rect x="4" y="4" width="7" height="7" rx="1.6" fill="currentColor" stroke="none"></rect>
       <rect x="13" y="4" width="7" height="7" rx="1.6"></rect>
       <rect x="4" y="13" width="7" height="7" rx="1.6"></rect>
       <rect x="13" y="13" width="7" height="7" rx="1.6"></rect>
     </svg>
-    <span>一覧</span>
+    <span data-i18n="navLevels">一覧</span>
   </button>
-  <button id="home-goals" class="home-nav-btn" type="button" aria-label="目標">
+  <button id="home-goals" class="home-nav-btn" type="button" data-i18n-aria="navGoals" aria-label="目標">
     <svg class="home-nav-icon" viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="12" cy="12" r="8"></circle>
       <circle cx="12" cy="12" r="4"></circle>
       <path d="M12 2v4M12 18v4M2 12h4M18 12h4"></path>
     </svg>
-    <span>目標</span>
+    <span data-i18n="navGoals">目標</span>
     <span id="goal-notice" class="achievement-notice" hidden>!</span>
   </button>
-  <button id="home-store" class="home-nav-btn" type="button" aria-label="ストア">
+  <button id="home-store" class="home-nav-btn" type="button" data-i18n-aria="navStore" aria-label="ストア">
     <svg class="home-nav-icon" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M6 9h12l-1 10H7L6 9Z"></path>
       <path d="M9 9a3 3 0 0 1 6 0"></path>
     </svg>
-    <span>ストア</span>
+    <span data-i18n="navStore">ストア</span>
   </button>
 </nav>
 
@@ -623,7 +623,7 @@ body.view-daily #btn-home { display: grid; }
 <script src="normal-levels.js?v=7366b4f2fb"></script>
 <script src="advanced-levels.js?v=40916070ee"></script>
 <script src="three-levels.js?v=fc3252ff51"></script>
-<script src="strings.js?v=0c155f3cfb"></script>
-<script src="app.js?v=462a2c3fd6"></script>
+<script src="strings.js?v=c7144aa2e4"></script>
+<script src="app.js?v=80b019b5f2"></script>
 </body>
 </html>

@@ -638,6 +638,7 @@ const HOME_AUTO_ADVANCE_REDUCED_DELAY_MS = 500;
 const HOME_SWIPE_MIN_X = 40;
 const HOME_SWIPE_MAX_Y_RATIO = 0.6;
 function showView(name, options = {}) {
+  if (name !== 'play' && typeof closeAnswer === 'function' && AV) closeAnswer(false);
   const animate = options.animate !== false;
   for (const v of ['chapters', 'levels', 'play', 'daily']) {
     $('#view-' + v).hidden = v !== name;
@@ -784,6 +785,7 @@ function setHomeIndex(index) {
 }
 
 function goHomeFromHeader() {
+  if (typeof closeAnswer === 'function' && AV) closeAnswer(false);
   closeStatsOverlay();
   if (!$('#view-play').hidden && curChapter) {
     setHomeIndex(curIndex);
@@ -1767,30 +1769,35 @@ function updateAnswerBar() {
   $('#btn-ans-next').disabled = AV.k >= AV.path.length;
 }
 
-async function answerForward(animate) {
-  if (!AV || AV.k >= AV.path.length) return;
-  const d = AV.path[AV.k];
-  const cur = G.pos;
-  const next = cur.map((p, i) => step(p, d, G.rooms[i].wallSet, G.w, G.h));
-  const anyBumped = next.some((np, i) => np === cur[i]);
-  if (AV.blockSet.has(AV.k)) {
-    // 妙手の可視化: ぶつかった壁/外周の、ぶつかった側面だけを光らせる
+async function answerForward(animate, session = AV) {
+  if (!session || AV !== session || session.busy || session.k >= session.path.length) return;
+  session.busy = true;
+  try {
+    const d = session.path[session.k];
+    const cur = G.pos;
+    const next = cur.map((p, i) => step(p, d, G.rooms[i].wallSet, G.w, G.h));
+    const anyBumped = next.some((np, i) => np === cur[i]);
+    if (session.blockSet.has(session.k)) {
+      // 妙手の可視化: ぶつかった壁/外周の、ぶつかった側面だけを光らせる
+      G.rooms.forEach((rm, i) => {
+        if (next[i] === cur[i]) { showBumpGlow(rm, cur[i], d); showRipple(rm, cur[i], d); }
+      });
+    }
     G.rooms.forEach((rm, i) => {
-      if (next[i] === cur[i]) { showBumpGlow(rm, cur[i], d); showRipple(rm, cur[i], d); }
+      if (next[i] === cur[i]) bumpPiece(rm, d);
+      else { setCellXY(rm.piece, next[i] % G.w, (next[i] - (next[i] % G.w)) / G.w); squashMove(rm.ball, d); showTrail(rm, cur[i], next[i], d); }
     });
+    G.pos = next;
+    session.k++;
+    if (AV === session) updateAnswerBar();
+    updateGoals();
+    if (animate) await sleep(Math.max(MOVE_MS, anyBumped ? BUMP_MS : 0));
+  } finally {
+    session.busy = false;
   }
-  G.rooms.forEach((rm, i) => {
-    if (next[i] === cur[i]) bumpPiece(rm, d);
-    else { setCellXY(rm.piece, next[i] % G.w, (next[i] - (next[i] % G.w)) / G.w); squashMove(rm.ball, d); showTrail(rm, cur[i], next[i], d); }
-  });
-  G.pos = next;
-  AV.k++;
-  updateAnswerBar();
-  updateGoals();
-  if (animate) await sleep(Math.max(MOVE_MS, anyBumped ? BUMP_MS : 0));
 }
 function answerBack() {
-  if (!AV || AV.k <= 0) return;
+  if (!AV || AV.busy || AV.k <= 0) return;
   AV.playing = false; // 手動操作で自動再生は止める
   AV.k--;
   placePieces(answerPosAt(AV.k)); // 戻りは滑らせるだけ(bumpなし)
@@ -1804,36 +1811,43 @@ function pauseAnswerIfPlaying() {
 }
 
 async function answerAutoLoop() {
-  if (AV.running) return; // 二重起動防止
-  AV.running = true;
-  while (AV && AV.playing && AV.k < AV.path.length) {
-    await answerForward(true);
-    if (!AV || !AV.playing) break;
+  const session = AV;
+  if (!session || session.running) return; // 二重起動防止
+  session.running = true;
+  while (AV === session && session.playing && session.k < session.path.length) {
+    await answerForward(true, session);
+    if (AV !== session || !session.playing) break;
     await sleep(ANSWER_AUTO_GAP);
   }
-  if (!AV) return;
-  const finished = AV.playing && AV.k >= AV.path.length; // 一時停止でなく最後まで再生し切った
-  AV.playing = false;
-  AV.running = false;
+  if (AV !== session) { session.running = false; return; }
+  const finished = session.playing && session.k >= session.path.length; // 一時停止でなく最後まで再生し切った
+  session.playing = false;
+  session.running = false;
   if (finished) {
     await sleep(REDUCED ? 0 : 900); // 詰み形を一拍見せてから
-    if (AV) {
-      AV.k = 0; // 頭出し(0/N)へ戻す
+    if (AV === session && !session.playing && session.k >= session.path.length) {
+      session.k = 0; // 頭出し(0/N)へ戻す
       placePieces(answerPosAt(0));
     }
   }
-  if (AV) updateAnswerBar();
+  if (AV === session) updateAnswerBar();
 }
 
 function toggleAnswerPlay() {
   if (!AV) return;
+  if (AV.playing) {
+    AV.playing = false;
+    updateAnswerBar();
+    return;
+  }
+  if (AV.busy) return;
   if (AV.k >= AV.path.length) {
     AV.k = 0; // 末尾なら頭出し
     placePieces(answerPosAt(0));
   }
-  AV.playing = !AV.playing;
+  AV.playing = true;
   updateAnswerBar();
-  if (AV.playing) answerAutoLoop();
+  answerAutoLoop();
 }
 
 function enterAnswer() {
@@ -1845,6 +1859,7 @@ function enterAnswer() {
     k: 0,
     playing: false,
     running: false,
+    busy: false,
   };
   clearWallHints(); // 答えビューア中は光ヒントを出さない
   $('#controls').hidden = true;
@@ -1853,7 +1868,7 @@ function enterAnswer() {
   $('#answer-bar').hidden = false;
   updateAnswerBar();
 }
-function closeAnswer() {
+function closeAnswer(restart = true) {
   if (!AV) return;
   AV.playing = false;
   AV = null;
@@ -1861,7 +1876,7 @@ function closeAnswer() {
   $('#controls').hidden = false;
   $('#hint-keys').hidden = false;
   $('#move-count').hidden = false;
-  restartCurrentPuzzle(); // 初形へ戻して自力で挑戦(クリアにはしない)。光も復帰
+  if (restart) restartCurrentPuzzle(); // 初形へ戻して自力で挑戦(クリアにはしない)。光も復帰
 }
 
 // ---- クリア後の流れ: 盤の演出(2秒) → A画面(切れ目) → 次へ/もう一度/一覧 ----
@@ -1913,7 +1928,7 @@ function goToGap() {
     } else {
       gt.hidden = true;
     }
-    $('#btn-next').textContent = t('levels');
+    $('#btn-next').textContent = t('dailyBackToHub');
     $('#btn-share').hidden = false;
   } else {
     $('#gap-time').hidden = true;
@@ -1951,7 +1966,7 @@ $('#btn-retry').addEventListener('click', () => {
 $('#btn-share').addEventListener('click', async () => {
   const s = loadDailyState();
   const { moves, best } = lastClear;
-  const text = t('dailyShareText', { day: dailyDayNumber(), moves, best: best ? '1' : '0', streak: s.streak });
+  const text = t('dailyShareText', { day: dailyDayNumber(), moves, best: Boolean(best), streak: s.streak });
   try {
     if (navigator.share) await navigator.share({ text });
     else { await navigator.clipboard.writeText(text); showToast(t('copied')); }
@@ -1981,6 +1996,9 @@ function relocalize(newLocale) {
   fillI18n();
   if (!$('#view-chapters').hidden) showChapters();
   else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
+  else if (!$('#view-daily').hidden) renderDailyHub();
+  if (!$('#stats-overlay').hidden) renderStats();
+  if (!$('#store-overlay').hidden) renderStore();
   if (!$('#view-play').hidden && G) {
     const globalNo = dailyMode ? t('dailyTitle') : `#${curChapter.from + curIndex + 1}`;
     $('#puzzle-label').textContent = globalNo;
@@ -1994,10 +2012,13 @@ function resetProgress() {
   if (!confirm(t('resetConfirm'))) return;
   cleared.clear(); localStorage.removeItem(STORE_KEY);
   bestCleared.clear(); localStorage.removeItem(BEST_KEY);
+  seenAchievements.clear(); localStorage.removeItem(ACHIEVEMENT_SEEN_KEY);
   unlockedState = {};
   localStorage.removeItem(UNLOCKED_KEY);
   localStorage.removeItem(DAILY_KEY);
+  homeIndex = null;
   updateModeTabLocks();
+  updateGoalNotice();
   if (!$('#view-chapters').hidden) showChapters();
   else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
   closeSettings();
@@ -2076,6 +2097,7 @@ function goalModeTabs(active, kind) {
   return `<div class="goal-tabs" data-goal-tabs="${kind}">
     <button class="goal-tab${active === 'normal' ? ' active' : ''}" data-goal-mode="normal">${t('modeNormal')}</button>
     <button class="goal-tab${active === 'advanced' ? ' active' : ''}" data-goal-mode="advanced">${t('modeAdvanced')}</button>
+    <button class="goal-tab${active === 'three' ? ' active' : ''}" data-goal-mode="three">${t('modeThree')}</button>
     ${kind === 'achievement' ? `<button class="goal-tab${active === 'continuity' ? ' active' : ''}" data-goal-mode="continuity">${t('goalContinuity')}</button>` : ''}
   </div>`;
 }
@@ -2146,10 +2168,9 @@ function renderGoalAchievementBody() {
 function updateGoalNotice() {
   const badge = $('#goal-notice');
   if (!badge) return;
-  const normal = modeProgress('normal'), advanced = modeProgress('advanced');
   const daily = loadDailyState(), login = loadLoginState(), hints = loadHintCredits();
-  const levelPending = ['normal', 'advanced'].some(mode => GOAL_MILESTONES.some(n => {
-    const p = mode === 'normal' ? normal : advanced;
+  const levelPending = ['normal', 'advanced', 'three'].some(mode => GOAL_MILESTONES.some(n => {
+    const p = modeProgress(mode);
     return (p.clear >= n && !achievementSeen(`${mode}-clear-${n}`)) || (p.best >= n && !achievementSeen(`${mode}-best-${n}`));
   }));
   const streaks = [[login.maxStreak, [7, 14, 30], 'goalLoginStreakAchievement'], [daily.maxVisitStreak, [7, 14, 30], 'goalDailyStreakAchievement'], [daily.totalDays, [1, 10, 50], 'goalDailyClearAchievement'], [hints.usedLight, [1, 10, 50, 100], 'goalHintUseAchievement'], [hints.usedAnswer, [1, 10, 50, 100], 'goalAnswerUseAchievement']];
@@ -2206,7 +2227,10 @@ $('#home-store').addEventListener('click', openStore);
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
 // 答え = 毎回リワード広告(差し込み口)→ 答えビューア
-$('#btn-answer-open').addEventListener('click', () => spendHint('answer', enterAnswer));
+$('#btn-answer-open').addEventListener('click', () => {
+  if (!G || G.busy || G.cleared || AV) return;
+  spendHint('answer', enterAnswer);
+});
 // 光ヒント = 1回消費してその問題で点灯(点灯済みなら据え置き=消費しない)
 $('#btn-hint-light').addEventListener('click', () => {
   if (!G || G.busy || G.cleared || AV) return;
