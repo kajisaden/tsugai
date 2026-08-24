@@ -19,3 +19,9 @@
 対象: `fillI18n`、`relocalize`、`updateInfo`、`updateAnswerBar`、`renderStats`、`renderStore`。
 
 言語切替時に動的に生成したARIAラベルだけ旧言語のまま残る問題を確認・修正した。静的属性と動的描画が別々の更新経路を持っているため、翻訳キーから表示文言とアクセシビリティ属性を同時に生成する仕組みへ整理する。
+
+### ホーム遷移ロックの状態を単一化する
+
+対象: `homeControlsLocked`、`homeHardLock`、`homeTransition`、ホームの矢印ボタンとスワイプ処理。
+
+レベル送りのアニメーション中に「次へ」を高速で2回押すと、遷移中のロック状態が入力経路に共有されず、1回の操作で2レベル進んで中間レベルを飛ばす状態をブラウザで再現した。今回の修正ではボタンの無効化・矢印ハンドラ・スワイプ判定に `homeControlsLocked` を反映した。今後は `homeControlsLocked` と `homeHardLock` の二重管理を、遷移状態オブジェクトと単一の入力ガードへ整理する。

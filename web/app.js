@@ -758,7 +758,7 @@ function renderHome(options = {}) {
     nextLevelEl.textContent = currentState.index + 1;
   }
 
-  const stepLocked = homeHardLock;
+  const stepLocked = homeHardLock || homeControlsLocked;
   center.classList.toggle('controls-locked', stepLocked);
   const playButton = $('#home-play');
   $('#home-prev').disabled = stepLocked || homeIndex <= 0;
@@ -848,18 +848,18 @@ function startHomeSlide(toIndex, options = {}) {
 }
 
 function homePrev() {
-  if (homeHardLock) return;
+  if (homeHardLock || homeControlsLocked) return;
   startHomeSlide((homeIndex == null ? defaultHomeIndex() : homeIndex) - 1);
 }
 
 function homeNext() {
-  if (homeHardLock) return;
+  if (homeHardLock || homeControlsLocked) return;
   startHomeSlide((homeIndex == null ? defaultHomeIndex() : homeIndex) + 1);
 }
 
 let homeSwipeStart = null;
 function beginHomeSwipe(e) {
-  if ($('#view-chapters').hidden || homeHardLock) return;
+  if ($('#view-chapters').hidden || homeHardLock || homeControlsLocked) return;
   if (e.target.closest('.home-footer')) return;
   if (e.target.closest('button, a, input, select, textarea')) return;
   const touch = e.touches && e.touches.length === 1 ? e.touches[0] : null;
@@ -874,7 +874,7 @@ function finishHomeSwipe(e) {
   const dx = touch.clientX - homeSwipeStart.x;
   const dy = touch.clientY - homeSwipeStart.y;
   homeSwipeStart = null;
-  if (homeHardLock) return;
+  if (homeHardLock || homeControlsLocked) return;
   if (Math.abs(dx) < HOME_SWIPE_MIN_X) return;
   if (Math.abs(dy) > Math.abs(dx) * HOME_SWIPE_MAX_Y_RATIO) return;
   dx < 0 ? homeNext() : homePrev();
