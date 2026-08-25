@@ -396,8 +396,18 @@ function fmtTime(ms) {
 
 // ---- デイリーのタイム計測 ----
 // カウントダウン終了時に開始し、初クリアで停止。途中のリセット/ミスも含む実測。
-let dailyRunStart = null;
-function beginDailyRun() { dailyRunStart = Date.now(); }
+const dailyRun = { startedAt: null, countdownTimer: null };
+function beginDailyRun() { dailyRun.startedAt = Date.now(); }
+function finishDailyRun() {
+  if (dailyRun.startedAt == null) return null;
+  const elapsed = Date.now() - dailyRun.startedAt;
+  dailyRun.startedAt = null;
+  return elapsed;
+}
+function abandonDailyRun() {
+  dailyRun.startedAt = null;
+  cancelCountdown();
+}
 
 function handleDailyClear(moves, min) {
   const s = loadDailyState();
@@ -626,8 +636,7 @@ let homeAutoAdvanceTimer = null;
 let homeSlideTimer = null;
 let homeUnlockTimer = null;
 let homeFeedback = false;
-let homeControlsLocked = false;
-let homeHardLock = false; // 解錠演出・クリア自動送りなど「割り込ませない」保護区間だけ true
+let homeLockState = 'none'; // none | transition | protected（解錠演出・クリア自動送り）
 let homeTransition = null;
 let homeUnlockReveal = null;
 const HOME_SLIDE_MS = 680;
@@ -637,9 +646,17 @@ const HOME_AUTO_ADVANCE_DELAY_MS = 1000;
 const HOME_AUTO_ADVANCE_REDUCED_DELAY_MS = 500;
 const HOME_SWIPE_MIN_X = 40;
 const HOME_SWIPE_MAX_Y_RATIO = 0.6;
+function homeInputLocked() { return homeLockState !== 'none'; }
 function showView(name, options = {}) {
-  if (name !== 'daily' && typeof cancelCountdown === 'function') cancelCountdown();
-  if (name !== 'play' && typeof closeAnswer === 'function' && AV) closeAnswer(false);
+  if (name !== 'daily') cancelCountdown();
+  if (name !== 'play') {
+    if (AV) closeAnswer(false);
+    endGameSession();
+    if (dailyMode) {
+      abandonDailyRun();
+      dailyMode = false;
+    }
+  }
   const animate = options.animate !== false;
   for (const v of ['chapters', 'levels', 'play', 'daily']) {
     $('#view-' + v).hidden = v !== name;
@@ -758,7 +775,7 @@ function renderHome(options = {}) {
     nextLevelEl.textContent = currentState.index + 1;
   }
 
-  const stepLocked = homeHardLock || homeControlsLocked;
+  const stepLocked = homeInputLocked();
   center.classList.toggle('controls-locked', stepLocked);
   const playButton = $('#home-play');
   $('#home-prev').disabled = stepLocked || homeIndex <= 0;
@@ -774,8 +791,7 @@ function showChapters(options = {}) {
 
 function setHomeIndex(index) {
   homeFeedback = false;
-  homeControlsLocked = false;
-  homeHardLock = false;
+  homeLockState = 'none';
   clearTimeout(homeAutoAdvanceTimer);
   clearTimeout(homeSlideTimer);
   clearTimeout(homeUnlockTimer);
@@ -786,9 +802,6 @@ function setHomeIndex(index) {
 }
 
 function goHomeFromHeader() {
-  invalidateGameSession();
-  cancelClearTimer();
-  if (typeof closeAnswer === 'function' && AV) closeAnswer(false);
   closeStatsOverlay();
   if (!$('#view-play').hidden && curChapter) {
     setHomeIndex(curIndex);
@@ -813,13 +826,12 @@ function startHomeSlide(toIndex, options = {}) {
   if (fromIndex === nextIndex || REDUCED) {
     homeTransition = null;
     homeUnlockReveal = null;
-    homeControlsLocked = false;
-    homeHardLock = false;
+    homeLockState = 'none';
     homeIndex = nextIndex;
     showChapters({ animate: false });
     return;
   }
-  homeControlsLocked = true;
+  if (homeLockState !== 'protected') homeLockState = 'transition';
   homeUnlockReveal = unlockRevealIndex == null ? null : { index: unlockRevealIndex, phase: 'locked' };
   homeTransition = {
     from: fromIndex,
@@ -832,8 +844,7 @@ function startHomeSlide(toIndex, options = {}) {
   homeSlideTimer = setTimeout(() => {
     homeTransition = null;
     if (unlockRevealIndex == null) {
-      homeControlsLocked = false;
-      homeHardLock = false;
+      homeLockState = 'none';
       showChapters({ animate: false });
       return;
     }
@@ -841,26 +852,25 @@ function startHomeSlide(toIndex, options = {}) {
     showChapters({ animate: false });
     homeUnlockTimer = setTimeout(() => {
       homeUnlockReveal = null;
-      homeControlsLocked = false;
-      homeHardLock = false;
+      homeLockState = 'none';
       showChapters({ animate: false });
     }, HOME_UNLOCK_REVEAL_MS);
   }, HOME_SLIDE_MS);
 }
 
 function homePrev() {
-  if (homeHardLock || homeControlsLocked) return;
+  if (homeInputLocked()) return;
   startHomeSlide((homeIndex == null ? defaultHomeIndex() : homeIndex) - 1);
 }
 
 function homeNext() {
-  if (homeHardLock || homeControlsLocked) return;
+  if (homeInputLocked()) return;
   startHomeSlide((homeIndex == null ? defaultHomeIndex() : homeIndex) + 1);
 }
 
 let homeSwipeStart = null;
 function beginHomeSwipe(e) {
-  if ($('#view-chapters').hidden || homeHardLock || homeControlsLocked) return;
+  if ($('#view-chapters').hidden || homeInputLocked()) return;
   if (e.target.closest('.home-footer')) return;
   if (e.target.closest('button, a, input, select, textarea')) return;
   const touch = e.touches && e.touches.length === 1 ? e.touches[0] : null;
@@ -875,7 +885,7 @@ function finishHomeSwipe(e) {
   const dx = touch.clientX - homeSwipeStart.x;
   const dy = touch.clientY - homeSwipeStart.y;
   homeSwipeStart = null;
-  if (homeHardLock || homeControlsLocked) return;
+  if (homeInputLocked()) return;
   if (Math.abs(dx) < HOME_SWIPE_MIN_X) return;
   if (Math.abs(dy) > Math.abs(dx) * HOME_SWIPE_MAX_Y_RATIO) return;
   dx < 0 ? homeNext() : homePrev();
@@ -888,8 +898,7 @@ function showHomeClearFeedback(clearIndex, unlockIndex = null) {
   homeTransition = null;
   homeUnlockReveal = null;
   homeFeedback = true;
-  homeControlsLocked = true;
-  homeHardLock = true;
+  homeLockState = 'protected';
   homeIndex = clampHomeIndex(clearIndex);
   showChapters({ animate: false });
   const em = $('#home-panel-a .home-emblem');
@@ -912,9 +921,9 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
   });
 });
 
-function showLevels(ch) {
+function showLevels(ch, options = {}) {
   curChapter = ch;
-  showView('levels');
+  showView('levels', options);
   document.querySelectorAll('.mode-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.mode === curMode);
   });
@@ -962,18 +971,24 @@ function showLevels(ch) {
 
 // ---- プレイ ----
 let G = null; // ゲーム状態
-let gameEpoch = 0; // 画面遷移で古い非同期手続きを無効化する世代番号
 let lastClear = null; // 直近クリアの結果(A画面用): { moves, min, best }
-let tsumiTimer = null; // クリア演出(2秒) → A画面 への自動遷移タイマー
 
-function cancelClearTimer() {
-  clearTimeout(tsumiTimer);
-  tsumiTimer = null;
+function isCurrentGameSession(session) {
+  return !!session && G === session && session.active;
 }
 
-function invalidateGameSession() {
-  gameEpoch++;
-  if (G) G.busy = false;
+function cancelClearTimer(session = G) {
+  if (!session) return;
+  clearTimeout(session.clearTimer);
+  session.clearTimer = null;
+}
+
+function endGameSession(session = G) {
+  if (!session) return;
+  cancelClearTimer(session);
+  session.active = false;
+  session.busy = false;
+  if (G === session) G = null;
 }
 
 function setCellPos(node, p, w, h) {
@@ -1038,9 +1053,8 @@ function animatePuzzleEntrance() {
   });
 }
 
-function _initPuzzle(puz, label, entrance, isBoss = false) {
-  gameEpoch++;
-  cancelClearTimer();
+function _initPuzzle(puz, label, entrance, isBoss = false, kind = 'normal') {
+  endGameSession();
   hintGlows = [];
   AV = null;
   $('#answer-bar').hidden = true;
@@ -1066,6 +1080,12 @@ function _initPuzzle(puz, label, entrance, isBoss = false) {
   updatePlayBanner();
   G = {
     puz, w, h, rooms,
+    active: true,
+    clearTimer: null,
+    kind,
+    mode: curMode,
+    chapter: curChapter,
+    index: curIndex,
     pos: puz.rooms.map((r) => r.start),
     moves: 0,
     history: [],
@@ -1090,13 +1110,13 @@ function startPuzzle(ch, index, entrance = true) {
   curIndex = index;
   const puz = chapterLevels(ch)[index];
   const globalNo = curChapter.from + index + 1;
-  _initPuzzle(puz, `#${globalNo}`, entrance, !!modeData().boss[curChapter.from + index]);
+  _initPuzzle(puz, `#${globalNo}`, entrance, !!modeData().boss[curChapter.from + index], 'normal');
 }
 
 function startDailyPuzzle(entrance = true) {
   dailyMode = true;
   const puz = getDailyPuzzle();
-  _initPuzzle(puz, t('dailyTitle'), entrance, false);
+  _initPuzzle(puz, t('dailyTitle'), entrance, false, 'daily');
 }
 
 // ---- デイリー・ハブ画面(プレイ前に挟む1画面) ----
@@ -1129,14 +1149,14 @@ function renderDailyHub() {
 }
 
 // ---- 挑戦: 5秒カウントダウン → 計測開始 → 盤へ ----
-let countdownTimer = null;
 function cancelCountdown() {
-  clearTimeout(countdownTimer);
-  countdownTimer = null;
+  clearTimeout(dailyRun.countdownTimer);
+  dailyRun.countdownTimer = null;
   const ov = $('#overlay-countdown');
   if (ov) ov.hidden = true;
 }
 function startDailyWithCountdown() {
+  abandonDailyRun();
   runCountdown(5, () => { startDailyPuzzle(true); beginDailyRun(); });
 }
 function runCountdown(from, done) {
@@ -1146,11 +1166,11 @@ function runCountdown(from, done) {
   ov.hidden = false;
   let c = from;
   const step = () => {
-    if (c <= 0) { ov.hidden = true; countdownTimer = null; done(); return; }
+    if (c <= 0) { ov.hidden = true; dailyRun.countdownTimer = null; done(); return; }
     num.textContent = c;
     if (!REDUCED) { num.classList.remove('pop'); void num.offsetWidth; num.classList.add('pop'); }
     c--;
-    countdownTimer = setTimeout(step, 1000);
+    dailyRun.countdownTimer = setTimeout(step, 1000);
   };
   step();
 }
@@ -1465,23 +1485,22 @@ function showTrail(rm, from, to, d) {
 async function doMove(d) {
   if (!G || G.busy || G.cleared) return;
   const session = G;
-  const epoch = gameEpoch;
   clearWallHints(); // 局面が動くと壁ヒントの位置がずれるので消す
-  const next = G.pos.map((p, i) => step(p, d, G.rooms[i].wallSet, G.w, G.h));
-  const anyMoved = next.some((np, i) => np !== G.pos[i]);
-  const anyBumped = next.some((np, i) => np === G.pos[i]);
-  G.busy = true;
+  const next = session.pos.map((p, i) => step(p, d, session.rooms[i].wallSet, session.w, session.h));
+  const anyMoved = next.some((np, i) => np !== session.pos[i]);
+  const anyBumped = next.some((np, i) => np === session.pos[i]);
+  session.busy = true;
 
   // 動かす/弾く(反則でも、まず「行って」見せてから判定する)
-  G.rooms.forEach((rm, i) => {
-    if (next[i] === G.pos[i]) {
+  session.rooms.forEach((rm, i) => {
+    if (next[i] === session.pos[i]) {
       bumpPiece(rm, d);
-      showBumpGlow(rm, G.pos[i], d); // ぶつかった面を光らせる
-      showRipple(rm, G.pos[i], d);   // 衝撃リップル(レバー6)
+      showBumpGlow(rm, session.pos[i], d); // ぶつかった面を光らせる
+      showRipple(rm, session.pos[i], d);   // 衝撃リップル(レバー6)
     } else {
-      setCellXY(rm.piece, next[i] % G.w, (next[i] - (next[i] % G.w)) / G.w);
+      setCellXY(rm.piece, next[i] % session.w, (next[i] - (next[i] % session.w)) / session.w);
       squashMove(rm.ball, d); // 進行軸へ伸び→着地でつぶれて戻る(settle)
-      showTrail(rm, G.pos[i], next[i], d); // 通り道の尾引き(G.pos はこの後で next に更新される=ここは旧位置)
+      showTrail(rm, session.pos[i], next[i], d); // 通り道の尾引き(session.pos はこの後で next に更新される=ここは旧位置)
     }
   });
   // 触覚＋効果音: ぶつかれば firm/「コッ」、きれいに動けば light/「トッ」。一手につき一度(両部屋で二度鳴らさない)。
@@ -1491,49 +1510,49 @@ async function doMove(d) {
   if (!anyMoved) {
     // 全員スキップ=無意味手。状態も手数も変えず、壁当てbumpだけ見せる(SPEC.md 3-1)
     await sleep(anyBumped ? BUMP_MS : 0);
-    if (G !== session || gameEpoch !== epoch) return;
-    G.busy = false;
+    if (!isCurrentGameSession(session)) return;
+    session.busy = false;
     refreshWallHints(); // 局面は不変だが光ヒントを出し直す
     return;
   }
 
-  const allGoal = next.every((np, i) => np === G.rooms[i].goalIndex);
-  const anyGoal = next.some((np, i) => np === G.rooms[i].goalIndex);
+  const allGoal = next.every((np, i) => np === session.rooms[i].goalIndex);
+  const anyGoal = next.some((np, i) => np === session.rooms[i].goalIndex);
   // ゴール吸着: クリアの一手(=両球が同時にゴールへ収まる)では、滑り込む間に輪がきゅっと締まって弾ける。
   // 反則(anyGoal && !allGoal)は祝福しないので対象外。スライドに重なるよう、await の前=今ここで点火する。
-  if (allGoal && !REDUCED) G.rooms.forEach((rm) => {
+  if (allGoal && !REDUCED) session.rooms.forEach((rm) => {
     rm.goal.classList.remove('sucking'); void rm.goal.offsetWidth; rm.goal.classList.add('sucking');
     // 600ms まで保持: ゴール吸着の余韻を見せてから外す
     clearTimeout(rm.goal._suckT); rm.goal._suckT = setTimeout(() => rm.goal.classList.remove('sucking'), 600);
   });
-  G.history.push(G.pos);
-  G.pos = next;
-  G.moves++;
+  session.history.push(session.pos);
+  session.pos = next;
+  session.moves++;
   updateInfo();
 
   await sleep(Math.max(MOVE_MS, anyBumped ? BUMP_MS : 0));
-  if (G !== session || gameEpoch !== epoch) return;
+  if (!isCurrentGameSession(session)) return;
   updateGoals();
 
   // 同時でないのにゴールへ入った=反則。行って見せてから → 初形へ戻す
   if (anyGoal && !allGoal) {
     playFoul(); // C: やさしい否定音
     haptic('heavy'); // 反則の手触り
-    if (!REDUCED) G.rooms.forEach((rm) => { // C: 盤に一拍の赤み
+    if (!REDUCED) session.rooms.forEach((rm) => { // C: 盤に一拍の赤み
       rm.board.classList.remove('foul'); void rm.board.offsetWidth; rm.board.classList.add('foul');
       clearTimeout(rm.board._foulT); rm.board._foulT = setTimeout(() => rm.board.classList.remove('foul'), 560);
     });
     // 反則の局面(＋赤み)を一拍見せてから、履歴を逆再生して初形まで巻き戻す。メッセージは出さない。
     if (REDUCED) { restartCurrentPuzzle(); return; }
     await sleep(MISS_HOLD_MS);
-    if (G !== session || gameEpoch !== epoch) return;
-    await slideToStart();
-    if (G !== session || gameEpoch !== epoch) return;
+    if (!isCurrentGameSession(session)) return;
+    await slideToStart(session);
+    if (!isCurrentGameSession(session)) return;
     restartCurrentPuzzle(false);
     return;
   }
 
-  G.busy = false;
+  session.busy = false;
   refreshWallHints(); // 動いた先の局面で光ヒントを出し直す
   checkClear();
 }
@@ -1546,51 +1565,53 @@ function dismissMiss() {
 
 // 反則からの復帰: 現局面から初形へ、ボールを「直線で」一回のスライドで戻す。
 // 手数が伸びても所要時間は一定(逆再生のように長くならない)。startPuzzle 前に見た目だけ先に戻す。
-async function slideToStart() {
-  const starts = G.puz.rooms.map((r) => r.start);
+async function slideToStart(session) {
+  const starts = session.puz.rooms.map((r) => r.start);
   const root = document.documentElement;
   const prev = root.style.getPropertyValue('--move-ms'); // インラインの上書き(通常は空=CSSの240ms)
   root.style.setProperty('--move-ms', RETURN_MS + 'ms'); // 戻りのスライド速度
-  G.rooms.forEach((rm, i) => setCellXY(rm.piece, starts[i] % G.w, (starts[i] - (starts[i] % G.w)) / G.w));
+  session.rooms.forEach((rm, i) => setCellXY(rm.piece, starts[i] % session.w, (starts[i] - (starts[i] % session.w)) / session.w));
   await sleep(RETURN_MS);
   if (prev) root.style.setProperty('--move-ms', prev); else root.style.removeProperty('--move-ms');
 }
 
-async function checkClear() {
-  if (!G.pos.every((p, i) => p === G.puz.rooms[i].goal)) return;
-  G.cleared = true;
-  G.busy = true;
-  // デイリーは計測終了。dailyRunStart が無ければ未計測(null)。
-  const timeMs = (dailyMode && dailyRunStart != null) ? Date.now() - dailyRunStart : null;
-  dailyRunStart = null;
-  const min = G.puz.solution.minMoves;
-  const best = G.moves === min;
+function checkClear() {
+  const session = G;
+  if (!session || !session.pos.every((p, i) => p === session.puz.rooms[i].goal)) return;
+  session.cleared = true;
+  session.busy = true;
+  // デイリーは計測終了。開始時刻が無ければ未計測(null)。
+  const isDailySession = session.kind === 'daily';
+  const timeMs = isDailySession ? finishDailyRun() : null;
+  const min = session.puz.solution.minMoves;
+  const best = session.moves === min;
   let unlockIndex = null;
-  const currentUnlockedBeforeClear = dailyMode ? null : unlockedIndex(curMode);
-  if (!dailyMode) {
-    markCleared(G.puz.id);
-    if (best) markBest(G.puz.id);
-    unlockIndex = unlockAfterClear(curMode, curIndex, currentUnlockedBeforeClear);
+  const currentUnlockedBeforeClear = isDailySession ? null : unlockedIndex(session.mode);
+  if (!isDailySession) {
+    markCleared(session.puz.id);
+    if (best) markBest(session.puz.id);
+    unlockIndex = unlockAfterClear(session.mode, session.index, currentUnlockedBeforeClear);
   }
-  lastClear = { moves: G.moves, min, best, index: curIndex, timeMs };
+  lastClear = { moves: session.moves, min, best, index: session.index, timeMs };
 
   const finishClearPresentation = () => {
-    if (dailyMode) goToGap();
-    else showHomeClearFeedback(curIndex, unlockIndex);
+    if (!isCurrentGameSession(session)) return;
+    if (isDailySession) goToGap();
+    else showHomeClearFeedback(session.index, unlockIndex);
   };
 
   // 点火: ボールが弾み、ゴールに光が満ちる。約1秒見せて A画面へ。
   const afterSuck = false;
   const ignite = () => {
-    if (!G.cleared || !$('#overlay-gap').hidden) return; // 待ちの間に遷移済みなら何もしない
-    G.rooms.forEach((rm) => rm.goal.classList.add('filled')); // 光が満ちる
+    if (!isCurrentGameSession(session) || !session.cleared || !$('#overlay-gap').hidden) return; // 待ちの間に遷移済みなら何もしない
+    session.rooms.forEach((rm) => rm.goal.classList.add('filled')); // 光が満ちる
     $('#boards').classList.add(best ? 'clear-best' : 'clear-win', 'bouncing');
     playClear(best); // クリアの効果音(最短はきらめきを追加)。音はモーション無効でも鳴らす
     haptic('heavy'); // クリアの祝福
     if (REDUCED) { finishClearPresentation(); return; } // モーション無効: 演出を飛ばして結果表示へ
     // A: つがいが同時に座る瞬間の一発演出(チャイムと同期)。両部屋のボールが祝福発光し、ゴールが一拍明るむ。
     // 既存のメダリオン/バウンスを壊さないよう、ジオメトリ非干渉(opacity/filter)だけで重ねる。
-    G.rooms.forEach((rm) => {
+    session.rooms.forEach((rm) => {
       if (rm.ballFlash && rm.ballFlash.animate) {
         rm.ballFlash.animate([
           { opacity: 0,    offset: 0 },
@@ -1607,8 +1628,8 @@ async function checkClear() {
       }
     });
     // 球の発光＋弾みを約1秒見せてから A画面へ自動遷移(幕は廃止)。旧 200ms の余韻＋1秒を畳む
-    clearTimeout(tsumiTimer);
-    tsumiTimer = setTimeout(finishClearPresentation, 1200);
+    cancelClearTimer(session);
+    session.clearTimer = setTimeout(finishClearPresentation, 1200);
   };
 
   if (afterSuck) setTimeout(ignite, GOAL_SUCK_HOLD_MS); // 吸着の収まりを見せてから点火
@@ -1911,7 +1932,7 @@ function closeAnswer(restart = true) {
 // A画面: 手数/最短 ・ つがいエンブレム(最短=金/クリア=銀) ・ 章の進捗 を出す。弾みは盤からエンブレムへ継ぐ。
 function goToGap() {
   if (!$('#overlay-gap').hidden) return; // 二重防止
-  clearTimeout(tsumiTimer);
+  cancelClearTimer();
   $('#boards').classList.remove('bouncing'); // 盤の弾みは止める(エンブレムが弾む)
   const { moves, min, best } = lastClear || { moves: 0, min: 0, best: false };
   $('#gap-moves-1').textContent = t('clearedMoves', { n: moves });
@@ -1972,6 +1993,7 @@ function goToGap() {
     const ov = $('#overlay-gap');
     ov.classList.remove('enter'); void ov.offsetWidth; ov.classList.add('enter');
   }
+  endGameSession();
 }
 
 $('#btn-next').addEventListener('click', () => {
@@ -2016,14 +2038,11 @@ function updateSettingsUI() {
   const se = $('#sw-se'); if (se) se.setAttribute('aria-pressed', String(seOn));
   const hp = $('#sw-haptics'); if (hp) hp.setAttribute('aria-pressed', String(hapticsOn));
 }
-// 言語切替: ロケール変更→保存→静的文言再翻訳→表示中ビューの動的文言を再描画
-function relocalize(newLocale) {
-  if (!STRINGS[newLocale] || newLocale === locale) return;
-  locale = newLocale;
-  localStorage.setItem(LANG_KEY, newLocale);
+// 静的文言と、現在表示中の動的UIを同じ経路で再翻訳する。
+function refreshLocalizedUI() {
   fillI18n();
-  if (!$('#view-chapters').hidden) showChapters();
-  else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
+  if (!$('#view-chapters').hidden) renderHome();
+  else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter, { animate: false });
   else if (!$('#view-daily').hidden) renderDailyHub();
   if (!$('#stats-overlay').hidden) renderStats();
   if (!$('#store-overlay').hidden) renderStore();
@@ -2033,11 +2052,26 @@ function relocalize(newLocale) {
     $('#puzzle-no').textContent = globalNo;
     updateInfo();
   }
+  if (AV) updateAnswerBar();
   updateSettingsUI();
+}
+// 言語切替: ロケール変更→保存→表示中UIを再翻訳
+function relocalize(newLocale) {
+  if (!STRINGS[newLocale] || newLocale === locale) return;
+  locale = newLocale;
+  localStorage.setItem(LANG_KEY, newLocale);
+  refreshLocalizedUI();
 }
 // 進捗(クリア/最短)を消去
 function resetProgress() {
   if (!confirm(t('resetConfirm'))) return;
+  if (AV) closeAnswer(false);
+  endGameSession();
+  abandonDailyRun();
+  dailyMode = false;
+  lastClear = null;
+  $('#overlay-gap').hidden = true;
+  $('#overlay-miss').hidden = true;
   cleared.clear(); localStorage.removeItem(STORE_KEY);
   bestCleared.clear(); localStorage.removeItem(BEST_KEY);
   seenAchievements.clear(); localStorage.removeItem(ACHIEVEMENT_SEEN_KEY);
@@ -2047,9 +2081,8 @@ function resetProgress() {
   homeIndex = null;
   updateModeTabLocks();
   updateGoalNotice();
-  if (!$('#view-chapters').hidden) showChapters();
-  else if (!$('#view-levels').hidden && curChapter) showLevels(curChapter);
-  closeSettings();
+  closeStatsOverlay();
+  setHomeIndex(0);
 }
 // 簡易トースト(未実装項目の「準備中」など)
 let toastTimer = null;
