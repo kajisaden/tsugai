@@ -2430,6 +2430,45 @@ function showLoginModal(result) {
   };
 }
 
+// 同じPWAを複数タブで開いた場合、別タブのクリア・解放を現在の表示へ反映する。
+// storage イベントは書き込んだタブ自身には発火しないため、通常のクリア演出とは競合しない。
+function replaceStoredSet(target, raw) {
+  let values;
+  try { values = JSON.parse(raw ?? '[]'); } catch (e) { return false; }
+  if (!Array.isArray(values)) return false;
+  target.clear();
+  values.forEach((value) => target.add(value));
+  return true;
+}
+
+window.addEventListener('storage', (e) => {
+  if (e.storageArea !== localStorage) return;
+  const syncAll = e.key === null;
+  let progressChanged = false;
+
+  if (syncAll || e.key === STORE_KEY) {
+    progressChanged = replaceStoredSet(cleared, syncAll ? localStorage.getItem(STORE_KEY) : e.newValue) || progressChanged;
+  }
+  if (syncAll || e.key === BEST_KEY) {
+    progressChanged = replaceStoredSet(bestCleared, syncAll ? localStorage.getItem(BEST_KEY) : e.newValue) || progressChanged;
+  }
+  if (syncAll || e.key === UNLOCKED_KEY) {
+    unlockedState = loadUnlockedState();
+    progressChanged = true;
+  }
+  if (syncAll || e.key === LEVEL_LOCK_KEY) {
+    levelLockOn = localStorage.getItem(LEVEL_LOCK_KEY) !== '0';
+    progressChanged = true;
+  }
+  if (!progressChanged) return;
+
+  updateModeTabLocks();
+  updateGoalNotice();
+  if (!$('#view-chapters').hidden) renderHome();
+  else if (!$('#view-levels').hidden) showLevels(curChapter || CHAPTERS[0]);
+  if (!$('#stats-overlay').hidden) renderStats();
+});
+
 // ---- 起動 ----
 fillI18n(); // 静的文言(ボタン・タグライン等)をロケールで流し込む
 updateSettingsUI(); // 設定の言語値・スイッチ状態を反映
