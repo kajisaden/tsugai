@@ -20,3 +20,5 @@ docs/mocks/**/*.png
 web/*mock*.html
 web/trail-*.html
 web/*-compare.html
+# 採用判断まで共有するフッター選択状態モックはリポジトリに残す
+!web/nav-state-mocks.html

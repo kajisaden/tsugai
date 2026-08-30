@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>フッター選択状態モック | Tsugai</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --tsugai-mock-bg: #f3efe6;
+      --tsugai-mock-paper: #fbf7ed;
+      --tsugai-mock-footer: #e9edf7;
+      --tsugai-mock-ink: #2b2620;
+      --tsugai-mock-muted: #4d587a;
+      --tsugai-mock-blue: #526df3;
+      --tsugai-mock-blue-soft: rgba(82, 109, 243, 0.12);
+      --tsugai-mock-gold: #b88424;
+      --tsugai-mock-border: rgba(43, 38, 32, 0.12);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+      font-synthesis: none;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      min-width: 320px;
+      background: var(--tsugai-mock-bg);
+      color: var(--tsugai-mock-ink);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    #nav-state-mocks {
+      width: min(960px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+
+    .mock-heading {
+      margin: 0 0 18px;
+    }
+
+    .mock-heading h1 {
+      margin: 0;
+      font-size: clamp(20px, 4vw, 28px);
+      line-height: 1.25;
+      letter-spacing: 0.03em;
+    }
+
+    .mock-heading p {
+      margin: 8px 0 0;
+      color: var(--tsugai-muted, #596174);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .mock-controls {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .mock-control-group {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    .mock-control-label {
+      color: var(--tsugai-mock-muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+
+    .mock-option-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .mock-screen-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .mock-option,
+    .mock-screen-option {
+      min-height: 40px;
+      border: 1px solid var(--tsugai-mock-border);
+      border-radius: 11px;
+      background: rgba(251, 247, 237, 0.82);
+      color: var(--tsugai-mock-ink);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.25;
+      transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .mock-option:hover,
+    .mock-screen-option:hover {
+      border-color: rgba(82, 109, 243, 0.46);
+    }
+
+    .mock-option:active,
+    .mock-screen-option:active {
+      transform: translateY(1px);
+    }
+
+    .mock-option:focus-visible,
+    .mock-screen-option:focus-visible,
+    .mock-footer button:focus-visible {
+      outline: 3px solid rgba(82, 109, 243, 0.36);
+      outline-offset: 2px;
+    }
+
+    .mock-option[aria-pressed="true"],
+    .mock-screen-option[aria-pressed="true"] {
+      border-color: var(--tsugai-mock-blue);
+      background: var(--tsugai-mock-blue);
+      color: #fff;
+    }
+
+    .mock-screen-option {
+      padding: 0 14px;
+    }
+
+    .mock-stage {
+      display: grid;
+      justify-items: center;
+    }
+
+    .mock-device {
+      position: relative;
+      width: min(390px, calc(100vw - 32px));
+      aspect-ratio: 390 / 844;
+      overflow: hidden;
+      border: 1px solid rgba(43, 38, 32, 0.18);
+      border-radius: 30px;
+      background: var(--tsugai-mock-paper);
+      box-shadow: 0 16px 38px rgba(43, 38, 32, 0.15), 0 2px 8px rgba(43, 38, 32, 0.08);
+      isolation: isolate;
+    }
+
+    .mock-device::before {
+      position: absolute;
+      z-index: 2;
+      top: 9px;
+      left: 50%;
+      width: 76px;
+      height: 22px;
+      border-radius: 0 0 14px 14px;
+      background: rgba(43, 38, 32, 0.08);
+      content: "";
+      transform: translateX(-50%);
+    }
+
+    .mock-screen {
+      display: flex;
+      height: 100%;
+      flex-direction: column;
+      align-items: center;
+      padding: 54px 24px 104px;
+      text-align: center;
+    }
+
+    .mock-screen-kicker {
+      margin: 0 0 8px;
+      color: var(--tsugai-mock-blue);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+    }
+
+    .mock-screen-title {
+      margin: 0;
+      font-size: clamp(22px, 6vw, 30px);
+      line-height: 1.2;
+      letter-spacing: 0.04em;
+    }
+
+    .mock-screen-note {
+      max-width: 250px;
+      margin: 14px 0 0;
+      color: #6b675f;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .mock-emblem {
+      display: grid;
+      width: 112px;
+      height: 112px;
+      margin: auto 0 26px;
+      place-items: center;
+      border: 1px solid rgba(82, 109, 243, 0.16);
+      border-radius: 50%;
+      background: rgba(82, 109, 243, 0.07);
+      color: var(--tsugai-mock-blue);
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -0.08em;
+    }
+
+    .mock-screen-label {
+      margin: 0;
+      color: var(--tsugai-mock-muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .mock-footer {
+      position: absolute;
+      z-index: 3;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0;
+      padding: 8px 18px calc(10px + env(safe-area-inset-bottom, 0px));
+      border-top: 1px solid rgba(43, 38, 32, 0.08);
+      background: var(--tsugai-mock-footer);
+    }
+
+    .mock-footer button {
+      position: relative;
+      display: grid;
+      min-width: 0;
+      height: 58px;
+      grid-template-rows: 28px 18px;
+      align-content: center;
+      justify-items: center;
+      gap: 3px;
+      padding: 4px 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--tsugai-mock-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.15;
+      transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .mock-footer button:active {
+      transform: translateY(1px);
+    }
+
+    /* ホームは選択状態に関係なく中央の主導線として少し浮かせる。 */
+    .mock-footer button[data-footer="home"] {
+      margin: 0 2px;
+      border-radius: 12px;
+      border: 1px solid rgba(82, 109, 243, 0.14);
+      background: rgba(251, 247, 237, 0.86);
+      box-shadow: 0 2px 6px rgba(43, 38, 32, 0.10);
+      transform: translateY(-3px);
+    }
+
+    .mock-footer button[data-footer="home"]:active {
+      transform: translateY(-2px);
+    }
+
+    .mock-icon-wrap {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 9px;
+      color: currentColor;
+    }
+
+    .mock-icon {
+      display: block;
+      width: 23px;
+      height: 23px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+    }
+
+    .mock-footer-label {
+      display: block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* A: 色だけ。背景・線・形状は変えず、選択色だけを変える。 */
+    .mock-device.nav-variant-a .mock-footer button[aria-pressed="true"] {
+      color: var(--tsugai-mock-blue);
+    }
+
+    /* B: 選択項目の上端に細いインジケーターを置く。 */
+    .mock-device.nav-variant-b .mock-footer button[aria-pressed="true"] {
+      color: var(--tsugai-mock-blue);
+    }
+
+    .mock-device.nav-variant-b .mock-footer button[aria-pressed="true"]::before {
+      position: absolute;
+      top: -8px;
+      right: 19%;
+      left: 19%;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--tsugai-mock-blue);
+      content: "";
+    }
+
+    /* C: 選択項目の範囲だけを薄い面で囲む。 */
+    .mock-device.nav-variant-c .mock-footer button[aria-pressed="true"] {
+      margin: 0 2px;
+      border-radius: 12px;
+      background: var(--tsugai-mock-blue-soft);
+      color: var(--tsugai-mock-blue);
+    }
+
+    .mock-device.nav-variant-c .mock-footer button[data-footer="home"][aria-pressed="true"] {
+      border-color: rgba(82, 109, 243, 0.42);
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(235, 241, 255, 0.92));
+      box-shadow: 0 4px 10px rgba(82, 109, 243, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.84);
+      color: var(--tsugai-mock-blue);
+    }
+
+    /* D: アイコンだけを青い小さな面で強調する。 */
+    .mock-device.nav-variant-d .mock-footer button[aria-pressed="true"] {
+      color: var(--tsugai-mock-blue);
+    }
+
+    .mock-device.nav-variant-d .mock-footer button[aria-pressed="true"] .mock-icon-wrap {
+      background: var(--tsugai-mock-blue);
+      color: #fff;
+    }
+
+    .mock-device.nav-variant-d .mock-footer button[aria-pressed="true"] .mock-icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    .mock-legend {
+      max-width: 390px;
+      margin: 14px 0 0;
+      color: #6b675f;
+      font-size: 11px;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    @media (max-width: 560px) {
+      #nav-state-mocks {
+        width: min(100% - 24px, 390px);
+        padding-top: 18px;
+      }
+
+      .mock-option-row {
+        gap: 6px;
+      }
+
+      .mock-option {
+        padding: 0 4px;
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 340px) {
+      .mock-footer {
+        padding-right: 10px;
+        padding-left: 10px;
+      }
+
+      .mock-footer button {
+        font-size: 10px;
+      }
+
+      .mock-screen {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .mock-option,
+      .mock-screen-option,
+      .mock-footer button {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="nav-state-mocks">
+    <header class="mock-heading">
+      <h1>フッター選択状態モック</h1>
+      <p id="mock-state" aria-live="polite">A：色だけ ／ 表示：ホーム ／ 選択：ホーム</p>
+    </header>
+
+    <section class="mock-controls" aria-label="モックの操作">
+      <fieldset class="mock-control-group">
+        <legend class="mock-control-label">選択状態デザイン</legend>
+        <div class="mock-option-row" role="group" aria-label="選択状態デザイン">
+          <button class="mock-option" type="button" data-variant="a" aria-pressed="true">A 色だけ</button>
+          <button class="mock-option" type="button" data-variant="b" aria-pressed="false">B 上部ライン</button>
+          <button class="mock-option" type="button" data-variant="c" aria-pressed="false">C ソフト背景</button>
+          <button class="mock-option" type="button" data-variant="d" aria-pressed="false">D 強調アイコン</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="mock-control-group">
+        <legend class="mock-control-label">表示する画面</legend>
+        <div class="mock-screen-row" role="group" aria-label="表示する画面">
+          <button class="mock-screen-option" type="button" data-screen="home" aria-pressed="true">ホーム</button>
+          <button class="mock-screen-option" type="button" data-screen="list" aria-pressed="false">一覧</button>
+          <button class="mock-screen-option" type="button" data-screen="daily" aria-pressed="false">デイリー</button>
+          <button class="mock-screen-option" type="button" data-screen="goals" aria-pressed="false">目標</button>
+          <button class="mock-screen-option" type="button" data-screen="store" aria-pressed="false">ストア</button>
+          <button class="mock-screen-option" type="button" data-screen="settings" aria-pressed="false">設定</button>
+          <button class="mock-screen-option" type="button" data-screen="howto" aria-pressed="false">遊び方</button>
+        </div>
+      </fieldset>
+    </section>
+
+    <section class="mock-stage" aria-label="Tsugai スマホプレビュー">
+      <div class="mock-device nav-variant-a" id="mock-device">
+        <div class="mock-screen">
+          <p class="mock-screen-kicker" id="mock-screen-kicker">HOME</p>
+          <h2 class="mock-screen-title" id="mock-screen-title">ホーム</h2>
+          <p class="mock-screen-note" id="mock-screen-note">フッターの中央にホームを配置した状態です。</p>
+          <div class="mock-emblem" aria-hidden="true">つ</div>
+          <p class="mock-screen-label" id="mock-footer-status">フッター選択：ホーム</p>
+        </div>
+
+        <nav class="mock-footer" aria-label="フッターメニュー">
+          <button type="button" id="mock-home-daily" data-footer="daily" aria-label="デイリー" aria-pressed="false">
+            <span class="mock-icon-wrap" aria-hidden="true">
+              <svg class="mock-icon" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="8.2"></circle><path d="M12 7.5v4.9l3.2 2"></path></svg>
+            </span>
+            <span class="mock-footer-label">デイリー</span>
+          </button>
+          <button type="button" id="mock-home-list" data-footer="list" aria-label="一覧" aria-pressed="false">
+            <span class="mock-icon-wrap" aria-hidden="true">
+              <svg class="mock-icon" viewBox="0 0 24 24" focusable="false"><rect x="4.2" y="4.2" width="6.2" height="6.2" rx="1.2"></rect><rect x="13.6" y="4.2" width="6.2" height="6.2" rx="1.2"></rect><rect x="4.2" y="13.6" width="6.2" height="6.2" rx="1.2"></rect><rect x="13.6" y="13.6" width="6.2" height="6.2" rx="1.2"></rect></svg>
+            </span>
+            <span class="mock-footer-label">一覧</span>
+          </button>
+          <button type="button" id="mock-home-home" data-footer="home" aria-label="ホーム" aria-pressed="true">
+            <span class="mock-icon-wrap" aria-hidden="true">
+              <svg class="mock-icon" viewBox="0 0 24 24" focusable="false"><path d="m4.2 10.6 7.8-6.1 7.8 6.1v8.1a1.2 1.2 0 0 1-1.2 1.2H5.4a1.2 1.2 0 0 1-1.2-1.2z"></path><path d="M9.4 19.9v-5.3h5.2v5.3"></path></svg>
+            </span>
+            <span class="mock-footer-label">ホーム</span>
+          </button>
+          <button type="button" id="mock-home-goals" data-footer="goals" aria-label="目標" aria-pressed="false">
+            <span class="mock-icon-wrap" aria-hidden="true">
+              <svg class="mock-icon" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="8.3"></circle><circle cx="12" cy="12" r="4.2"></circle><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"></circle></svg>
+            </span>
+            <span class="mock-footer-label">目標</span>
+          </button>
+          <button type="button" id="mock-home-store" data-footer="store" aria-label="ストア" aria-pressed="false">
+            <span class="mock-icon-wrap" aria-hidden="true">
+              <svg class="mock-icon" viewBox="0 0 24 24" focusable="false"><path d="M5.1 9.2h13.8l-1 10.2H6.1z"></path><path d="M8.3 9.2a3.7 3.7 0 0 1 7.4 0"></path></svg>
+            </span>
+            <span class="mock-footer-label">ストア</span>
+          </button>
+        </nav>
+      </div>
+      <p class="mock-legend">390×844相当のプレビュー。フッターはsafe-area-inset-bottomを含む現行寸法です。</p>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const state = {
+        variant: "a",
+        screen: "home",
+        lastFooter: "home"
+      };
+
+      const variantLabels = {
+        a: "A：色だけ",
+        b: "B：上部ライン",
+        c: "C：ソフト背景",
+        d: "D：強調アイコン"
+      };
+
+      const screenLabels = {
+        home: "ホーム",
+        list: "一覧",
+        daily: "デイリー",
+        goals: "目標",
+        store: "ストア",
+        settings: "設定",
+        howto: "遊び方"
+      };
+
+      const screenKickers = {
+        home: "HOME",
+        list: "LEVELS",
+        daily: "DAILY",
+        goals: "GOALS",
+        store: "STORE",
+        settings: "SETTINGS",
+        howto: "HOW TO PLAY"
+      };
+
+      const screenNotes = {
+        home: "フッターの中央にホームを配置した状態です。",
+        list: "一覧を選択中の状態を確認できます。",
+        daily: "デイリーを選択中の状態を確認できます。",
+        goals: "目標を選択中の状態を確認できます。",
+        store: "ストアを選択中の状態を確認できます。",
+        settings: "設定では直前のフッター選択を保持します。",
+        howto: "遊び方では直前のフッター選択を保持します。"
+      };
+
+      const footerButtons = [...document.querySelectorAll("[data-footer]")];
+      const variantButtons = [...document.querySelectorAll("[data-variant]")];
+      const screenButtons = [...document.querySelectorAll("[data-screen]")];
+      const device = document.querySelector("#mock-device");
+      const stateText = document.querySelector("#mock-state");
+      const screenKicker = document.querySelector("#mock-screen-kicker");
+      const screenTitle = document.querySelector("#mock-screen-title");
+      const screenNote = document.querySelector("#mock-screen-note");
+      const footerStatus = document.querySelector("#mock-footer-status");
+
+      const setPressed = (elements, selected, key) => {
+        elements.forEach((element) => {
+          element.setAttribute("aria-pressed", element.dataset[key] === selected ? "true" : "false");
+        });
+      };
+
+      const render = () => {
+        device.className = `mock-device nav-variant-${state.variant}`;
+        setPressed(variantButtons, state.variant, "variant");
+        setPressed(screenButtons, state.screen, "screen");
+        setPressed(footerButtons, state.lastFooter, "footer");
+
+        const screenLabel = screenLabels[state.screen];
+        const footerLabel = screenLabels[state.lastFooter];
+        screenKicker.textContent = screenKickers[state.screen];
+        screenTitle.textContent = screenLabel;
+        screenNote.textContent = screenNotes[state.screen];
+        footerStatus.textContent = `フッター選択：${footerLabel}`;
+        stateText.textContent = `${variantLabels[state.variant]} ／ 表示：${screenLabel} ／ 選択：${footerLabel}`;
+      };
+
+      variantButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          state.variant = button.dataset.variant;
+          render();
+        });
+      });
+
+      screenButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          state.screen = button.dataset.screen;
+          if (["home", "list", "daily", "goals", "store"].includes(state.screen)) {
+            state.lastFooter = state.screen;
+          }
+          render();
+        });
+      });
+
+      footerButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          state.lastFooter = button.dataset.footer;
+          state.screen = button.dataset.footer;
+          render();
+        });
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -58,6 +58,23 @@ main {
   flex-direction: column;
   justify-content: safe center;
 }
+/* ホームハブは1画面に固定する。home-hub の min-height と、固定フッターを避ける
+   main の下余白を同時に持たせると、スマホの表示高を超えてページ自体が縦スクロールする。 */
+html:has(body.view-chapters),
+body.view-chapters {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+body.view-chapters main,
+body.view-chapters #view-chapters {
+  min-height: 0;
+  overflow: hidden;
+}
+body.view-chapters .home-hub {
+  min-height: 0;
+  height: 100%;
+  touch-action: pan-x;
+}
 /* ホーム・問題一覧は内容を上寄せ＋上マージンにして、ロゴ/ヘッダとの余白を詰める
    (縦中央寄せだと上が大きく空く)。:has 非対応の旧環境は従来の中央寄せにフォールバック。
    プレイ画面(view-play)は対象外＝従来どおり */
@@ -638,7 +655,7 @@ button:active { transform: translateY(1px); }
   z-index: 5;
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 0;
   margin: 0;
   padding: 8px 18px calc(10px + env(safe-area-inset-bottom, 0px));
@@ -669,16 +686,13 @@ body:not(.view-play):has(#store-overlay:not([hidden])) .home-footer { z-index: 4
 }
 body:has(#stats-overlay:not([hidden])) #app-header { background: #fbf7ed; }
 #stats-overlay .info-body { padding-top: 8px; }
-body:has(#stats-overlay:not([hidden])) #btn-home { display: grid; }
 #store-overlay { top:calc(60px + env(safe-area-inset-top, 0px)); background:#fbf7ed; --text:#29356c; }
 #store-overlay .info-body { padding:8px 16px calc(116px + env(safe-area-inset-bottom, 0px)); max-width:560px; }
 body:has(#store-overlay:not([hidden])) #app-header { background:#fbf7ed; }
-body:has(#store-overlay:not([hidden])) #btn-home { display:grid; }
 /* 設定も目標・ストアと同型のオーバーレイ。フッタを前面に残し、ホームで戻れるようにする */
 #settings-overlay { top:calc(60px + env(safe-area-inset-top, 0px)); background:#fbf7ed; --text:#29356c; }
 #settings-overlay .info-body { padding:8px 16px calc(116px + env(safe-area-inset-bottom, 0px)); max-width:560px; }
 body:has(#settings-overlay:not([hidden])) #app-header { background:#fbf7ed; }
-body:has(#settings-overlay:not([hidden])) #btn-home { display:grid; }
 body:not(.view-play):has(#settings-overlay:not([hidden])) .home-footer { z-index:45; }
 .home-nav-btn {
   min-width: 0;
@@ -696,8 +710,30 @@ body:not(.view-play):has(#settings-overlay:not([hidden])) .home-footer { z-index
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.02em;
+  transition: background-color 160ms ease, color 160ms ease;
 }
 .home-nav-btn { position:relative; }
+.home-nav-btn.is-selected {
+  margin: 0 2px;
+  border-radius: 12px;
+  background: rgba(82, 109, 243, 0.12);
+  color: #5874f0;
+}
+#home-home {
+  margin: 0 2px;
+  border-radius: 12px;
+  border: 1px solid rgba(82, 109, 243, 0.14);
+  background: rgba(251, 247, 237, 0.86);
+  box-shadow: 0 2px 6px rgba(43, 38, 32, 0.10);
+  transform: translateY(-3px);
+}
+#home-home.is-selected {
+  border-color: rgba(82, 109, 243, 0.42);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(235, 241, 255, 0.92));
+  box-shadow: 0 4px 10px rgba(82, 109, 243, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.84);
+  color: #526df3;
+}
+#home-home:active { transform: translateY(-2px); }
 .home-nav-btn:active {
   transform: none;
   color: #5874f0;
@@ -1602,14 +1638,9 @@ body:not(.view-play):has(#settings-overlay:not([hidden])) .home-footer { z-index
 
 /* ③ 画面切り替え(章/問題/プレイ)の登場: 瞬間カットを和らげ、ふわっと立ち上げる。showView で .view-enter を付け直す */
 .view-enter { animation: view-enter 360ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-#view-chapters.view-enter { animation-name: view-enter-fade; }
 @keyframes view-enter {
   from { opacity: 0; transform: translateY(12px) scale(0.985); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes view-enter-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
 }
 
 
