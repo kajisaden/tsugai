@@ -18,8 +18,7 @@
   --bump-ms: 200ms;  /* 壁当て */
   /* 盤の縦並びサイズ計算: 一辺 = (画面高 - 上下UI - 盤間余白) / 2(盤数)。
      盤数が変わる3部屋ビューアは、ここの除数と --play-chrome を別管理する */
-  --ad-slot-h: clamp(36px, 6dvh, 50px); /* 将来のバナー広告枠。背の低い端末では薄くする */
-  --play-chrome: clamp(238px, 31dvh, 278px); /* ヘッダ + 下部操作 + 広告枠の概算 */
+  --play-chrome: clamp(194px, 23.4dvh, 216px); /* ヘッダ + 下部操作の概算(広告枠は2026-11に廃止) */
   --board-gap: clamp(18px, 3.5dvh, 34px);    /* 上下2盤の間隔。小さいスマホでは詰める */
 }
 
@@ -1072,16 +1071,12 @@ body:not(.view-play):has(#settings-overlay:not([hidden])) .home-footer { z-index
 }
 #boards.three-boards {
   gap:clamp(8px, 1.4dvh, 14px);
-  /* 3面はフッター広告なし: 広告枠高+その上マージンをクローム概算から引き、盤へ回す */
-  --three-chrome: calc(var(--play-chrome) - var(--ad-slot-h) - clamp(8px, 1.6dvh, 12px));
 }
 #boards.three-boards .board {
   aspect-ratio:5 / 3;
-  width:min(100%, calc((100vh - var(--three-chrome) - (2 * clamp(8px, 1.4dvh, 14px))) / 3 * 5 / 3));
-  width:min(100%, calc((100dvh - var(--three-chrome) - (2 * clamp(8px, 1.4dvh, 14px)) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) / 3 * 5 / 3));
+  width:min(100%, calc((100vh - var(--play-chrome) - (2 * clamp(8px, 1.4dvh, 14px))) / 3 * 5 / 3));
+  width:min(100%, calc((100dvh - var(--play-chrome) - (2 * clamp(8px, 1.4dvh, 14px)) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) / 3 * 5 / 3));
 }
-/* 3面プレイ中は広告枠そのものを出さない(#ad-slot は #boards の後続兄弟) */
-#boards.three-boards ~ #ad-slot { display:none; }
 /* C: 反則(おてつき)の一拍。盤に淡い赤みが一瞬差す(JSで .foul を一時付与)。overflow:hidden で角丸にクリップ */
 .board::after {
   content: "";
@@ -1320,16 +1315,6 @@ body:not(.view-play):has(#settings-overlay:not([hidden])) .home-footer { z-index
 }
 /* 光ヒント点灯中(この問題): 金で強調 */
 .help.lit { color: var(--gold); border-color: rgba(232, 217, 176, 0.35); }
-/* 残数バッジ(角丸の金。0で▶=広告)。答えは常に▶ */
-.hint-badge {
-  position: absolute; top: -7px; right: -7px;
-  min-width: 18px; height: 18px; padding: 0 4px;
-  border-radius: 5px;
-  font-size: 10px; font-weight: 700; line-height: 18px; text-align: center;
-  background: #e8d9b0; color: #16161d;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-.hint-badge.ad { font-weight: 400; font-size: 9px; }
 /* 最初から = 下段フル幅・枠強(中立。リワードの金とは別カテゴリ) */
 .reset-btn {
   width: 50px;
@@ -1543,7 +1528,7 @@ body:not(.view-play):has(#settings-overlay:not([hidden])) .home-footer { z-index
   background: radial-gradient(circle, rgba(228, 236, 252, 0.32) 0%, rgba(228, 236, 252, 0.07) 70%);
 }
 
-/* ---- 切れ目(広告枠) ---- */
+/* ---- 切れ目(A画面) ---- */
 .gap-buttons { display: flex; flex-direction: column; gap: 10px; align-items: center; }
 /* A画面のボタン: 壁カードから彫り出した(raised)質感。次の問題へ=金文字 / もう一度=平文 */
 #btn-next, #btn-retry {
@@ -1747,14 +1732,6 @@ body {
 .bump-glow {
   background: #6fa7c7;
   box-shadow: 0 0 8px 2px rgba(63, 127, 173, 0.46), 0 0 15px 4px rgba(63, 127, 173, 0.20);
-}
-#ad-slot {
-  height: var(--ad-slot-h);
-  margin-top: clamp(8px, 1.6dvh, 12px);
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  background:
-    linear-gradient(180deg, rgba(10, 10, 14, 0), rgba(10, 10, 14, 0.58) 35%),
-    rgba(255, 255, 255, 0.025);
 }
 .bump-glow.show { animation-name: bump-glow-light; }
 :root[data-boss="boss"] .bump-glow.show { animation-name: bump-glow-light-boss; }
@@ -2340,21 +2317,10 @@ body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), 0 2px 4px rgba(88, 66, 45, 0.08);
 }
 .help.lit { color: #a8801f; border-color: rgba(168, 128, 31, 0.45); }
-.hint-badge {
-  background: radial-gradient(120% 150% at 40% 24%, #f7ecc8 0%, #e0c585 45%, #bd9c52 100%);
-  color: #4a3a12;
-  box-shadow: inset 0 1px 1px rgba(255, 248, 224, 0.7), 0 1px 2px rgba(80, 58, 18, 0.25);
-}
 .reset-btn {
   background: linear-gradient(160deg, #fff8eb 0%, #e8d8c4 100%);
   border-color: rgba(64, 56, 48, 0.13);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68), 0 2px 4px rgba(88, 66, 45, 0.08);
-}
-#ad-slot {
-  border-top-color: rgba(43, 38, 32, 0.10);
-  background:
-    linear-gradient(180deg, rgba(243, 239, 230, 0), rgba(243, 239, 230, 0.74) 35%),
-    rgba(43, 38, 32, 0.025);
 }
 
 /* オーバーレイの暗幕 → 明るい紙の幕 */

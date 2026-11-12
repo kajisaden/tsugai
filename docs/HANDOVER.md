@@ -8,6 +8,16 @@
 
 ---
 
+## 現在地 (2026-11-13 更新) — 広告を全廃
+
+- AdMob を完全撤去: バナー(`#ad-slot`)・切れ目のインタースティシャル・ヒント用リワード・隠し広告デバッグ(バージョン7回タップ)・`@capacitor-community/admob`・Info.plist の `GADApplicationIdentifier`/`SKAdNetworkItems`/`NSUserTrackingUsageDescription`(ATT) を削除。
+- 光ヒント・答えは**無制限**(残数バッジも削除)。使用回数(`usedLight`/`usedAnswer`)は実績用に引き続き記録。ストックはデータ互換のため保持のみ。
+- ストアから「広告除去」商品を削除し、3面拡張パックの説明を「3面ステージを解放します」に変更。アプリは `ad_free` entitlement を参照しない。プライバシーポリシーの広告(AdMob)節も削除。
+- 盤サイズ計算の `--play-chrome` から広告枠分を差し引き、2面の盤が少し大きくなった(3面は元々広告枠を除いて計算していたため実質不変)(375×667 / 375×812 でスクロールなしを確認)。
+- 残(ユーザー作業): RevenueCat の `ad_free` package/entitlement と App Store Connect の広告除去商品の整理、AdMob コンソールのアプリ/ユニットの停止、App Store Connect の App Privacy(広告データ/トラッキング)申告の更新。
+
+---
+
 ## 現在地 (2026-08-30 更新) — ホーム選択中の専用UIを強調
 
 - ホーム画面選択中は、常時浮き上がるホームボタンに加えて、専用の青い枠・淡い青白い面・内側ハイライト・強めの影を表示。他のフッター項目のソフト背景とは異なる主ボタン状態にした。

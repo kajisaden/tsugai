@@ -16,8 +16,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- 更新の目印: URL も画面のビルド印も同じ版番号に揃える -->
-<script>try{var V='275',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=64e63a56ac">
+<script>try{var V='276',u=new URL(location.href);if(u.searchParams.get('v')!==V){u.searchParams.set('v',V);history.replaceState(null,'',u.pathname+u.search+u.hash)}document.addEventListener('DOMContentLoaded',function(){var b=document.getElementById('build-mark');if(b)b.textContent=V})}catch(e){}</script>
+<link rel="stylesheet" href="style.css?v=cb4f81ef25">
 <style>
 .hdr-left { grid-column: 1; justify-self: start; }
 /* ホームはフッターのナビと同じ言葉遣い: 面なし・アイコン+小ラベルの縦積み(設定と対) */
@@ -58,7 +58,7 @@ body.view-play #btn-home { display: grid; }
     </button>
   </div>
   <div id="hdr-center">
-    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">275</span></h1>
+    <h1 id="app-title"><span data-i18n="title">Tsugai</span><span class="build-mark" id="build-mark" aria-hidden="true">276</span></h1>
     <div id="play-status" aria-live="polite">
       <span id="puzzle-no"></span>
       <span id="play-progress"></span>
@@ -227,7 +227,7 @@ body.view-play #btn-home { display: grid; }
       <span id="move-count"></span>
     </div>
     <div id="boards"></div>
-    <!-- 操作系: 広告バナー予定領域を避け、盤面寄りにリセット/光ヒントだけを置く。 -->
+    <!-- 操作系: 盤面寄りにリセット/光ヒントだけを置く。 -->
     <div id="controls">
       <div id="hint-row">
         <button id="btn-reset" class="reset-btn" data-i18n-aria="reset" aria-label="最初から">
@@ -236,11 +236,10 @@ body.view-play #btn-home { display: grid; }
         </button>
         <button id="btn-hint-light" class="help" data-i18n-aria="light" aria-label="光ヒント">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.7-1.2 1.4-1.3 2H9.8c-.1-.6-.5-1.3-1.3-2Z"/></svg>
-          <span class="sr-only" data-i18n="light">光ヒント</span><span class="hint-badge"></span>
+          <span class="sr-only" data-i18n="light">光ヒント</span>
         </button>
       </div>
     </div>
-    <div id="ad-slot" aria-hidden="true"></div>
     <!-- 答えビューア: 再生(自動)ボタン + ◀▶ で一手ずつ -->
     <div id="answer-bar" hidden>
       <button id="btn-ans-play" data-i18n="play">再生</button>
@@ -318,7 +317,7 @@ body.view-play #btn-home { display: grid; }
   <p class="miss-hint" data-i18n="tapHint">画面をタップ</p>
 </div>
 
-<!-- 問題間の切れ目 = A画面(クリア結果＋次へ)。SPEC.md 6章の広告差し込み口もここ(盤面は聖域) -->
+<!-- 問題間の切れ目 = A画面(クリア結果＋次へ) -->
 <div id="overlay-gap" hidden>
   <button id="btn-list" class="ghost btn-icon" data-i18n-aria="levels" aria-label="一覧へ">
     <svg class="ic-home" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
@@ -348,7 +347,6 @@ body.view-play #btn-home { display: grid; }
       <button id="btn-retry" class="ghost" data-i18n="retryAgain">もう一度</button>
     </div>
   </div>
-  <!-- AD SLOT: 広告は別インタースティシャル想定(A画面はカードに集約) -->
 </div>
 
 <!-- デイリー挑戦の5秒カウントダウン(計測開始タイミングを揃える) -->
@@ -597,11 +595,6 @@ body.view-play #btn-home { display: grid; }
       <p class="pp-p" data-i18n="ppLocalNote">これらはサーバーには送信されません。設定画面の「進捗をリセット」で全消去できます。</p>
     </div>
     <div class="pp-sec">
-      <h2 class="pp-h" data-i18n="ppAdH">広告</h2>
-      <p class="pp-p" data-i18n="ppAdP">本アプリでは Google AdMob を利用して広告を表示します。AdMob は広告配信のために広告ID・デバイス情報を収集することがあります。詳細は Google のプライバシーポリシーをご確認ください。</p>
-      <p class="pp-p pp-link"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener" data-i18n="ppAdLink">Google プライバシーポリシー ↗</a></p>
-    </div>
-    <div class="pp-sec">
       <h2 class="pp-h" data-i18n="ppAnalyticsH">アナリティクス</h2>
       <p class="pp-p" data-i18n="ppAnalyticsP">アプリの改善のため、Firebase Analytics を利用して利用状況を匿名で収集します。個人を特定する情報は含まれません。</p>
     </div>
@@ -628,7 +621,7 @@ body.view-play #btn-home { display: grid; }
 <script src="normal-levels.js?v=7366b4f2fb"></script>
 <script src="advanced-levels.js?v=40916070ee"></script>
 <script src="three-levels.js?v=fc3252ff51"></script>
-<script src="strings.js?v=f9602dda7c"></script>
-<script src="app.js?v=88df8daa4e"></script>
+<script src="strings.js?v=7352ce3848"></script>
+<script src="app.js?v=c6acdc6ea9"></script>
 </body>
 </html>

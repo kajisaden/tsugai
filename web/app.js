@@ -150,23 +150,15 @@ function loadPurchases() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(PURCHASE_KEY)); } catch (e) {}
   if (!s || typeof s !== 'object') s = {};
-  if (s.threePack === undefined) s.threePack = false; // 3面拡張パック(広告除去込み)
-  if (s.adFree === undefined) s.adFree = false;       // 単独の広告除去
+  if (s.threePack === undefined) s.threePack = false; // 3面拡張パック
+  delete s.adFree; // 広告廃止(2026-11)に伴い「広告除去」商品も廃止。旧キャッシュの値は捨てる
   return s;
 }
 let purchases = loadPurchases();
 function savePurchases() { localStorage.setItem(PURCHASE_KEY, JSON.stringify(purchases)); }
+try { localStorage.removeItem('nikenzume.adDebug.v1'); } catch (e) {} // 旧・広告デバッグスイッチの残骸
 const DEV_UNLOCK = new URLSearchParams(location.search).get('dev') === '1';
-// 隠しデバッグ(設定のバージョン7回タップ): 広告除去を持っていても「未購入」として扱い、
-// 広告(リワード/バナー)の動作を実機確認できるようにする。広告判定にだけ効かせ、3面解放には影響させない
-const AD_DEBUG_KEY = 'nikenzume.adDebug.v1';
-let adDebugNoFree = localStorage.getItem(AD_DEBUG_KEY) === '1';
 function hasThreePack() { return DEV_UNLOCK || purchases.threePack; }
-// 広告除去の権利: 単独購入 or 3面拡張パック(広告除去込み)。ストアでは重複購入できない(renderStore参照)
-function hasAdFree() {
-  if (adDebugNoFree) return false;
-  return DEV_UNLOCK || purchases.adFree || purchases.threePack;
-}
 function hasAdvancedMode() {
   const required = MODES.normal.levels[19];
   return Boolean(required && cleared.has(required.id));
@@ -439,120 +431,22 @@ function handleDailyClear(moves, min) {
   return { reward, best: isBest, streak: s.streak, streakReward, isFirst };
 }
 
-// ---- 広告(AdMob via Capacitor) ----
-// ネイティブ(Capacitor)なら @capacitor-community/admob を使う。PWA/ブラウザでは広告なし(即時実行)。
-// テスト用 adId は Google 公式テストID。本番リリース前に実IDへ差し替える。
-const AdMob = window.Capacitor?.Plugins?.AdMob;
-// 実ID(AdMobコンソール 2026-07-22作成、アプリ=Tsugai iOS ~6882461908)。
-// GoogleのサンプルID(デモ配信)がiOS実機で "No ad to show" を返し続けたため実IDへ移行。
-// 新規ユニットは配信開始まで最大1時間+アプリ審査完了までは配信制限がある点に注意
-const AD_IDS = {
-  interstitial: 'ca-app-pub-9870222937107755/9041601242',
-  reward:       'ca-app-pub-9870222937107755/2943216891',
-  banner:       'ca-app-pub-9870222937107755/5569380236',
-};
-let adReady = false;
-// 直近の広告エラー。通常は静かに握りつぶす(広告なしで続行)が、
-// 隠しデバッグON中はトーストで見せて実機での原因究明に使う
-let adLastError = '';
-function adFail(tag, e) {
-  adLastError = tag + ': ' + (e?.message || e?.code || String(e));
-  if (adDebugNoFree) showToast('広告エラー ' + adLastError);
-}
-(async function initAdMob() {
-  if (!AdMob) return;
-  try {
-    // iOS: ATT(トラッキング許可)ダイアログ。未回答のままだと実機で広告が
-    // 配信されない(No ad to show)事例があるため、初期化前に一度だけ聞く
-    try { await AdMob.requestTrackingAuthorization(); } catch (e2) {}
-    await AdMob.initialize({ initializeForTesting: true });
-    adReady = true;
-    // 読み込み/表示失敗の本当の理由(GADErrorのcode/message)はイベント側にしか来ないため、
-    // デバッグ用に全失敗イベントを購読して adLastError に残す
-    for (const ev of ['interstitialAdFailedToLoad', 'interstitialAdFailedToShow',
-                      'bannerAdFailedToLoad',
-                      'onRewardedVideoAdFailedToLoad', 'onRewardedVideoAdFailedToShow']) {
-      try { AdMob.addListener(ev, (info) => adFail(ev, JSON.stringify(info))); } catch (e2) {}
-    }
-    prepareInterstitial();
-  } catch (e) { adFail('init', e); }
-})();
-async function prepareInterstitial() {
-  if (!adReady) return;
-  try { await AdMob.prepareInterstitial({ adId: AD_IDS.interstitial }); } catch (e) { adFail('prepInt', e); }
-}
-async function showInterstitial() {
-  if (!adReady || hasAdFree()) return; // 広告除去(単独 or 3面パック)購入済みなら出さない
-  try { await AdMob.showInterstitial(); } catch (e) { adFail('showInt', e); }
-  prepareInterstitial();
-}
-// ゲーム画面下部のバナー。ネイティブビューとして最前面に重なるため、WebView側の
-// プレースホルダ #ad-slot の位置(画面下端からの距離)を margin に渡して枠に重ねる。
-// 2部屋プレイのみ(3面はパック購入者専用=広告なし)。広告除去購入済みなら出さない。
-let bannerShown = false;
-async function showPlayBanner() {
-  if (!adReady || hasAdFree() || bannerShown) return;
-  const slot = document.getElementById('ad-slot');
-  const boards = document.getElementById('boards');
-  if (!slot || document.body.classList.contains('view-play') === false) return;
-  if (boards && boards.classList.contains('three-boards')) return;
-  try {
-    const rect = slot.getBoundingClientRect();
-    const margin = Math.max(0, Math.round(window.innerHeight - rect.bottom));
-    await AdMob.showBanner({
-      adId: AD_IDS.banner,
-      adSize: 'ADAPTIVE_BANNER',
-      position: 'BOTTOM_CENTER',
-      margin,
-    });
-    bannerShown = true;
-  } catch (e) { adFail('banner', e); }
-}
-async function hidePlayBanner() {
-  if (!bannerShown) return;
-  bannerShown = false;
-  try { await AdMob.removeBanner(); } catch (e) {}
-}
-function updatePlayBanner() {
-  if (!adReady) return;
-  const inPlay = document.body.classList.contains('view-play');
-  const three = document.getElementById('boards')?.classList.contains('three-boards');
-  if (inPlay && !three && !hasAdFree()) {
-    // 画面切替アニメの後にレイアウトが確定してから位置を測る
-    setTimeout(showPlayBanner, 350);
-  } else {
-    hidePlayBanner();
-  }
-}
-function watchRewardAd(then) {
-  if (!adReady || hasAdFree()) { then(); return; } // 広告除去済み=視聴なしで即実行(ストア文言と一致)
-  (async () => {
-    try {
-      await AdMob.prepareRewardVideoAd({ adId: AD_IDS.reward });
-      const result = await AdMob.showRewardVideoAd();
-      if (result) then();
-    } catch (e) { adFail('reward', e); then(); }
-  })();
-}
 // ---- 課金(RevenueCat via Capacitor) ----
 // ネイティブでのみ動く。PWA/ブラウザや APIキー未設定時は rcReady=false のまま(ストアは「準備中」トースト)。
 // 権利はRevenueCatのentitlementが正で、purchases(localStorage)はそのオフラインキャッシュ。
-// ダッシュボード側の前提: entitlement `three_pack`(3面+広告除去) / `ad_free`(広告除去のみ)、
-// current offering に package `three_pack` / `ad_free` を置く。3面パックの商品には両entitlementを付ける。
+// ダッシュボード側の前提: entitlement `three_pack`、current offering に package `three_pack` を置く。
+// (広告は2026-11に全廃。旧 `ad_free` entitlement/package はアプリからは参照しない)
 const RCPurchases = window.Capacitor?.Plugins?.Purchases;
 const RC_API_KEY_IOS = 'appl_WRMxsjUEGXhjFgCUxlIyiPQqhsg'; // RevenueCatのiOS公開SDKキー(アプリ埋め込み前提の公開値)
-const RC_ENTITLEMENT = { threePack: 'three_pack', adFree: 'ad_free' };
-const RC_PACKAGE = { threePack: 'three_pack', adFree: 'ad_free' };
+const RC_ENTITLEMENT = { threePack: 'three_pack' };
+const RC_PACKAGE = { threePack: 'three_pack' };
 let rcReady = false;
 const rcPackages = {}; // kind -> RevenueCatパッケージ(実価格 priceString の供給元)
 function applyEntitlements(customerInfo) {
   const active = customerInfo?.entitlements?.active || {};
   purchases.threePack = Boolean(active[RC_ENTITLEMENT.threePack]);
-  purchases.adFree = Boolean(active[RC_ENTITLEMENT.adFree]);
   savePurchases();
   updateModeTabLocks();
-  updateHintUI();
-  updatePlayBanner(); // 購入直後にプレイ中バナーを消す
 }
 (async function initRevenueCat() {
   if (!RCPurchases || !RC_API_KEY_IOS) return;
@@ -573,7 +467,6 @@ function applyEntitlements(customerInfo) {
     const offering = (await RCPurchases.getOfferings()).current;
     for (const pkg of offering?.availablePackages || []) {
       if (pkg.identifier === RC_PACKAGE.threePack) rcPackages.threePack = pkg;
-      if (pkg.identifier === RC_PACKAGE.adFree) rcPackages.adFree = pkg;
     }
     if (!$('#store-overlay').hidden) renderStore(); // 表示中に初期化が終わったら実価格へ描き直す
   } catch (e) { /* オフライン等。purchasesキャッシュのまま動かす */ }
@@ -598,24 +491,19 @@ async function restorePurchasesRC() {
     const res = await RCPurchases.restorePurchases();
     applyEntitlements(res.customerInfo);
     renderStore();
-    showToast(purchases.threePack || purchases.adFree ? t('storeRestored') : t('storeNothingToRestore'));
+    showToast(purchases.threePack ? t('storeRestored') : t('storeNothingToRestore'));
   } catch (e) {
     if (!rcErrorCancelled(e)) showToast(t('storeError'));
   }
 }
 
-// 残数を1消費して action。0なら広告(差し込み口)。
+// ヒント/答えは無制限(広告廃止に伴いストックは消費しない)。使用回数だけ実績用に数える。
 function spendHint(kind, action) {
-  const use = () => {
-    action();
-    if (kind === 'light') hintCredits.usedLight++;
-    if (kind === 'answer') hintCredits.usedAnswer++;
-    saveHintCredits();
-    updateGoalNotice();
-  };
-  if (hasAdFree()) { use(); } // 広告除去済み=常に無限。スタックは消費せず温存
-  else if (hintCredits[kind] > 0) { hintCredits[kind]--; saveHintCredits(); use(); }
-  else watchRewardAd(use);
+  action();
+  if (kind === 'light') hintCredits.usedLight++;
+  if (kind === 'answer') hintCredits.usedAnswer++;
+  saveHintCredits();
+  updateGoalNotice();
   updateHintUI();
 }
 
@@ -696,7 +584,6 @@ function showView(name, options = {}) {
   if (animate && !REDUCED && cur && name !== 'play') { cur.classList.remove('view-enter'); void cur.offsetWidth; cur.classList.add('view-enter'); }
   $('#app-title').hidden = name === 'play';
   $('#play-status').hidden = name !== 'play';
-  updatePlayBanner();
 }
 
 function nextHomeIndex() {
@@ -1105,7 +992,6 @@ function _initPuzzle(puz, label, entrance, isBoss = false, kind = 'normal') {
     return b;
   });
   boardsEl.classList.toggle('three-boards', rooms.length === 3);
-  updatePlayBanner();
   G = {
     puz, w, h, rooms,
     active: true,
@@ -1735,18 +1621,7 @@ function hintFromState(positions) {
 // ヘルプボタンの状態(光の点灯・残数バッジ)を反映
 function updateHintUI() {
   const lightBtn = $('#btn-hint-light');
-  if (lightBtn) {
-    lightBtn.classList.toggle('lit', hintSettings.light);
-    setHintBadge(lightBtn, hintCredits.light);
-  }
-}
-// 残数バッジ: 1以上は数字 / 0は ▶(広告)。広告除去済みなら0でも∞(視聴なしで使える)
-function setHintBadge(btn, n) {
-  const b = btn && btn.querySelector('.hint-badge');
-  if (!b) return;
-  if (hasAdFree()) { b.textContent = '∞'; b.classList.remove('ad'); } // 残数があっても常に∞(消費しない)
-  else if (n > 0) { b.textContent = String(n); b.classList.remove('ad'); }
-  else { b.textContent = '▶'; b.classList.add('ad'); }
+  if (lightBtn) lightBtn.classList.toggle('lit', hintSettings.light);
 }
 // 光ヒントONなら現局面のぶつかり面を出し直す。OFFなら消す
 function refreshWallHints() {
@@ -2015,7 +1890,6 @@ function goToGap() {
     $('#btn-next').textContent = t('nextPuzzle');
     $('#btn-share').hidden = true;
   }
-  showInterstitial();
   $('#overlay-gap').hidden = false;
   if (!REDUCED) { // ① つなぎ演出: 背景フェード＋カード立ち上がり＋2球が寄り集まる(.enter を付け直して毎回再生)
     const ov = $('#overlay-gap');
@@ -2122,27 +1996,6 @@ function showToast(msg) {
 }
 $('#set-lang').addEventListener('click', () => relocalize(locale === 'ja' ? 'en' : 'ja'));
 $('#set-reset').addEventListener('click', resetProgress);
-// 隠しデバッグ: 設定のバージョン表記を7回タップで「未購入として扱う」を切替。
-// 広告除去を持ったままリワード/バナー広告の動作を実機確認するための開発用スイッチ。
-(() => {
-  const el = document.querySelector('.set-version');
-  if (!el) return;
-  let taps = 0, timer = 0;
-  el.addEventListener('click', () => {
-    taps++;
-    clearTimeout(timer);
-    timer = setTimeout(() => { taps = 0; }, 1500);
-    if (taps >= 7) {
-      taps = 0;
-      adDebugNoFree = !adDebugNoFree;
-      localStorage.setItem(AD_DEBUG_KEY, adDebugNoFree ? '1' : '0');
-      showToast(adDebugNoFree
-        ? `広告デバッグON: 未購入として扱います (adReady=${adReady}${adLastError ? ' / ' + adLastError : ''})`
-        : '広告デバッグOFF');
-      updateHintUI(); updateModeTabLocks(); updatePlayBanner();
-    }
-  });
-})();
 // 遊び方
 function openHowto() { cancelCountdown(); closeSettings(); $('#howto-overlay').hidden = false; }
 function closeHowto() { $('#howto-overlay').hidden = true; }
@@ -2278,18 +2131,15 @@ function showInfoOverlay(selector) {
 function openStats() { cancelCountdown(); closeSettings(); $('#store-overlay').hidden = true; setFooterSelection('goals'); renderStats(); showInfoOverlay('#stats-overlay'); }
 // 商品タイル1枚分。未購入=価格付きボタン / 購入済み・パック内包=押下不可の状態表示
 function storeTile(kind, emblem, extraClass, stateLabel) {
-  const copy = `<div class="store-emblem">${emblem}</div><div class="store-copy"><b>${t(kind === 'threePack' ? 'storeThreePack' : 'storeAdFree')}</b><span>${t(kind === 'threePack' ? 'storeThreePackDesc' : 'storeAdFreeDesc')}</span></div>`;
+  const copy = `<div class="store-emblem">${emblem}</div><div class="store-copy"><b>${t('storeThreePack')}</b><span>${t('storeThreePackDesc')}</span></div>`;
   if (stateLabel) return `<div class="store-item ${extraClass} owned">${copy}<em>${stateLabel}</em></div>`;
-  const price = rcPackages[kind]?.product?.priceString || (kind === 'threePack' ? '¥800' : '¥500'); // RevenueCat接続前は仮価格
+  const price = rcPackages[kind]?.product?.priceString || '¥800'; // RevenueCat接続前は仮価格
   return `<button class="store-item ${extraClass}" type="button" data-buy="${kind}">${copy}<strong>${price}</strong></button>`;
 }
 function renderStore() {
-  // 重複購入防止: 3面パック(広告除去込み)所有中は広告除去を「パックに含まれます」で押下不可にする
   const threeState = purchases.threePack ? t('storeOwned') : null;
-  const adFreeState = purchases.threePack ? t('storeIncluded') : (purchases.adFree ? t('storeOwned') : null);
   $('#store-content').innerHTML = `<section class="goal-card store-card"><div class="goal-card-head"><span>${t('store')}</span></div><div class="store-list">
     ${storeTile('threePack', goalEmblem('best'), 'supporter', threeState)}
-    ${storeTile('adFree', goalEmblem('win'), '', adFreeState)}
     <div class="store-item coming"><div class="store-emblem">${goalEmblem('win', true)}</div><div class="store-copy"><b>${t('storeSkinPack')}</b><span>${t('storeSkinPackDesc')}</span></div><em>${t('storeComingSoon')}</em></div>
   </div></section>
   <button class="store-restore" type="button">${t('restore')}</button>`;
@@ -2348,7 +2198,7 @@ $('#home-store').addEventListener('click', () => {
 });
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
-// 答え = 毎回リワード広告(差し込み口)→ 答えビューア
+// 答え = そのまま答えビューアへ(無制限)
 $('#btn-answer-open').addEventListener('click', () => {
   if (!G || G.busy || G.cleared || AV) return;
   spendHint('answer', enterAnswer);

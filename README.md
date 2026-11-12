@@ -32,5 +32,5 @@ node tools/generate-pool.mjs [--sizes 4x4,5x5] [--seeds 1-6000] [--rooms 2]
 
 - 操作: 矢印キー / WASD / スワイプ
 - レベル列は通常/上級のモード別。各モードの固定レベルID列は `tools/select-normal.mjs` / `select-advanced.mjs` が選別し `web/normal-levels.js` / `advanced-levels.js`(`window.NORMAL_LEVEL_IDS` / `ADVANCED_LEVEL_IDS`)へ出力。`web/app.js` の `CHAPTERS` はそのモード全レベルを束ねる単一章で `from`/`to` で slice するだけ
-- 「答え」ボタン(`#btn-answer-open`)はプレイ画面ヘッダに常設。押すと `answer` ヒント残数を1消費して正解を自動再生(残数0ならリワード広告、再生中は妙手=ぶつかる壁をハイライト)。妙手/壁のハイライトは別の常設ボタン「光ヒント」(`#btn-hint-light`)。`debug` パラメータは存在しない
+- 「答え」ボタン(`#btn-answer-open`)はプレイ画面ヘッダに常設。押すと正解を自動再生(回数無制限、再生中は妙手=ぶつかる壁をハイライト)。妙手/壁のハイライトは別の常設ボタン「光ヒント」(`#btn-hint-light`)。`debug` パラメータは存在しない
 - クリア記録は localStorage(`nikenzume.cleared.v1`)

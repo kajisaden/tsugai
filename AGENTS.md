@@ -19,7 +19,7 @@
 
 - Vanilla JS/HTML/CSS(バンドラなし)。本体は `web/`(`app.js` / `style.css` / `index.html` / `strings.js`)。
 - iOSネイティブは Capacitor 8(`ios/`、SPM構成)。プラグインは `window.Capacitor?.Plugins?.X` 経由で、PWA/ブラウザでは未定義のため必ずオプショナルに扱う。
-- 課金は RevenueCat(entitlement `three_pack` / `ad_free` が正、localStorageはオフラインキャッシュ)。広告は AdMob(実IDは HANDOVER 参照)。
+- 課金は RevenueCat(entitlement `three_pack` が正、localStorageはオフラインキャッシュ)。広告は2026-11に全廃(AdMob撤去済み・再導入しない)。
 - 問題データ生成は `tools/generate-pool.mjs` ほか(HANDOVER参照)。
 
 ## 動作確認
