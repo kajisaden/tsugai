@@ -16,6 +16,9 @@ workflows:
       vars:
         XCODE_PROJECT: ios/App/App.xcodeproj
         XCODE_SCHEME: App
+        # Xcode 26 の新altoolが "Cannot determine the Apple ID from Bundle ID" (exit 31) で
+        # アップロードに失敗する既知問題の回避(Codemagic公式ヘルプの対処)。旧altoolで送る
+        APP_STORE_CONNECT_ALTOOL_ADDITIONAL_ARGUMENTS: --use-old-altool
     scripts:
       - name: 依存インストール
         script: npm ci
