@@ -8,6 +8,13 @@
 
 ---
 
+## 現在地 (2026-11-13 更新) — プレイ画面の盤を拡大
+
+- プレイ画面を縦いっぱいに使うよう変更: 操作ボタン(リセット/光ヒント・答えバー)を下端へ寄せ、残りの高さを全部 `#boards` に渡す。`#boards` をサイズコンテナ(`container-type: size`)にし、盤の一辺を `cqw/cqh` の実寸から決める(上限 440px)。旧 `260px/70vw` 上限と `--play-chrome` 概算は cq 非対応 WebView 向けフォールバックとして残置。
+- 390×844 で盤 260→328px、375×667 で 225→244px。3面・答え再生中もスクロールなしを確認(ブラウザ)。iPhone 実機(PWA)での見え方は未確認。
+
+---
+
 ## 現在地 (2026-11-13 更新) — 広告を全廃
 
 - AdMob を完全撤去: バナー(`#ad-slot`)・切れ目のインタースティシャル・ヒント用リワード・隠し広告デバッグ(バージョン7回タップ)・`@capacitor-community/admob`・Info.plist の `GADApplicationIdentifier`/`SKAdNetworkItems`/`NSUserTrackingUsageDescription`(ATT) を削除。

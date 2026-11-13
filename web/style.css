@@ -1076,6 +1076,18 @@ body:not(.view-play):has(#settings-overlay:not([hidden])) .home-footer { z-index
   aspect-ratio:5 / 3;
   width:min(100%, calc((100vh - var(--play-chrome) - (2 * clamp(8px, 1.4dvh, 14px))) / 3 * 5 / 3));
   width:min(100%, calc((100dvh - var(--play-chrome) - (2 * clamp(8px, 1.4dvh, 14px)) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) / 3 * 5 / 3));
+  width:min(100cqw, calc((100cqh - (2 * clamp(8px, 1.4dvh, 14px))) / 3 * 5 / 3)); /* 下の「盤エリア」参照 */
+}
+/* 盤エリア(2026-11): プレイ画面を縦いっぱいに使い、操作ボタンを下端へ、残りの高さを全部 #boards に渡す。
+   #boards をサイズコンテナにして、盤の一辺を実寸(cqw/cqh)から決める(--play-chrome の概算に頼らない)。
+   cq 単位が使えない古い WebView では cq 指定の行だけ無効になり、上の dvh 概算式で従来どおり描く */
+body.view-play main { justify-content: flex-start; }
+#view-play:not([hidden]) { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+#view-play > #boards {
+  flex: 1 1 0;
+  min-height: 0;
+  container-type: size;
+  align-content: center; /* 盤の組を残りの高さの中で縦中央に */
 }
 /* C: 反則(おてつき)の一拍。盤に淡い赤みが一瞬差す(JSで .foul を一時付与)。overflow:hidden で角丸にクリップ */
 .board::after {
@@ -1697,6 +1709,8 @@ body {
 .board {
   width: min(260px, 70vw, calc((100vh  - var(--play-chrome) - var(--board-gap)) / 2));
   width: min(260px, 70vw, calc((100dvh - var(--play-chrome) - var(--board-gap) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) / 2));
+  /* cq 対応環境: 盤エリアの実寸いっぱい(横幅 or 縦の半分の小さい方)。iPadで巨大化しないよう 440px 上限 */
+  width: min(440px, 100cqw, calc((100cqh - var(--board-gap)) / 2));
   background: #e7d8c3;
   border: 2px solid rgba(78, 64, 49, 0.16);
   border-radius: 14px;
