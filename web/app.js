@@ -2441,6 +2441,9 @@ updateModeTabLocks();
     const w = b ? b.offsetWidth : 0;
     if (w > 0) controls.style.setProperty('--board-w', `${w}px`);
   };
-  new ResizeObserver(apply).observe(boardsEl);
-  new MutationObserver(apply).observe(boardsEl, { childList: true });
+  // .board は width に transition が掛かるので、盤エリアだけでなく盤そのものも監視して最終幅に追従する
+  const ro = new ResizeObserver(apply);
+  const watchBoards = () => { ro.disconnect(); ro.observe(boardsEl); boardsEl.querySelectorAll('.board').forEach(b => ro.observe(b)); apply(); };
+  new MutationObserver(watchBoards).observe(boardsEl, { childList: true });
+  watchBoards();
 })();

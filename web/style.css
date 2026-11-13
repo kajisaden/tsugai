@@ -1077,6 +1077,26 @@ body.view-play main { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0p
   container-type: size;
   align-content: center; /* 盤の組を残りの高さの中で縦中央に */
 }
+/* 等間隔(2026-11): 「見出し↔上の盤」「盤↔盤」「下の盤↔操作バー」の余白を常に同じにする。
+   盤の間の gap をやめ、#boards の余り高さを space-evenly で上・間・下へ等分する。
+   盤の一辺は最低余白 --play-space を (盤数+1) 個ぶん引いた残りから決めるので、
+   高さで決まる端末では余白=--play-space、横幅で決まる端末では余白が等しく広がる。
+   cq 非対応の旧 WebView は従来の gap 方式のまま */
+@supports (container-type: size) {
+  body.view-play { --play-space: clamp(12px, 2.2dvh, 22px); }
+  body.view-play #app-header { padding-bottom: 0; }
+  /* ヘッダ行の高さはホームボタン(40px)で決まり、中央の「#番号 手数」(約19px)はその縦中央に来る。
+     その差の半分(約10px)だけ盤エリアを持ち上げ、上の余白を「文字の下端→盤」で測って揃える */
+  body.view-play #view-play > #boards { margin-top: -10px; }
+  #view-play > #boards,
+  #view-play > #boards.three-boards { gap: 0; align-content: space-evenly; }
+  #view-play > #boards .board { width: min(440px, 100cqw, calc((100cqh - 3 * var(--play-space)) / 2)); }
+  #view-play > #boards.three-boards .board { width: min(100cqw, calc((100cqh - 4 * var(--play-space)) / 3 * 5 / 3)); }
+  body.view-play #controls,
+  body.view-play #answer-bar { margin-top: 0; }
+  /* 答え再生バーも操作バーと同じ高さにし、切り替えで盤の大きさが揺れないようにする */
+  body.view-play #answer-bar { min-height: 52px; }
+}
 /* C: 反則(おてつき)の一拍。盤に淡い赤みが一瞬差す(JSで .foul を一時付与)。overflow:hidden で角丸にクリップ */
 .board::after {
   content: "";
