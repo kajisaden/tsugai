@@ -19,7 +19,7 @@
   /* 盤の縦並びサイズ計算: 一辺 = (画面高 - 上下UI - 盤間余白) / 2(盤数)。
      盤数が変わる3部屋ビューアは、ここの除数と --play-chrome を別管理する */
   --play-chrome: clamp(194px, 23.4dvh, 216px); /* ヘッダ + 下部操作の概算(広告枠は2026-11に廃止) */
-  --board-gap: clamp(18px, 3.5dvh, 34px);    /* 上下2盤の間隔。小さいスマホでは詰める */
+  --board-gap: clamp(14px, 2.4dvh, 24px);    /* 上下2盤の間隔。小さいスマホでは詰める(2026-11 操作バー下端化で詰めた) */
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -135,7 +135,6 @@ main:has(#view-levels:not([hidden])) { justify-content: flex-start; }
   opacity: 0.7;
   pointer-events: none;
 }
-.hdr-right { grid-column: 3; justify-self: end; }
 #play-status {
   grid-column: 1;
   justify-self: center;
@@ -172,19 +171,6 @@ body.view-play #play-status { display: flex; }
   border-color: rgba(232, 217, 176, 0.25);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-/* 戻る(左)と設定(右)はフッターのナビと同じ言葉遣い: 面なし・アイコン+小ラベルの縦積み */
-#btn-settings {
-  min-width: 44px; padding: 2px 4px;
-  display: grid; grid-template-rows: 22px 12px;
-  justify-items: center; align-items: center; gap: 2px;
-  border: 0; border-radius: 8px;
-  background: transparent; box-shadow: none;
-  color: #4d587a;
-  font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
-}
-#btn-settings svg { color: inherit; display: block; }
-#btn-settings svg { width: 20px; height: 20px; }  /* 歯車は密なので少し小さく */
-#btn-settings:active { transform: none; color: #5874f0; }
 .answer-btn {
   background: linear-gradient(160deg, #fff8eb 0%, #e8d8c4 100%);
   border-color: rgba(64, 56, 48, 0.13);
@@ -1083,6 +1069,8 @@ body:not(.view-play):has(#settings-overlay:not([hidden])) .home-footer { z-index
    cq 単位が使えない古い WebView では cq 指定の行だけ無効になり、上の dvh 概算式で従来どおり描く */
 body.view-play main { justify-content: flex-start; }
 #view-play:not([hidden]) { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+/* プレイ中は下にフッタが無いので、main の下余白は safe-area + 少しだけにする */
+body.view-play main { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
 #view-play > #boards {
   flex: 1 1 0;
   min-height: 0;
@@ -1294,11 +1282,15 @@ body.view-play main { justify-content: flex-start; }
   50% { opacity: 1; }
 }
 /* ---- 操作系: 上段=ヘルプ(リワード) / 下段=最初から(無料・フル幅) ---- */
+/* 操作バー(2026-11): 画面下端に、盤と同じ横幅(--board-w は JS が実寸を入れる)で3つを等分に並べる */
 #controls {
-  margin: clamp(10px, 2dvh, 16px) auto 0;
-  width: fit-content;
+  margin: clamp(10px, 1.8dvh, 16px) auto 0;
+  width: var(--board-w, min(100%, 360px));
+  max-width: 100%;
 }
-#hint-row { display: flex; gap: 14px; align-items: center; justify-content: center; }
+#hint-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: stretch; }
+#hint-row > button { width: 100%; height: 52px; border-radius: 16px; }
+#hint-row > .answer-btn { font-size: 15px; letter-spacing: 0.12em; text-indent: 0.12em; }
 /* ヘルプ = 盤床色のカード(一覧タイル/結果カードと同家系)。背後の一枚板は置かない */
 .help {
   position: relative;

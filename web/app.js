@@ -551,7 +551,8 @@ function syncFooterSelectionForView(view) {
 // フッターの再タップ判定。設定/遊び方など別オーバーレイ中は、背後の選択状態ではなく
 // 現在見えている操作対象を優先し、フッターから目的の画面へ移れるようにする。
 function currentFooterDestination() {
-  if (!$('#settings-overlay').hidden || !$('#howto-overlay').hidden || !$('#privacy-overlay').hidden) return null;
+  if (!$('#howto-overlay').hidden || !$('#privacy-overlay').hidden) return null;
+  if (!$('#settings-overlay').hidden) return 'settings';
   if (!$('#stats-overlay').hidden) return 'goals';
   if (!$('#store-overlay').hidden) return 'store';
   if (!$('#view-chapters').hidden) return 'home';
@@ -1925,10 +1926,15 @@ $('#btn-share').addEventListener('click', async () => {
   } catch (e) {}
 });
 
-// 設定: 目標・ストアと同型の全画面オーバーレイ。歯車でトグル / ホーム・フッタ遷移・Esc で閉じる
-function openSettings() { cancelCountdown(); $('#stats-overlay').hidden = true; $('#store-overlay').hidden = true; $('#settings-overlay').hidden = false; }
-function closeSettings() { $('#settings-overlay').hidden = true; }
-$('#btn-settings').addEventListener('click', () => { $('#settings-overlay').hidden ? openSettings() : closeSettings(); });
+// 設定: 目標と同型の全画面オーバーレイ。フッタの「設定」で開き、他のフッタ項目・Esc で閉じる。
+// (2026-11: ヘッダ右上の歯車とフッタの「ストア」を廃し、ストアの位置に設定を置いた。プレイ中は出さない)
+function openSettings() { cancelCountdown(); $('#stats-overlay').hidden = true; $('#store-overlay').hidden = true; setFooterSelection('settings'); updateSettingsUI(); showInfoOverlay('#settings-overlay'); }
+function closeSettings() {
+  if ($('#settings-overlay').hidden) return;
+  $('#settings-overlay').hidden = true;
+  const view = !$('#view-chapters').hidden ? 'chapters' : (!$('#view-levels').hidden ? 'levels' : (!$('#view-daily').hidden ? 'daily' : null));
+  if (view) syncFooterSelectionForView(view);
+}
 
 // ---- 設定の中身 ----
 // 音/触覚: 本体は実装済み(seOn=playMove/Bump/Clear/Foul/Tap、hapticsOn=haptic())。ここは設定値の保存/トグルのみ。既定ON
@@ -1996,6 +2002,7 @@ function showToast(msg) {
 }
 $('#set-lang').addEventListener('click', () => relocalize(locale === 'ja' ? 'en' : 'ja'));
 $('#set-reset').addEventListener('click', resetProgress);
+$('#set-restore').addEventListener('click', restorePurchasesRC);
 // 遊び方
 function openHowto() { cancelCountdown(); closeSettings(); $('#howto-overlay').hidden = false; }
 function closeHowto() { $('#howto-overlay').hidden = true; }
@@ -2146,7 +2153,8 @@ function renderStore() {
   document.querySelectorAll('#store-content [data-buy]').forEach(btn => btn.addEventListener('click', () => purchaseProduct(btn.dataset.buy)));
   document.querySelector('#store-content .store-restore').addEventListener('click', restorePurchasesRC);
 }
-function openStore() { cancelCountdown(); closeSettings(); $('#stats-overlay').hidden = true; setFooterSelection('store'); renderStore(); showInfoOverlay('#store-overlay'); }
+// ストアはフッタから外した(2026-11)。3面タブのロック時にだけ購入案内として開く
+function openStore() { cancelCountdown(); closeSettings(); $('#stats-overlay').hidden = true; renderStore(); showInfoOverlay('#store-overlay'); }
 // お問い合わせ: Googleフォームへ外部遷移
 $('#set-contact').addEventListener('click', () => {
   window.open('https://docs.google.com/forms/d/e/1FAIpQLScYY6LslirKCd3dq_1in33V68IG7MGiPZRFneTxSYPesJxbkg/viewform?usp=publish-editor', '_blank', 'noopener');
@@ -2192,9 +2200,9 @@ $('#home-goals').addEventListener('click', () => {
   if (isCurrentFooterDestination('goals')) return;
   openStats();
 });
-$('#home-store').addEventListener('click', () => {
-  if (isCurrentFooterDestination('store')) return;
-  openStore();
+$('#home-settings').addEventListener('click', () => {
+  if (isCurrentFooterDestination('settings')) return;
+  openSettings();
 });
 $('#btn-reset').addEventListener('click', resetPuzzle);
 $('#overlay-miss').addEventListener('click', dismissMiss); // 反則メッセージは任意の画面タップで閉じる
@@ -2422,3 +2430,17 @@ const loginResult = checkLoginBonus();
 if (loginResult) showLoginModal(loginResult);
 updateGoalNotice();
 updateModeTabLocks();
+
+// 操作バーの横幅を盤の実寸にそろえる(盤は CSS で残り高さから決まるため JS で追従)。
+// ResizeObserver 非対応環境は CSS の既定幅のまま。
+(function syncControlsWidth() {
+  const boardsEl = $('#boards'), controls = $('#controls');
+  if (!boardsEl || !controls || typeof ResizeObserver !== 'function') return;
+  const apply = () => {
+    const b = boardsEl.querySelector('.board');
+    const w = b ? b.offsetWidth : 0;
+    if (w > 0) controls.style.setProperty('--board-w', `${w}px`);
+  };
+  new ResizeObserver(apply).observe(boardsEl);
+  new MutationObserver(apply).observe(boardsEl, { childList: true });
+})();
