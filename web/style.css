@@ -659,7 +659,7 @@ body.view-chapters .home-play { margin-top: 24px; margin-bottom: 14px; flex: non
   margin: 0;
   /* 上下の余白をそろえる(2026-11)。iPhone の safe-area(約34px)を丸ごと足すと下だけ大きく空くので、
      ホームインジケータ(下端から約13px)に文字が被らない分だけ使う: 下余白 = max(上余白, safe-area - 24px) */
-  --footer-pad: 10px;
+  --footer-pad: 16px;
   --footer-pad-bottom: max(var(--footer-pad), calc(env(safe-area-inset-bottom, 0px) - 24px));
   padding: var(--footer-pad) 18px var(--footer-pad-bottom);
   border-top: 1px solid rgba(43, 38, 32, 0.08);
@@ -668,7 +668,7 @@ body.view-chapters .home-play { margin-top: 24px; margin-bottom: 14px; flex: non
 /* ゲーム画面(view-play)ではフッターを隠す。それ以外の画面では常時表示。 */
 body.view-play .home-footer { display: none; }
 /* フッターは fixed なので、下部の内容が隠れないよう非プレイ画面では下余白を確保 */
-body:not(.view-play) main { padding-bottom: calc(86px + max(10px, calc(env(safe-area-inset-bottom, 0px) - 24px))); }
+body:not(.view-play) main { padding-bottom: calc(92px + max(16px, calc(env(safe-area-inset-bottom, 0px) - 24px))); }
 /* オーバーレイ(目標/ストア/設定/遊び方)表示中は背後のページを固定する。
    iOS実機ではオーバーレイ内のスクロールが端に達すると背後(一覧など)に連鎖し、
    ヘッダ領域に背後の内容が透けて見えるため(実機バグ報告 2026-07-21) */
