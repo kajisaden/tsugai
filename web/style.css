@@ -541,6 +541,20 @@ button:active { transform: translateY(1px); }
 .home-center.home-level-down .home-level-num.next {
   animation: home-level-next-down 680ms cubic-bezier(0.2, 0.72, 0.18, 1) var(--home-level-delay, 0ms) both;
 }
+/* ホーム縦配置(2026-11): プレイボタンをフッタの少し上に置き、エンブレム群(状態文字〜レベル表示)を
+   ロゴとプレイボタンの間で上下 auto マージンにより中央へ。margin-top:166px 固定はやめた */
+body.view-chapters .home-center {
+  height: 100%;
+  min-height: 0;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+body.view-chapters .home-stage { margin-top: auto; }
+/* エンブレム上の状態文字(44px)とエンブレム下のレベル表示(約32px)の高さ差を下側の余白で補い、エンブレム自体を中央に */
+body.view-chapters .home-level { margin-bottom: auto; padding-bottom: 12px; }
+body.view-chapters .home-play { margin-top: 24px; margin-bottom: 14px; flex: none; }
 .home-play {
   width: min(220px, 72vw);
   height: 52px;
@@ -643,14 +657,18 @@ button:active { transform: translateY(1px); }
   grid-template-columns: repeat(5, 1fr);
   gap: 0;
   margin: 0;
-  padding: 8px 18px calc(10px + env(safe-area-inset-bottom, 0px));
+  /* 上下の余白をそろえる(2026-11)。iPhone の safe-area(約34px)を丸ごと足すと下だけ大きく空くので、
+     ホームインジケータ(下端から約13px)に文字が被らない分だけ使う: 下余白 = max(上余白, safe-area - 24px) */
+  --footer-pad: 10px;
+  --footer-pad-bottom: max(var(--footer-pad), calc(env(safe-area-inset-bottom, 0px) - 24px));
+  padding: var(--footer-pad) 18px var(--footer-pad-bottom);
   border-top: 1px solid rgba(43, 38, 32, 0.08);
   background: #e9edf7;
 }
 /* ゲーム画面(view-play)ではフッターを隠す。それ以外の画面では常時表示。 */
 body.view-play .home-footer { display: none; }
 /* フッターは fixed なので、下部の内容が隠れないよう非プレイ画面では下余白を確保 */
-body:not(.view-play) main { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+body:not(.view-play) main { padding-bottom: calc(86px + max(10px, calc(env(safe-area-inset-bottom, 0px) - 24px))); }
 /* オーバーレイ(目標/ストア/設定/遊び方)表示中は背後のページを固定する。
    iOS実機ではオーバーレイ内のスクロールが端に達すると背後(一覧など)に連鎖し、
    ヘッダ領域に背後の内容が透けて見えるため(実機バグ報告 2026-07-21) */
