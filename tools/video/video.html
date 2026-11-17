@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Tsugaiの作り方(解説動画の画面)</title>
+<!-- 解説動画の全画面。window.seek(秒) で任意の時刻の絵を出す。render.mjs が1コマずつ撮影する。
+     data.js / clips/ / node_modules は出力ディレクトリ側にあり、render.mjs がこのファイルをそこへコピーして開く。 -->
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-jp/400.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-jp/500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-jp/700.css">
+<link rel="stylesheet" href="node_modules/@fontsource/noto-sans-jp/900.css">
+<style>
+:root{--bg:#fbf7ef;--ink:#232733;--sub:#6b7180;--line:#e2d9c8;--blue:#4f6bf0;--ball:#6ea6d8;--gold:#c9962a;--goldbg:#fbeecb;--board:#e9dcc6;--grid:#dccbb0;--wall:#f7ecda;--red:#d2533f}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{font-family:"Noto Sans JP",sans-serif;color:var(--ink);overflow:hidden}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--bg)}
+.scene{position:absolute;inset:0;opacity:0}
+.abs{position:absolute}
+#cap{position:absolute;left:160px;right:160px;bottom:34px;height:120px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:42px;font-weight:700;line-height:1.42;letter-spacing:.01em}
+#tag{position:absolute;left:44px;top:30px;font-size:24px;font-weight:700;color:var(--sub);display:flex;gap:14px;align-items:center}
+#tag b{color:#fff;background:var(--blue);border-radius:8px;padding:2px 14px;font-weight:700}
+.phone{position:absolute;border-radius:38px;overflow:hidden;background:#fbf7ef;box-shadow:0 0 0 7px #2b2f3a,0 24px 60px rgba(60,45,20,.22)}
+.phone img{display:block;width:100%;height:100%}
+.h1{font-size:112px;font-weight:900;letter-spacing:.02em;line-height:1.2}
+.h2{font-size:64px;font-weight:900;line-height:1.3}
+.h3{font-size:44px;font-weight:700;line-height:1.4}
+.txt{font-size:36px;font-weight:500;line-height:1.5}
+.sub{color:var(--sub)}.blue{color:var(--blue)}.gold{color:var(--gold)}.red{color:var(--red)}
+.note{display:inline-block;font-size:36px;font-weight:700;border-radius:14px;padding:12px 26px;background:#fff;box-shadow:0 2px 0 var(--line)}
+.note.g{background:var(--goldbg);color:#8a6410}
+.qrow{display:flex;align-items:center;gap:26px;font-size:46px;font-weight:700;margin-bottom:34px}
+.qrow i{font-style:normal;flex:none;width:70px;height:70px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:900}
+.chips{position:absolute;display:flex;gap:8px;justify-content:center}
+.chip{width:108px;height:104px;border-radius:14px;background:#efe6d6;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.chip b{font-size:44px;line-height:1.1;font-weight:700}
+.chip span{font-size:20px;font-weight:700;color:#8a6410;height:26px}
+.chip em{position:absolute;top:-22px;right:-10px;font-style:normal;width:44px;height:44px;border-radius:50%;background:var(--blue);color:#fff;font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.big{font-size:200px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+.seqchip{display:inline-flex;min-width:92px;height:92px;border-radius:16px;background:#fff;box-shadow:0 2px 0 var(--line);align-items:center;justify-content:center;font-size:44px;font-weight:900;padding:0 14px;font-variant-numeric:tabular-nums}
+.seqchip.first{background:var(--blue);color:#fff}
+.row{display:flex;align-items:center;gap:14px}
+.arrow{font-size:34px;color:var(--sub)}
+svg text{font-family:"Noto Sans JP",sans-serif}
+</style>
+</head>
+<body>
+<div id="stage"><div id="tag"></div><div id="cap"></div></div>
+<script src="data.js"></script>
+<script>
+'use strict';
+const D = window.DATA, FPS = 30, ARW = ['↑', '↓', '←', '→'];
+const stage = document.getElementById('stage');
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const pr = (t, s, d = .5) => ease((t - s) / d);          // s秒から d秒かけて 0→1
+const lin = (t, s, d) => clamp((t - s) / d);
+const lerp = (a, b, p) => a + (b - a) * p;
+const pop = (x) => { x = clamp(x); return x === 0 ? 0 : 1 + 0.25 * Math.sin(x * Math.PI) * (1 - x) - (1 - x) * (1 - x); }; // ぽんと出る
+function el(parent, cls, html = '', css = '') { const e = document.createElement('div'); e.className = cls; e.innerHTML = html; if (css) e.style.cssText = css; parent.appendChild(e); return e; }
+const at = (parent, x, y, cls, html = '', css = '') => el(parent, 'abs ' + cls, html, `left:${x}px;top:${y}px;` + css);
+function show(e, p, dy = 24) { e.style.opacity = p; e.style.transform = `translateY(${(1 - p) * dy}px)`; }
+function scale(e, p) { e.style.opacity = clamp(p * 3); e.style.transform = `scale(${pop(p)})`; }
+const svgNS = 'http://www.w3.org/2000/svg';
+function svg(parent, x, y, w, h, inner = '') { const s = document.createElementNS(svgNS, 'svg'); s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;overflow:visible`; s.innerHTML = inner; parent.appendChild(s); return s; }
+
+// ---- ゲーム画面(録画コマ)を出すスマホ枠 ----
+const pending = new Set();
+function Phone(parent, x, y, h) {
+  const w = Math.round(h * 390 / 844);
+  const e = el(parent, 'phone', '<img alt="">', `left:${x}px;top:${y}px;width:${w}px;height:${h}px`);
+  const img = e.firstChild; let cur = '';
+  return { el: e, w, set(name, sec) {
+    const n = clamp(Math.floor(sec * FPS), 0, D.clips[name].frames - 1);
+    const src = `clips/${name}/f${String(n).padStart(5, '0')}.jpg`;
+    if (src !== cur) { cur = src; img.src = src; pending.add(img); }
+  } };
+}
+// ---- ゲームの盤に似せたSVGの盤 ----
+function boardSVG(parent, x, y, size, puz, i) {
+  const c = size / puz.w, r = puz.rooms[i], P = (k) => [(k % puz.w) * c, Math.floor(k / puz.w) * c];
+  let s = `<rect width="${size}" height="${size}" rx="${c * .16}" fill="var(--board)"/>`;
+  for (let k = 1; k < puz.w; k++) s += `<line x1="${k * c}" y1="6" x2="${k * c}" y2="${size - 6}" stroke="var(--grid)" stroke-width="2"/><line x1="6" y1="${k * c}" x2="${size - 6}" y2="${k * c}" stroke="var(--grid)" stroke-width="2"/>`;
+  const tile = (k, cls, fill, extra = '') => { const [px, py] = P(k); return `<rect class="${cls}" x="${px + c * .13}" y="${py + c * .13}" width="${c * .74}" height="${c * .74}" rx="${c * .14}" fill="${fill}" ${extra} style="transform-box:fill-box;transform-origin:center"/>`; };
+  for (const k of r.walls) s += tile(k, 'wall', 'var(--wall)', 'stroke="#d9c6a6" stroke-width="2"');
+  s += tile(r.goal, 'goal', 'none', 'stroke="#3f86c2" stroke-width="5"');
+  s += `<g class="glows"></g>` + tile(r.start, 'ball', 'var(--ball)', 'stroke="#4d8bc0" stroke-width="2"');
+  const e = svg(parent, x, y, size, size, s);
+  return { el: e, c, P, walls: [...e.querySelectorAll('.wall')], goal: e.querySelector('.goal'), ball: e.querySelector('.ball'), glows: e.querySelector('.glows'),
+    moveBall(k0, k1, p) { const [a, b] = P(k0), [a2, b2] = P(k1), [sx, sy] = P(r.start); this.ball.style.transform = `translate(${lerp(a, a2, p) - sx}px,${lerp(b, b2, p) - sy}px)`; } };
+}
+// ---- 場面の地図(14×14の点) ----
+function stateMap(parent, x, y, sp) {
+  const n = D.free[0].length, m = D.free[1].length, xy = (pos) => [D.free[0].indexOf(pos[0]) * sp + sp / 2, D.free[1].indexOf(pos[1]) * sp + sp / 2];
+  let s = '';
+  for (let a = 0; a < n; a++) for (let b = 0; b < m; b++) s += `<circle cx="${a * sp + sp / 2}" cy="${b * sp + sp / 2}" r="${sp * .09}" fill="#d8cdb8"/>`;
+  s += '<g class="edges"></g><g class="dots"></g><g class="top"></g>';
+  const e = svg(parent, x, y, n * sp, m * sp, s);
+  const lab = el(parent, 'abs sub', '', `left:${x}px;top:${y + m * sp + 8}px;width:${n * sp}px;text-align:center;font-size:24px;font-weight:700`); lab.textContent = '上のボールの位置 →';
+  const lab2 = el(parent, 'abs sub', '', `left:${x - 46}px;top:${y + m * sp}px;width:${m * sp}px;text-align:center;font-size:24px;font-weight:700;transform-origin:0 0;transform:rotate(-90deg)`); lab2.textContent = '下のボールの位置 →';
+  const mk = (g, tag, attrs) => { const c = document.createElementNS(svgNS, tag); for (const k in attrs) c.setAttribute(k, attrs[k]); e.querySelector(g).appendChild(c); return c; };
+  return { el: e, labs: [lab, lab2], xy, sp,
+    dot(pos, fill, r = .3) { const [cx, cy] = xy(pos); return mk('.dots', 'circle', { cx, cy, r: sp * r, fill, style: 'transform-box:fill-box;transform-origin:center' }); },
+    topDot(pos, fill, r = .36) { const [cx, cy] = xy(pos); return mk('.top', 'circle', { cx, cy, r: sp * r, fill, style: 'transform-box:fill-box;transform-origin:center' }); },
+    edge(p0, p1, stroke, w = 6) { const [a, b] = xy(p0), [c, d] = xy(p1); const l = mk('.edges', 'line', { x1: a, y1: b, x2: c, y2: d, stroke, 'stroke-width': w, 'stroke-linecap': 'round' }); l._len = Math.hypot(c - a, d - b); l.setAttribute('stroke-dasharray', l._len); return l; } };
+}
+const drawLine = (l, p) => l.setAttribute('stroke-dashoffset', l._len * (1 - clamp(p)));
+const depthColor = (d, max) => `hsl(${lerp(228, 200, d / max)} ${lerp(85, 70, d / max)}% ${lerp(60, 80, d / max)}%)`;
+function chipsRow(parent, cx, y, steps) {
+  const row = el(parent, 'chips', '', `left:${cx - 420}px;top:${y}px;width:840px`);
+  return steps.map((s) => { const who = s.blocked[0] ? '上が止まる' : s.blocked[1] ? '下が止まる' : ''; const c = el(row, 'chip', `<b>${ARW[s.d]}</b><span>${who}</span>` + (s.isNew ? `<em>${s.ep}</em>` : '')); c._s = s; return c; });
+}
+function paintChip(c, on, badge) { const hit = c._s.blocked.some(Boolean); c.style.opacity = on ? 1 : .28; c.style.background = on && hit ? 'var(--goldbg)' : '#efe6d6'; c.querySelector('span').style.opacity = on ? 1 : 0; const em = c.querySelector('em'); if (em) scale(em, badge); }
+
+// ================= シーン定義 =================
+const SCENES = {};
+const scene = (id, build, draw) => { SCENES[id] = { id, build, draw }; };
+const clipT = (i) => (D.START + i * D.STEP) / 1000; // i手目が始まるクリップ内の秒
+
+scene('intro', (r) => {
+  const ph = Phone(r, 250, 50, 860);
+  const title = at(r, 800, 300, 'h1', 'Tsugai の<br>作り方');
+  const subt = at(r, 806, 620, 'h3 sub', 'この問題は、だれが作った?');
+  const n1 = at(r, 800, 330, 'note g', '上の盤: 外枠にぶつかって止まる');
+  const n2 = at(r, 800, 450, 'note', '下の盤: そのまま1マス進む');
+  const n3 = at(r, 800, 600, 'txt sub', '位置のずれを作る方法は、これだけ');
+  const cnt = at(r, 800, 250, 'big blue num', '0'), cu = at(r, 800, 470, 'h2', '問、すべて機械が作った');
+  const cs = at(r, 806, 590, 'txt sub', '通常 200問 ・ 上級 200問 ・ 3面 200問');
+  const qs = at(r, 800, 270, '', ['難易度をどう調整するの?', '機械的に問題を作るには?', '光ヒントはどういう仕組み?'].map((q, i) => `<div class="qrow"><i>${i + 1}</i>${q}</div>`).join(''));
+  return { ph, title, subt, n1, n2, n3, cnt, cu, cs, qs };
+}, (e, { step, tau }) => {
+  e.ph.set('intro', step === 0 ? tau - 1.2 : step === 1 ? tau - 0.6 : 99);
+  const o0 = step === 0 ? pr(tau, .3) : 0;
+  show(e.title, o0); show(e.subt, step === 0 ? pr(tau, 1.0) : 0);
+  const b = clipT(1) + 0.6; // 2手目=上の盤が止まる
+  show(e.n1, step === 1 ? pr(tau, b) : 0); show(e.n2, step === 1 ? pr(tau, b + .5) : 0); show(e.n3, step === 1 ? pr(tau, b + 1.6) : 0);
+  const o2 = step === 2 ? pr(tau, .2) : 0;
+  show(e.cnt, o2); e.cnt.textContent = Math.round(600 * ease(lin(tau, .3, 1.6)));
+  show(e.cu, step === 2 ? pr(tau, 1.6) : 0); show(e.cs, step === 2 ? pr(tau, 2.4) : 0);
+  [...e.qs.children].forEach((q, i) => show(q, step === 3 ? pr(tau, .4 + i * .9) : 0));
+  e.qs.style.opacity = step === 3 ? 1 : 0;
+});
+
+const QTITLES = ['難易度をどう調整するの?', '機械的に問題を作るには?', '光ヒントはどういう仕組み?'];
+[1, 2, 3].forEach((n) => scene('t' + n, (r) => {
+  const a = el(r, 'abs', `<div class="h3 blue" style="font-weight:900;letter-spacing:.2em">疑問 ${n}</div><div class="h1" style="font-size:104px;margin-top:20px">${QTITLES[n - 1]}</div>`, 'left:0;right:0;top:340px;text-align:center');
+  const bar = el(r, 'abs', '', 'left:860px;top:640px;width:200px;height:8px;border-radius:4px;background:var(--blue);transform-origin:center');
+  return { a, bar };
+}, (e, { tau }) => { show(e.a, pr(tau, .15, .6), 40); e.bar.style.transform = `scaleX(${pr(tau, .5, .7)})`; }));
+
+scene('q1', (r) => {
+  const pL = Phone(r, 480 - 148, 84, 640), pR = Phone(r, 1440 - 148, 84, 640);
+  const cL = chipsRow(r, 480, 760, D.simE), cR = chipsRow(r, 1440, 760, D.simH);
+  const mk = (cx, ep) => { const w = el(r, 'abs row', `<span class="h3">7手</span><span class="h3 blue k" style="margin-left:26px">気づき ${ep}</span>`, `left:${cx - 300}px;top:880px;width:600px;justify-content:center`); return w; };
+  const sL = mk(480, 1), sR = mk(1440, 3);
+  const vs = at(r, 900, 330, 'h2 sub', '');
+  return { pL, pR, cL, cR, sL, sR, vs };
+}, (e, { step, tau, T }) => {
+  const ct = step === 0 ? tau - 1.0 : 99;
+  e.pL.set('exE', ct); e.pR.set('exH', ct);
+  for (const [chips] of [[e.cL], [e.cR]]) chips.forEach((c, i) => {
+    const on = step > 0 || ct >= clipT(i);
+    const k = chips.filter((x, j) => j <= i && x._s.isNew).length; // この手までの気づき番号
+    paintChip(c, on, step === 3 ? lin(tau, .8 + k * .8, .4) : step > 3 ? 1 : 0);
+  });
+  for (const s of [e.sL, e.sR]) { show(s.firstChild, step >= 2 ? (step === 2 ? pr(tau, .3) : 1) : 0); show(s.querySelector('.k'), step === 3 ? pr(tau, 4.0) : 0); }
+});
+
+scene('dp', (r) => {
+  const W = 6, H = 5, c = 116, x0 = 150, y0 = 170;
+  let s = '';
+  for (let k = 0; k < W * H; k++) { const x = k % W, y = (k - x) / W; s += `<rect class="cell" x="${x * c + 5}" y="${y * c + 5}" width="${c - 10}" height="${c - 10}" rx="14" fill="#efe6d6"/><text class="n" x="${x * c + c / 2}" y="${y * c + c / 2 + 16}" text-anchor="middle" font-size="44" font-weight="900" fill="var(--ink)"></text>`; }
+  s += '<polyline class="path" fill="none" stroke="var(--blue)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>';
+  const g = svg(r, x0, y0, W * c, H * c, s);
+  const dp = []; for (let k = 0; k < W * H; k++) { const x = k % W, y = (k - x) / W; dp[k] = (!x || !y) ? 1 : dp[k - 1] + dp[k - W]; }
+  // でたらめな道(右か下)を決まった乱数で何本か用意
+  let seed = 7; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+  const paths = Array.from({ length: 14 }, () => { const m = [...'RRRRRDDDD'].sort(() => rnd() - .5); let x = 0, y = 0; const pts = [[c / 2, c / 2]]; for (const ch of m) { if (ch === 'R') x++; else y++; pts.push([x * c + c / 2, y * c + c / 2]); } return pts; });
+  const sLab = at(r, x0, y0 - 64, 'txt sub', 'スタート'), gLab = at(r, x0 + W * c - 110, y0 + H * c + 8, 'txt sub', 'ゴール');
+  const q = at(r, 960, 250, 'h2', '道は何通り?'), cnt = at(r, 960, 360, 'big blue num', '', 'font-size:150px');
+  const f = at(r, 960, 250, 'h2', '<span class="blue">左</span> + <span class="blue">上</span> = このマス'), f2 = at(r, 960, 360, 'txt sub', '手前の答えを書きとめて、使い回す');
+  const res = at(r, 960, 470, 'h3', `右下まで <span class="blue" style="font-size:72px;font-weight:900">${dp[W * H - 1]}</span> 通り`);
+  const name = at(r, 960, 220, 'h1', '動的計画法', 'font-size:96px'), use = at(r, 964, 400, 'txt', '<span class="note">Tsugaiでは</span><br><br>各場面に「ここまでの気づきの最小」を<br>書きとめて、次の場面の計算に使う');
+  return { g, W, H, c, dp, paths, q, cnt, f, f2, res, name, use, sLab, gLab, cells: [...g.querySelectorAll('.cell')], nums: [...g.querySelectorAll('.n')], path: g.querySelector('.path') };
+}, (e, { step, tau }) => {
+  const { W, H } = e;
+  // step0: 道を1本ずつ引いて数える
+  const per = .42, i = Math.floor((tau - .8) / per), ok = step === 0 && i >= 0 && i < e.paths.length;
+  if (ok) { const pts = e.paths[i], p = lin((tau - .8) % per, 0, per * .8), n = Math.max(2, Math.ceil(p * pts.length)); e.path.setAttribute('points', pts.slice(0, n).map((q) => q.join(',')).join(' ')); }
+  e.path.style.opacity = ok ? 1 : 0;
+  show(e.q, step === 0 ? pr(tau, .3) : 0); show(e.cnt, step === 0 ? 1 : 0);
+  e.cnt.textContent = step === 0 ? (i < 0 ? '' : i >= e.paths.length ? '…?' : (i + 1) + '…') : '';
+  // step1: 斜めの列ごとに数を書きこむ
+  e.nums.forEach((n, k) => { const x = k % W, y = (k - x) / W, t0 = 1.0 + (x + y) * .55; const on = step > 1 || (step === 1 && tau >= t0); n.textContent = on ? e.dp[k] : ''; const hot = step === 1 && tau >= t0 && tau < t0 + .55; e.cells[k].setAttribute('fill', hot ? 'var(--goldbg)' : (on ? '#fff' : '#efe6d6')); });
+  show(e.f, step === 1 ? pr(tau, .3) : 0); show(e.f2, step === 1 ? pr(tau, 1.2) : 0); show(e.res, step === 1 ? pr(tau, 1.0 + (W + H - 2) * .55 + .3) : 0);
+  show(e.name, step === 2 ? pr(tau, .3) : 0); show(e.use, step === 2 ? pr(tau, 1.4) : 0);
+});
+
+scene('curve', (r) => {
+  const x0 = 150, y0 = 190, bw = 6.1, H = 560, maxEp = 4;
+  let s = '';
+  for (let k = 0; k <= maxEp; k++) s += `<line x1="0" x2="${200 * bw}" y1="${H - k * H / maxEp}" y2="${H - k * H / maxEp}" stroke="var(--line)" stroke-width="2"/><text x="-18" y="${H - k * H / maxEp + 10}" text-anchor="end" font-size="28" font-weight="700" fill="var(--sub)">${k}</text>`;
+  D.curve.forEach((c, i) => { const hh = Math.max(4, c.ep * H / maxEp); s += `<rect class="b" x="${i * bw}" y="${H - hh}" width="${bw - 1.4}" height="${hh}" fill="${c.boss ? 'var(--gold)' : 'var(--blue)'}" style="transform-box:fill-box;transform-origin:bottom"/>`; });
+  for (const n of [1, 50, 100, 150, 200]) s += `<text x="${(n - .5) * bw}" y="${H + 40}" text-anchor="middle" font-size="28" font-weight="700" fill="var(--sub)">${n}</text>`;
+  const g = svg(r, x0, y0, 200 * bw, H + 60, s);
+  at(r, x0 - 40, y0 - 66, 'txt sub', '気づきの数', 'font-size:28px;font-weight:700'); at(r, x0 + 200 * bw - 220, y0 + H + 62, 'txt sub', 'レベル(通常モード)', 'font-size:28px;font-weight:700');
+  const leg = at(r, x0 + 420, y0 - 70, 'row txt', '<span style="width:28px;height:28px;border-radius:6px;background:var(--gold);display:inline-block"></span><span style="font-size:30px;font-weight:700">10問ごとの山場</span>');
+  const ph = Phone(r, 1500, 110, 760), pl = at(r, 1500, 884, 'txt sub', 'レベル10(山場)', `width:${ph.w}px;text-align:center;font-size:28px;font-weight:700`);
+  return { bars: [...g.querySelectorAll('.b')], leg, ph, pl };
+}, (e, { step, tau }) => {
+  e.bars.forEach((b, i) => { const p = step === 0 ? pr(tau, .6 + i * .022, .5) : 1; const boss = D.curve[i].boss; const pulse = step === 1 && boss ? 1 + .12 * Math.sin(clamp((tau - .6 - (i / 200) * 2) / .7) * Math.PI) : 1; b.style.transform = `scaleY(${p * pulse})`; b.style.opacity = step === 1 && !boss ? lerp(1, .45, pr(tau, .3)) : 1; });
+  show(e.leg, step === 1 ? pr(tau, .4) : 0);
+  e.ph.set('boss', step === 0 ? -1 : tau - 1.2);
+  e.ph.el.style.opacity = 1; show(e.pl, step === 1 ? pr(tau, .6) : 0);
+});
+
+scene('gen', (r) => {
+  const lab = at(r, 0, 70, 'h3 sub', '問題の番号', 'width:1920px;text-align:center');
+  const num = at(r, 0, 120, 'big blue num', String(D.ex1.seed), 'width:1920px;text-align:center;font-size:150px');
+  const row = el(r, 'abs row', '', 'left:0;width:1920px;top:310px;justify-content:center;gap:12px');
+  const chips = D.rngHead.map((v) => el(row, 'seqchip', v.toFixed(3), 'font-size:32px;height:70px;font-weight:700'));
+  const dots = el(row, 'h3 sub', '…');
+  const bA = boardSVG(r, 530, 440, 400, D.ex1, 0), bB = boardSVG(r, 990, 440, 400, D.ex1, 1);
+  const same = at(r, 0, 868, 'h3', '同じ番号 → いつも同じ盤', 'width:1920px;text-align:center');
+  return { lab, num, chips, dots, bs: [bA, bB], same };
+}, (e, { step, tau }) => {
+  show(e.lab, 1, 0); scale(e.num, step === 0 ? lin(tau, .3, .5) : 1);
+  e.chips.forEach((c, i) => scale(c, step === 0 ? lin(tau, 2.0 + i * .35, .35) : 1)); show(e.dots, step === 0 ? pr(tau, 2.0 + 8 * .35) : 1);
+  // 盤を組み立てる(step1 はゆっくり、step2 は消して素早く2回)
+  let p; if (step === 0) p = -1; else if (step === 1) p = (tau - .6) / 5.0; else { const cyc = (tau - .4) / 2.0; p = cyc < 0 ? 1 : cyc >= 2 ? 1 : (cyc % 1) * 1.6 - .15; }
+  e.bs.forEach((b, i) => {
+    const base = i * .12; b.el.style.opacity = step === 0 ? pr(tau, 5.2) * .0 : 1; if (step === 0) b.el.style.opacity = 0;
+    b.walls.forEach((w, k) => scale(w, lin(p, base + k * .1, .12)));
+    scale(b.ball, lin(p, .5 + base, .12)); scale(b.goal, lin(p, .72 + base, .12));
+  });
+  show(e.same, step === 2 ? pr(tau, .8) : 0);
+});
+
+scene('rng', (r) => {
+  const f = at(r, 0, 150, 'h2', '次の数 = ( 前の数 <span class="blue">× 5 + 3</span> ) を <span class="blue">16</span> で割った余り', 'width:1920px;text-align:center;font-size:56px');
+  const seq = [1]; while (seq.length < 10) seq.push((seq[seq.length - 1] * 5 + 3) % 16);
+  const mkRow = (y) => { const row = el(r, 'abs row', '', `left:0;width:1920px;top:${y}px;justify-content:center`); return seq.map((v, i) => { const a = i ? el(row, 'arrow', '→') : null; const c = el(row, 'seqchip' + (i ? '' : ' first'), String(v)); return { a, c }; }); };
+  const r1 = mkRow(330), r2 = mkRow(600);
+  const calc = at(r, 0, 450, 'txt sub num', '', 'width:1920px;text-align:center');
+  const name = at(r, 0, 440, 'h1', '擬似乱数', 'width:1920px;text-align:center;font-size:96px');
+  const again = at(r, 0, 720, 'h3', '同じ <span class="blue">1</span> から始めれば、何度やっても同じ並び', 'width:1920px;text-align:center');
+  return { f, seq, r1, r2, calc, name, again };
+}, (e, { step, tau }) => {
+  show(e.f, step === 0 ? pr(tau, .3) : 1, 0);
+  const per = .62, k = Math.floor((tau - 1.6) / per);
+  e.r1.forEach((x, i) => { const p = step === 0 ? lin(tau, 1.0 + i * per, .3) : 1; scale(x.c, p); if (x.a) x.a.style.opacity = p; });
+  e.calc.textContent = step === 0 && k >= 0 && k < 9 ? `${e.seq[k]} × 5 + 3 = ${e.seq[k] * 5 + 3}  →  16で割った余りは ${e.seq[k + 1]}` : '';
+  e.calc.style.opacity = step === 0 ? 1 : 0;
+  show(e.name, step === 1 ? pr(tau, .3) * (1 - pr(tau, 3.0)) : 0);
+  e.r2.forEach((x, i) => { const p = step === 1 ? lin(tau, 3.4 + i * .16, .25) : 0; scale(x.c, p); if (x.a) x.a.style.opacity = p; });
+  show(e.again, step === 1 ? pr(tau, 5.4) : 0);
+});
+
+scene('state', (r) => {
+  const ph = Phone(r, 240, 84, 830);
+  const q = at(r, 900, 320, 'big sub', '?'), qt = at(r, 1080, 380, 'h2', 'この盤は解ける?');
+  const map = stateMap(r, 960, 110, 46);
+  const cur = map.topDot(D.start1, 'var(--blue)', .42);
+  const t1 = at(r, 1640, 200, 'h3', '点1つ<br>=<br>場面1つ', 'text-align:center;width:240px');
+  const t2 = at(r, 1640, 470, 'h2 blue num', '14 × 14', 'width:260px;text-align:center;font-size:52px'), t3 = at(r, 1640, 550, 'h2 num', '196通り', 'width:260px;text-align:center');
+  return { ph, q, qt, map, cur, t1, t2, t3 };
+}, (e, { step, tau }) => {
+  // step1 で例題を再生し、いまの場面の点を連動させる
+  const loop = 5.6, ct = step === 1 ? ((tau - 1.6 + loop * 10) % loop) : (step === 0 ? -1 : 99);
+  e.ph.set('intro', step === 1 && tau < 1.6 ? -1 : ct);
+  show(e.q, step === 0 ? pr(tau, .3) : 0); show(e.qt, step === 0 ? pr(tau, .6) : 0);
+  const on = step === 0 ? 0 : step === 1 ? pr(tau, .2, .8) : 1;
+  e.map.el.style.opacity = on; e.map.labs.forEach((l) => l.style.opacity = on);
+  let pos = D.start1, nxt = D.start1, p = 0;
+  D.sim1.forEach((s, i) => { if (ct >= clipT(i)) { pos = s.from; nxt = s.to; p = ease(lin(ct, clipT(i), .24)); } });
+  const [a, b] = e.map.xy(pos), [c, d] = e.map.xy(nxt), [sx, sy] = e.map.xy(D.start1);
+  e.cur.style.transform = `translate(${lerp(a, c, p) - sx}px,${lerp(b, d, p) - sy}px)`; e.cur.style.opacity = on;
+  show(e.t1, step === 1 ? pr(tau, 1.0) : step === 2 ? 1 : 0); show(e.t2, step === 2 ? pr(tau, .4) : 0); show(e.t3, step === 2 ? pr(tau, 1.2) : 0);
+});
+
+scene('maze', (r) => {
+  const W = 10, H = 7, c = 100, x0 = 130, y0 = 130, walls = new Set([12, 22, 32, 42, 15, 16, 26, 36, 56, 57, 58, 29, 39, 61, 62, 44]), st = 30;
+  const dist = new Array(W * H).fill(-1); dist[st] = 0; const q = [st];
+  for (const p of q) { const x = p % W, y = (p - x) / W; for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) { const a = x + dx, b = y + dy; if (a < 0 || a >= W || b < 0 || b >= H) continue; const np = b * W + a; if (walls.has(np) || dist[np] >= 0) continue; dist[np] = dist[p] + 1; q.push(np); } }
+  const max = Math.max(...dist);
+  let s = '';
+  for (let k = 0; k < W * H; k++) { const x = k % W, y = (k - x) / W; s += `<rect class="c" x="${x * c + 4}" y="${y * c + 4}" width="${c - 8}" height="${c - 8}" rx="14" fill="${walls.has(k) ? '#3b4252' : '#efe6d6'}" style="transform-box:fill-box;transform-origin:center"/><text class="n" x="${x * c + c / 2}" y="${y * c + c / 2 + 14}" text-anchor="middle" font-size="38" font-weight="900" fill="#fff"></text>`; }
+  const g = svg(r, x0, y0, W * c, H * c, s);
+  const t1 = at(r, 1200, 190, 'h2', '近いところから<br>順に、全部'), t2 = at(r, 1200, 400, 'txt sub', '波紋のように<br>1歩ずつ広げる');
+  const name = at(r, 1200, 190, 'h1', '幅優先探索', 'font-size:92px'), t3 = at(r, 1200, 340, 'txt', '届いた順番 = 最短の歩数');
+  const far = at(r, 1200, 470, 'txt sub', `いちばん遠いマスまで <b class="blue">${max}</b> 歩`);
+  return { W, H, walls, dist, max, st, cells: [...g.querySelectorAll('.c')], nums: [...g.querySelectorAll('.n')], t1, t2, name, t3, far };
+}, (e, { step, tau }) => {
+  const per = .42, wave = step === 0 ? (tau - 1.0) / per : 99;
+  e.cells.forEach((c, k) => { if (e.walls.has(k)) return; const d = e.dist[k], p = lin(wave, d, .9); c.setAttribute('fill', p > 0 ? (k === e.st ? 'var(--blue)' : depthColor(d, e.max)) : '#efe6d6'); c.style.transform = `scale(${p > 0 && p < 1 ? 1 + .12 * Math.sin(p * Math.PI) : 1})`; e.nums[k].textContent = p > 0 ? d : ''; });
+  show(e.t1, step === 0 ? pr(tau, .3) : 0); show(e.t2, step === 0 ? pr(tau, 1.2) : 0);
+  show(e.name, step === 1 ? pr(tau, .3) : 0); show(e.t3, step === 1 ? pr(tau, 1.0) : 0); show(e.far, step === 1 ? pr(tau, 1.8) : 0);
+});
+
+scene('bfsmap', (r) => {
+  const map = stateMap(r, 240, 60, 58), B = D.bStart, maxD = Math.max(...B.states.map((s) => s.depth));
+  const goalPos = B.nodes[B.nodes.length - 1];
+  const dots = B.states.map((s) => { const isGoal = s.pos.join() === goalPos.join(); const c = map.dot(s.pos, s.depth === 0 ? 'var(--blue)' : isGoal ? 'var(--gold)' : depthColor(s.depth, maxD), isGoal || s.depth === 0 ? .4 : .3); c._d = s.depth; c._goal = isGoal; return c; });
+  const edges = B.nodes.slice(1).map((n, i) => map.edge(B.nodes[i], n, 'var(--gold)', 9));
+  const counts = []; B.states.forEach((s) => counts[s.depth] = (counts[s.depth] || 0) + 1);
+  const list = at(r, 1190, 80, '', counts.map((n, d) => `<div class="row" style="font-size:34px;font-weight:700;margin-bottom:9px"><span class="sub" style="width:96px">${d}手</span><span style="display:inline-block;height:26px;border-radius:6px;background:${d === 0 ? 'var(--blue)' : depthColor(d, maxD)};width:${n * 14}px"></span><span class="num">${n}通り</span></div>`).join(''));
+  const s0 = at(r, 1190, 120 + counts.length * 58, 'h3', '<span class="gold">●</span> ゴールの場面'), found = at(r, 1190, 200 + counts.length * 58, 'h2', '<span class="gold">3手目</span>で到着 = 最短手数');
+  const sum = at(r, 1190, 200 + counts.length * 58, 'h2', `行ける場面 <span class="blue num">${B.states.length}</span> / 196`);
+  return { map, dots, edges, rows: [...list.children], s0, found, sum, maxD };
+}, (e, { step, tau }) => {
+  // step0: 深さ0〜3を1.5秒ずつ / step1: 道を金色でなぞり、残りを速く / step2: まとめ
+  const tOf = (d) => d <= 3 ? { s: 0, t: 1.2 + d * 1.5 } : { s: 1, t: 3.2 + (d - 4) * .45 };
+  const lit = (d) => { const o = tOf(d); return step > o.s ? 1 : step === o.s ? lin(tau, o.t, .5) : 0; };
+  e.dots.forEach((c) => { const p = c._goal ? (step > 0 ? 1 : lin(tau, 1.2 + 3 * 1.5 + .2, .5)) : lit(c._d); scale(c, p); });
+  e.rows.forEach((row, d) => show(row, lit(d)));
+  e.edges.forEach((l, i) => drawLine(l, step === 0 ? 0 : step === 1 ? lin(tau, .5 + i * .6, .6) : 1));
+  show(e.s0, step === 0 ? pr(tau, 1.2 + 3 * 1.5 + .4) : 1); show(e.found, step === 1 ? pr(tau, .6) : 0); show(e.sum, step === 2 ? pr(tau, .3) : 0);
+});
+
+scene('foul', (r) => {
+  const ph = Phone(r, 330, 84, 830);
+  const t1 = at(r, 900, 280, 'h1 red', '反則', 'font-size:140px'), t2 = at(r, 904, 480, 'h3', '片方だけがゴールに入る手'), t3 = at(r, 904, 580, 'txt sub', '調べるときは「選べない手」として飛ばす');
+  return { ph, t1, t2, t3 };
+}, (e, { tau }) => { e.ph.set('foul', tau - .8); const ft = .8 + clipT(1) + .3; scale(e.t1, lin(tau, ft, .4)); show(e.t2, pr(tau, ft + .5)); show(e.t3, pr(tau, ft + 1.4)); });
+
+scene('mass', (r) => {
+  const cols = 150, rows = 80, cs = 9, x0 = 285, y0 = 96;
+  const cv = document.createElement('canvas'); cv.width = cols * cs; cv.height = rows * cs; cv.style.cssText = `position:absolute;left:${x0}px;top:${y0}px`; r.appendChild(cv);
+  const lab = at(r, x0, y0 + rows * cs + 10, 'row', '', 'width:1350px;justify-content:space-between');
+  const c1 = el(lab, 'h3 num', ''), c2 = el(lab, 'h3 num', '');
+  const maxN = Math.max(...D.epDist.map((n) => n || 0));
+  const bars = at(r, 330, 150, '', D.epDist.map((n, k) => `<div class="row" style="font-size:36px;font-weight:700;margin-bottom:14px"><span class="sub" style="width:170px">気づき ${k}</span><span class="bar" style="display:inline-block;height:40px;border-radius:8px;background:var(--blue);width:${Math.max(4, n / maxN * 880)}px;transform-origin:left"></span><span class="num">${n.toLocaleString()}問</span></div>`).join(''));
+  return { cv, ctx: cv.getContext('2d'), cols, rows, cs, c1, c2, lab, bars };
+}, (e, { step, tau }) => {
+  const { ctx, cols, rows, cs } = e, N = D.mass.length;
+  ctx.clearRect(0, 0, cols * cs, rows * cs);
+  const shown = step === 0 ? Math.floor(N * ease(lin(tau, .6, 4.6))) : N, fade = step === 0 ? 0 : step === 1 ? pr(tau, 1.0, 1.4) : 1;
+  for (let i = 0; i < shown; i++) { const ep = D.mass[i], x = Math.floor(i / rows), y = i % rows; ctx.globalAlpha = ep < 0 ? lerp(1, .13, fade) : 1; ctx.fillStyle = ep < 0 ? (fade > 0 ? '#b9ae99' : '#6ea6d8') : (fade > 0 ? '#4f6bf0' : '#6ea6d8'); ctx.fillRect(x * cs + 1, y * cs + 1, cs - 2, cs - 2); }
+  ctx.globalAlpha = 1;
+  e.c1.textContent = step === 0 ? `作った盤 ${shown.toLocaleString()}個` : `解けた ${Math.round(lerp(12000, D.total, fade)).toLocaleString()}問`;
+  e.c1.style.color = step === 0 ? 'var(--ink)' : 'var(--blue)';
+  e.c2.textContent = step >= 1 ? `捨てた ${Math.round(D.rejected * fade).toLocaleString()}個` : ''; e.c2.style.color = 'var(--sub)';
+  const out = step === 2 ? pr(tau, .2, .7) : 0;
+  e.cv.style.opacity = 1 - out; e.lab.style.opacity = 1 - out;
+  [...e.bars.children].forEach((row, k) => { show(row, step === 2 ? pr(tau, .8 + k * .12) : 0); row.querySelector('.bar').style.transform = `scaleX(${step === 2 ? pr(tau, .9 + k * .12, .7) : 0})`; });
+});
+
+scene('hint', (r) => {
+  const ph = Phone(r, 210, 84, 830), HT = D.HINT_T;
+  const a1 = at(r, 760, 300, 'note', '1手目で道をまちがえた'), a2 = at(r, 760, 420, 'note g', '光ヒントを押す → 壁が光る');
+  const st = at(r, 760, 240, 'h3 sub', 'アプリに入っている答え');
+  const stored = el(r, 'chips', '', 'left:760px;top:330px;gap:14px'); D.sim1.forEach((s) => el(stored, 'chip', `<b>${ARW[s.d]}</b><span></span>`));
+  const strike = el(r, 'abs', '', 'left:740px;top:378px;width:390px;height:10px;border-radius:5px;background:var(--red);transform-origin:left'), st2 = at(r, 760, 480, 'txt', '最初の場面からの答え。<br>道を外れた<span class="red">いまの場面</span>では使えない');
+  const map = stateMap(r, 980, 90, 44), B = D.bOff, maxD = B.goalDepth, goalPos = B.nodes[B.nodes.length - 1];
+  const dots = B.states.filter((s) => s.depth <= maxD).map((s) => { const g = s.pos.join() === goalPos.join(); const c = map.dot(s.pos, s.depth === 0 ? 'var(--blue)' : g ? 'var(--gold)' : depthColor(s.depth, maxD + 1), g || !s.depth ? .42 : .3); c._d = s.depth; return c; });
+  const edges = B.nodes.slice(1).map((n, i) => map.edge(B.nodes[i], n, 'var(--gold)', 9)).reverse(); // ゴール側から
+  const ml = at(r, 1630, 150, 'txt', '<span class="blue">●</span> いまの場面<br><span class="gold">●</span> ゴール', 'font-size:32px;font-weight:700');
+  const pt = at(r, 760, 740, 'txt sub', '取り出した最短の道', 'font-size:28px;font-weight:700');
+  const path = chipsRow(r, 760 + 420, 780, D.simOff); path[0].parentNode.style.cssText += ';justify-content:flex-start;left:760px';
+  const fin = at(r, 760, 330, 'h2', '教えるのは<br><span class="gold">「どこで止まるか」</span>だけ'), fin2 = at(r, 764, 560, 'txt sub', '順番と道すじは、自分で見つける');
+  path.forEach((c) => { const em = c.querySelector('em'); if (em) em.remove(); });
+  // 光っている面は細いので、輪で場所を示す(位置は録画コマから実測)
+  const ring = el(r, 'abs', '', 'left:453px;top:125px;width:140px;height:60px;border-radius:30px;border:6px solid var(--gold)');
+  return { ring, ph, HT, a1, a2, st, stored, strike, st2, map, dots, edges, ml, pt, path, fin, fin2 };
+}, (e, { step, tau }) => {
+  const hold = 5.0, res = e.HT.resume / 1000;
+  e.ph.set('hint', step === 0 ? Math.min(tau - .6, hold) : step < 4 ? hold : step === 4 ? Math.max(hold, res - 1.0 + (tau - 1.5)) : 99);
+  const lightAt = .6 + e.HT.light / 1000 + .3, rp = step === 0 ? lin(tau, lightAt, .4) : step < 4 ? 1 : step === 4 ? 1 - lin(tau, 1.6, .4) : 0;
+  e.ring.style.opacity = rp * (.65 + .35 * Math.sin(tau * 4)); e.ring.style.transform = `scale(${lerp(1.6, 1, ease(rp))})`;
+  show(e.a1, step === 0 ? pr(tau, .6 + e.HT.wrong / 1000 + .3) : 0); show(e.a2, step === 0 ? pr(tau, .6 + e.HT.light / 1000 + .2) : 0);
+  const s1 = step === 1; show(e.st, s1 ? pr(tau, .3) : 0); e.stored.style.opacity = s1 ? pr(tau, .6) : 0; e.strike.style.transform = `scaleX(${s1 ? pr(tau, 3.0, .5) : 0})`; show(e.st2, s1 ? pr(tau, 3.4) : 0);
+  const mOn = step === 2 ? pr(tau, .2) : (step === 3 || step === 4) ? 1 : 0;
+  e.map.el.style.opacity = mOn; e.map.labs.forEach((l) => l.style.opacity = mOn); e.ml.style.opacity = mOn;
+  e.dots.forEach((c) => scale(c, step === 2 ? lin(tau, 1.0 + c._d * 1.1, .5) : step > 2 ? 1 : 0));
+  e.edges.forEach((l, i) => drawLine(l, step === 3 ? lin(tau, 1.2 + i * .8, .7) : step === 4 ? 1 : 0));
+  const pOn = step === 3 ? pr(tau, 4.8) : step === 4 ? 1 : 0; show(e.pt, pOn); e.path[0].parentNode.style.opacity = pOn;
+  e.path.forEach((c) => { const hit = c._s.blocked.some(Boolean); c.style.background = hit && step === 4 && tau > .8 ? 'var(--goldbg)' : '#efe6d6'; c.style.opacity = 1; c.querySelector('span').style.opacity = step === 4 ? pr(tau, .8) : 0; });
+  show(e.fin, step === 5 ? pr(tau, .3) : 0); show(e.fin2, step === 5 ? pr(tau, 1.4) : 0);
+});
+
+scene('outro', (r) => {
+  const ph = Phone(r, 250, 50, 860);
+  const A = [['難しさは', '気づきの数で測る'], ['問題は', '作って、解いて、選ぶ'], ['ヒントは', 'その場で解き直す']];
+  const rec = at(r, 800, 250, '', A.map((a, i) => `<div class="qrow" style="margin-bottom:44px"><i>${i + 1}</i><span><span class="sub" style="font-size:34px">${a[0]}</span><br>${a[1]}</span></div>`).join(''));
+  const con = at(r, 800, 230, '', `<div class="h3 sub" style="margin-bottom:30px">登場した考え方</div>` + ['動的計画法', '擬似乱数', '幅優先探索'].map((c) => `<div class="h2" style="margin-bottom:22px">${c}</div>`).join('') + `<div class="txt sub" style="margin-top:34px">くわしい説明は概要欄のリンクへ</div>`);
+  const end = el(r, 'abs', '<div class="h1" style="font-size:150px">Tsugai</div>', 'left:800px;top:380px');
+  return { ph, rec, con, end };
+}, (e, { step, tau, T }) => {
+  const loop = 5.4; e.ph.set('three', (T - .8 + loop * 20) % loop);
+  [...e.rec.children].forEach((q, i) => show(q, step === 0 ? pr(tau, .5 + i * 1.8) : 0)); e.rec.style.opacity = step === 0 ? 1 : 0;
+  [...e.con.children].forEach((q, i) => show(q, step === 1 ? pr(tau, .3 + i * .5) : 0)); e.con.style.opacity = step === 1 ? 1 : 0;
+  show(e.end, step === 2 ? pr(tau, .3, .8) : 0);
+});
+
+// ================= 台本(シーン, 秒, 字幕) =================
+const BEATS = [
+  ['intro', 6.5, 'Tsugaiは、2つのボールを同時に動かすパズルです。'],
+  ['intro', 7.5, '壁にぶつかったボールだけが止まります。<br>仕掛けはこれだけです。'],
+  ['intro', 7, '問題は全部で600問。<br>人が考えて作った問題は、1つもありません。'],
+  ['intro', 7.5, 'コンピュータが作り、解き、難しさを測って並べています。<br>3つの疑問で、その仕組みを見ていきます。'],
+
+  ['t1', 3.2, ''],
+  ['q1', 9.5, '同じ7手の問題が2つあります。動きを見比べてください。'],
+  ['q1', 8, '左は、壁に当てる場所が1か所。<br>右は3か所で、止める盤も向きも毎回違います。'],
+  ['q1', 6, '手数は同じでも、右のほうがずっと難しく感じます。'],
+  ['q1', 9, 'そこで「気づきの数」を数えます。<br>止まる盤と向きが変わるたびに、1つです。'],
+  ['dp', 9, '答えが何通りもある問題は、いちばん楽な答えで測ります。<br>でも、答えを1本ずつ数えていては大変です。'],
+  ['dp', 10, 'そこで、手前の答えを書きとめて使い回します。<br>格子の道の数なら、左と上を足すだけです。'],
+  ['dp', 8.5, 'この方法を動的計画法といいます。<br>気づきの数の最小は、これで求めています。'],
+  ['curve', 8.5, 'こうして測った気づきの数で、200問を並べます。'],
+  ['curve', 9, '10問ごとに山場を置き、そのあと一度戻します。<br>越えたあとに、一息つけるようにするためです。'],
+
+  ['t2', 3.2, ''],
+  ['gen', 7.5, 'もとになるのは、1つの番号です。<br>番号から、でたらめに見える数の列を作ります。'],
+  ['gen', 8, 'その数で、壁の位置、スタート、ゴールを順に決めます。'],
+  ['gen', 7, '同じ番号からは、必ず同じ盤ができます。'],
+  ['rng', 9, '数の列の作り方は単純です。たとえば<br>「前の数×5+3を、16で割った余り」を次の数にします。'],
+  ['rng', 9, '規則は単純でも、並びはでたらめに見えます。<br>これを擬似乱数といいます。'],
+  ['state', 6, 'できた盤が解けるかどうかは、まだわかりません。<br>コンピュータに解かせます。'],
+  ['state', 11, '2つのボールの位置の組を「場面」と呼びます。<br>場面を1つの点で表すと、地図ができます。'],
+  ['state', 6.5, 'この問題の場面は、196通りしかありません。'],
+  ['maze', 9.5, 'これなら全部調べられます。<br>近いところから順に、波紋のように広げていきます。'],
+  ['maze', 7.5, '届いた順番が、そのまま最短の歩数です。<br>幅優先探索といいます。'],
+  ['bfsmap', 9, '場面の地図で同じことをします。<br>1手で行ける場面、2手で行ける場面、と広げます。'],
+  ['bfsmap', 8, '3手目でゴールの場面に届きました。これが最短手数です。'],
+  ['bfsmap', 7, 'コンピュータはひらめいているのではありません。<br>全部試しているだけです。'],
+  ['foul', 7.5, '片方だけがゴールに入る手は反則です。<br>調べるときは、その手を飛ばします。'],
+  ['mass', 7.5, '番号1から6000まで、2種類の大きさで、<br>12,000個の盤を作って解きました。'],
+  ['mass', 7.5, '解けなかった5,374個は捨てます。<br>残ったのは6,626問です。'],
+  ['mass', 9, '残した問題に、手数と気づきの数を書きこみます。<br>ここから200問を選ぶのが、疑問1の話でした。'],
+
+  ['t3', 3.2, ''],
+  ['hint', 7.5, '道をまちがえても、光ヒントを押すと、ぶつかる壁が光ります。'],
+  ['hint', 9, 'アプリには答えが入っています。<br>でも、道を外れるともう使えません。'],
+  ['hint', 8.5, 'そこで押した瞬間に、いまの場面から波紋を広げ直します。<br>場面は少ないので、一瞬で終わります。'],
+  ['hint', 9, '広げるときに「どこから来たか」を書きとめておき、<br>ゴールから逆にたどると、最短の道が取り出せます。'],
+  ['hint', 8.5, 'その道をなぞって、ボールが止まる面を集めて光らせます。'],
+  ['hint', 7, '教えるのは「どこで止まるか」だけ。<br>順番と道すじは、自分で見つけてもらいます。'],
+
+  ['outro', 8.5, '難しさは気づきの数で測る。問題は作って解いて選ぶ。<br>ヒントはその場で解き直す。'],
+  ['outro', 6.5, '登場した考え方のくわしい説明は、概要欄からどうぞ。'],
+  ['outro', 4.5, ''],
+];
+const TAGS = { q1: 1, dp: 1, curve: 1, gen: 2, rng: 2, state: 2, maze: 2, bfsmap: 2, foul: 2, mass: 2, hint: 3 };
+
+// シーンの実体を作り、時刻表を組む
+const runs = []; let acc = 0;
+BEATS.forEach(([id, dur, cap], i) => {
+  let run = runs[runs.length - 1];
+  if (!run || run.id !== id) { const root = el(stage, 'scene'); run = { id, root, start: acc, steps: [], els: SCENES[id].build(root) }; runs.push(run); }
+  run.steps.push({ start: acc, dur, cap }); acc += dur; run.end = acc;
+});
+window.DURATION = acc;
+const capEl = document.getElementById('cap'), tagEl = document.getElementById('tag');
+stage.appendChild(tagEl); stage.appendChild(capEl);
+const FADE = .35;
+window.seek = async (t) => {
+  t = clamp(t, 0, acc - 1e-6);
+  for (const run of runs) {
+    const inRun = t >= run.start && t < run.end;
+    if (!inRun) { run.root.style.opacity = 0; run.root.style.visibility = 'hidden'; continue; }
+    run.root.style.visibility = 'visible';
+    run.root.style.opacity = Math.min(lin(t, run.start, FADE), run === runs[runs.length - 1] ? 1 : lin(run.end - t, 0, FADE));
+    let step = run.steps.findIndex((s) => t >= s.start && t < s.start + s.dur); const s = run.steps[step];
+    SCENES[run.id].draw(run.els, { step, tau: t - s.start, T: t - run.start });
+    const next = run.steps[step + 1];
+    capEl.innerHTML = s.cap; capEl.style.opacity = Math.min(lin(t, s.start + .1, .3), lin(s.start + s.dur - t, 0, .25) + (next && next.cap === s.cap ? 1 : 0));
+    const n = TAGS[run.id]; tagEl.innerHTML = n ? `<b>疑問 ${n}</b>${QTITLES[n - 1]}` : ''; tagEl.style.opacity = n ? lin(t, run.start, FADE) : 0;
+  }
+  const waits = [...pending].map((img) => img.decode().catch(() => {})); pending.clear();
+  await Promise.all(waits); await document.fonts.ready;
+};
+window.BEAT_STARTS = runs.flatMap((r) => r.steps.map((s) => s.start));
+</script>
+</body>
+</html>
